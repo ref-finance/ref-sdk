@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@types/big.js": "^6.1.5",
-    "@types/lodash": "^4.14.182"
+    "@types/lodash": "^4.14.182",
+    "near-api-js": "0.44.2"
   }
 }

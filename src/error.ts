@@ -2,6 +2,8 @@ export const formatError = (msg: string) => {
   return new Error(msg);
 };
 
+export const unNamedError = formatError('Something wrong happened');
+
 export const SameInputTokenError = formatError(
   'Input token should be different with output token'
 );

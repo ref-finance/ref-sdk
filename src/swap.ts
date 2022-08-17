@@ -10,8 +10,19 @@ import { SameInputTokenError, ZeroInputError, NoPoolError } from './error';
 import { ONLY_ZEROS } from './number';
 import _ from 'lodash';
 import { FEE_DIVISOR } from './constant';
+import { fetchAllRefPools } from './pool';
 
-interface SwapOptions {
+// core function
+
+export interface SwapParams {
+  tokenIn: TokenMetadata;
+  tokenOut: TokenMetadata;
+  amountIn: string;
+  simplePools: Pool[];
+  options: SwapOptions;
+}
+
+export interface SwapOptions {
   smartRouting?: boolean;
   stablePools?: StablePool[];
 }
@@ -79,13 +90,7 @@ export const swap = ({
   amountIn,
   simplePools,
   options,
-}: {
-  tokenIn: TokenMetadata;
-  tokenOut: TokenMetadata;
-  amountIn: string;
-  simplePools: Pool[];
-  options: SwapOptions;
-}) => {
+}: SwapParams) => {
   if (tokenIn.id === tokenOut.id) throw SameInputTokenError;
 
   if (ONLY_ZEROS.test(amountIn)) throw ZeroInputError;
@@ -110,9 +115,17 @@ export const swap = ({
       amountIn,
     });
   } else if (smartRouting && !includeStablePools) {
-    // TODO: for smart routing case
+    // TODO: smart routing case
   }
 
-  // TODO: define return case
+  // TODO: define return type
   return [];
+};
+
+// entry to call swap
+export const callSwap = async (params: SwapParams) => {
+  // call
+  // fetch pool
+  // swap(params);
+  // const { simplePools, stablePools, ratedPools } = await fetchAllRefPools();
 };

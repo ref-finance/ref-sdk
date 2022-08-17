@@ -27,7 +27,7 @@ export const toNonDivisibleNumber = (
     .padStart(1, '0');
 };
 
-export function scientificNotationToString(strParam: string) {
+export const scientificNotationToString = (strParam: string) => {
   let flag = /e/.test(strParam);
   if (!flag || !strParam) return strParam;
 
@@ -87,4 +87,4 @@ export function scientificNotationToString(strParam: string) {
       );
     }
   }
-}
+};
