@@ -2,6 +2,8 @@ import { getTotalPools, refFiViewFunction } from './ref';
 import { Pool, PoolRPCView } from './types';
 import { parsePool } from './utils';
 import { unNamedError } from './error';
+import { toNonDivisibleNumber } from './number';
+import { STABLE_LP_TOKEN_DECIMALS } from './constant';
 
 export const DEFAULT_PAGE_LIMIT = 100;
 
@@ -11,7 +13,11 @@ export const getRatedPools = async ({ ids }: { ids: (string | number)[] }) => {
       refFiViewFunction({
         methodName: 'get_rated_pool',
         args: { pool_id: Number(id) },
-      })
+      }).then(pool_info => ({
+        ...pool_info,
+        pool_kind: 'RATED_SWAP',
+        id: Number(id),
+      }))
     )
   ).catch(() => {
     throw unNamedError;
@@ -24,7 +30,14 @@ export const getStablePools = async ({ ids }: { ids: (string | number)[] }) => {
       refFiViewFunction({
         methodName: 'get_stable_pool',
         args: { pool_id: Number(id) },
-      })
+      }).then(pool_info => ({
+        ...pool_info,
+        pool_kind: 'STABLE_SWAP',
+        id: Number(id),
+        rates: pool_info.c_amounts.map((_: any) =>
+          toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
+        ),
+      }))
     )
   ).catch(() => {
     throw unNamedError;
@@ -52,9 +65,7 @@ export const fetchAllRefPools = async () => {
 
   const pools = (
     await Promise.all([...Array(pages)].map((_, i) => getRefPools(i + 1)))
-  )
-    .flat()
-    .map(p => ({ ...p, Dex: 'ref' }));
+  ).flat() as Pool[];
 
   return {
     simplePools: pools.filter(

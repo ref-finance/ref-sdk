@@ -1,8 +1,14 @@
 import { StablePool } from './types';
 import { FEE_DIVISOR } from './constant';
-import { toReadableNumber, toNonDivisibleNumber } from './number';
+import {
+  toReadableNumber,
+  toNonDivisibleNumber,
+  scientificNotationToString,
+} from './number';
 
 import Big from 'big.js';
+
+import _ from 'lodash';
 
 const tradeFee = (amount: number, trade_fee: number) => {
   return (amount * trade_fee) / FEE_DIVISOR;
@@ -86,44 +92,46 @@ export const getSwappedAmount = (
   tokenInId: string,
   tokenOutId: string,
   amountIn: string,
-  stablePool: StablePool
+  stablePool: StablePool,
+  STABLE_LP_TOKEN_DECIMALS: number
 ) => {
   const amp = stablePool.amp;
   const trade_fee = stablePool.total_fee;
 
-  const STABLE_TOKEN_INDEX = getStableTokenIndex(stablePool.id);
-
-  const in_token_idx = STABLE_TOKEN_INDEX[tokenInId];
-  const out_token_idx = STABLE_TOKEN_INDEX[tokenOutId];
-
-  const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool.id);
-
-  const old_c_amounts = stablePool.c_amounts.map(amount =>
-    Number(toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amount))
+  // depended on pools
+  const in_token_idx = stablePool.token_account_ids.findIndex(
+    id => id === tokenInId
+  );
+  const out_token_idx = stablePool.token_account_ids.findIndex(
+    id => id === tokenOutId
   );
 
-  // const old_c_amounts = base_old_c_amounts
-  //   .map((amount, i) =>
-  //     toNonDivisibleNumber(
-  //       STABLE_LP_TOKEN_DECIMALS,
-  //       scientificNotationToString(
-  //         new (amount || 0).times(new Big(rates[i])).toString()
-  //       )
-  //     )
-  //   )
-  //   .map(amount => Number(amount));
+  const rates = stablePool.rates.map(r =>
+    toReadableNumber(STABLE_LP_TOKEN_DECIMALS, r)
+  );
 
-  // const in_c_amount = Number(
-  //   toNonDivisibleNumber(
-  //     STABLE_LP_TOKEN_DECIMALS,
-  //     scientificNotationToString(
-  //       new Big(amountIn).times(new Big(rates[in_token_idx])).toString()
-  //     )
-  //   )
-  // );
+  const base_old_c_amounts = stablePool.c_amounts.map(amount =>
+    toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amount)
+  );
+
+  const old_c_amounts = base_old_c_amounts
+    .map((amount, i) =>
+      toNonDivisibleNumber(
+        STABLE_LP_TOKEN_DECIMALS,
+        scientificNotationToString(
+          new Big(amount || 0).times(new Big(rates[i])).toString()
+        )
+      )
+    )
+    .map(amount => Number(amount));
 
   const in_c_amount = Number(
-    toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, amountIn)
+    toNonDivisibleNumber(
+      STABLE_LP_TOKEN_DECIMALS,
+      scientificNotationToString(
+        new Big(amountIn).times(new Big(rates[in_token_idx])).toString()
+      )
+    )
   );
 
   const [amount_swapped, fee, dy] = calc_swap(
@@ -135,8 +143,9 @@ export const getSwappedAmount = (
     trade_fee
   );
 
-  // TODO:
-  return [amount_swapped, fee, dy];
-
-  // return [amount_swapped, fee, dy];
+  return [
+    amount_swapped / Number(rates[out_token_idx]),
+    fee,
+    dy / Number(rates[out_token_idx]),
+  ];
 };

@@ -88,3 +88,31 @@ export const scientificNotationToString = (strParam: string) => {
     }
   }
 };
+
+export const formatWithCommas = (value: string) => {
+  const pattern = /(-?\d+)(\d{3})/;
+  while (pattern.test(value)) {
+    value = value.replace(pattern, '$1,$2');
+  }
+  return value;
+};
+
+export const toPrecision = (
+  number: string,
+  precision: number,
+  withCommas: boolean = false,
+  atLeastOne: boolean = true
+): string => {
+  const [whole, decimal = ''] = number.split('.');
+
+  let str = `${withCommas ? formatWithCommas(whole) : whole}.${decimal.slice(
+    0,
+    precision
+  )}`.replace(/\.$/, '');
+  if (atLeastOne && Number(str) === 0 && str.length > 1) {
+    var n = str.lastIndexOf('0');
+    str = str.slice(0, n) + str.slice(n).replace('0', '1');
+  }
+
+  return str;
+};

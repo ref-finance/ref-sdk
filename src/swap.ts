@@ -7,10 +7,12 @@ import {
 import Big from 'big.js';
 import { StablePool } from './types';
 import { SameInputTokenError, ZeroInputError, NoPoolError } from './error';
-import { ONLY_ZEROS } from './number';
+import { ONLY_ZEROS, toPrecision } from './number';
 import _ from 'lodash';
 import { FEE_DIVISOR } from './constant';
 import { fetchAllRefPools } from './pool';
+import { getSwappedAmount } from './stable-swap';
+import { getStablePoolDecimal } from './utils';
 
 // core function
 
@@ -27,13 +29,18 @@ export interface SwapOptions {
   stablePools?: StablePool[];
 }
 
-export const getSinglePoolEstimate = (
-  tokenIn: TokenMetadata,
-  tokenOut: TokenMetadata,
-  pool: Pool,
-  tokenInAmount: string
-) => {
-  const amount_with_fee = Number(tokenInAmount) * (FEE_DIVISOR - pool.fee);
+export const getSimplePoolEstimate = ({
+  tokenIn,
+  tokenOut,
+  pool,
+  amountIn,
+}: {
+  tokenIn: TokenMetadata;
+  tokenOut: TokenMetadata;
+  pool: Pool;
+  amountIn: string;
+}) => {
+  const amount_with_fee = Number(amountIn) * (FEE_DIVISOR - pool.fee);
   const in_balance = toReadableNumber(
     tokenIn.decimals,
     pool.supplies[tokenIn.id]
@@ -58,33 +65,109 @@ export const getSinglePoolEstimate = (
   };
 };
 
+export const getStablePoolEstimate = ({
+  tokenIn,
+  tokenOut,
+  amountIn,
+  stablePool,
+}: {
+  tokenIn: TokenMetadata;
+  tokenOut: TokenMetadata;
+  amountIn: string;
+  stablePool: StablePool;
+}) => {
+  const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
+
+  const [amount_swapped, fee, dy] = getSwappedAmount(
+    tokenIn.id,
+    tokenOut.id,
+    amountIn,
+    stablePool,
+    STABLE_LP_TOKEN_DECIMALS
+  );
+
+  const amountOut =
+    amount_swapped < 0
+      ? '0'
+      : toPrecision(scientificNotationToString(amount_swapped.toString()), 0);
+
+  const dyOut =
+    amount_swapped < 0
+      ? '0'
+      : toPrecision(scientificNotationToString(dy.toString()), 0);
+
+  return {
+    estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
+    noFeeAmountOut: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, dyOut),
+    pool: stablePool,
+    token: tokenIn,
+    outputToken: tokenOut.id,
+    inputToken: tokenIn.id,
+  };
+};
+
 /**
  * @description Get the estimate of the amount of tokenOut that can be received
  *
  */
-export const noSmartRoutingSimplePool = ({
+export const singlePoolSwap = ({
   tokenIn,
   tokenOut,
   simplePools,
   amountIn,
+  stablePools,
 }: {
   tokenIn: TokenMetadata;
   tokenOut: TokenMetadata;
   simplePools: Pool[];
   amountIn: string;
+  stablePools?: StablePool[];
 }) => {
   if (!simplePools || simplePools.length === 0) {
     throw NoPoolError;
   }
 
-  const estimates = simplePools.map(p =>
-    getSinglePoolEstimate(tokenIn, tokenOut, p, amountIn)
+  // const pools = simplePools.concat(stablePools);
+
+  const estimatesSimplePool = simplePools.map(pool =>
+    getSimplePoolEstimate({
+      tokenIn,
+      tokenOut,
+      pool,
+      amountIn,
+    })
   );
 
-  return _.maxBy(estimates, estimate => Number(estimate.estimate));
+  // different stable lp token decimal for different type of pools
+  const estimatesStablePool = stablePools?.map(stablePool =>
+    getStablePoolEstimate({
+      tokenIn,
+      tokenOut,
+      amountIn,
+      stablePool,
+    })
+  );
+
+  const maxSimplePoolEstimate =
+    estimatesSimplePool.length === 1
+      ? estimatesSimplePool[0]
+      : _.maxBy(estimatesSimplePool, estimate => Number(estimate.estimate));
+
+  if (!estimatesStablePool) return maxSimplePoolEstimate;
+
+  const maxStablePoolEstimate =
+    estimatesStablePool.length === 1
+      ? estimatesStablePool[0]
+      : _.maxBy(estimatesStablePool, estimate => Number(estimate.estimate));
+
+  return Number(maxSimplePoolEstimate?.estimate) >
+    Number(maxSimplePoolEstimate?.estimate)
+    ? maxSimplePoolEstimate
+    : maxStablePoolEstimate;
 };
 
-export const swap = ({
+// simple pools and stable pools for this pair
+export const estimateSwap = ({
   tokenIn,
   tokenOut,
   amountIn,
@@ -97,35 +180,19 @@ export const swap = ({
 
   const { smartRouting, stablePools } = options;
 
-  const includeStablePools = !!stablePools && stablePools.length > 0;
-
   // const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
 
-  if (!smartRouting && !includeStablePools) {
-    const candidatePools = simplePools.filter(
-      pool =>
-        pool.tokenIds.includes(tokenIn.id) &&
-        pool.tokenIds.includes(tokenOut.id)
-    );
-
-    return noSmartRoutingSimplePool({
+  if (!smartRouting) {
+    return singlePoolSwap({
       tokenIn,
       tokenOut,
-      simplePools: candidatePools,
+      simplePools,
       amountIn,
+      stablePools,
     });
-  } else if (smartRouting && !includeStablePools) {
-    // TODO: smart routing case
+  } else {
+    // smart routing algorithm, get estimates on simple pools, get hybrid estimate on stable pools
   }
-
-  // TODO: define return type
-  return [];
 };
 
 // entry to call swap
-export const callSwap = async (params: SwapParams) => {
-  // call
-  // fetch pool
-  // swap(params);
-  // const { simplePools, stablePools, ratedPools } = await fetchAllRefPools();
-};

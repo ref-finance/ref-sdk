@@ -8,6 +8,8 @@ export interface TokenMetadata {
 
 export type PoolKind = 'SIMPLE_POOL' | 'STABLE_SWAP' | 'RATED_SWAP';
 
+export type StablePoolKind = 'STABLE_SWAP' | 'RATED_SWAP';
+
 export interface PoolRPCView {
   id: number;
   token_account_ids: string[];
@@ -32,7 +34,7 @@ export interface Pool {
   tvl: number;
   token0_ref_price: string;
   partialAmountIn?: string;
-  Dex?: string; // denote
+  Dex?: string;
   pool_kind?: PoolKind;
   rates?: {
     [id: string]: string;
@@ -49,4 +51,16 @@ export interface StablePool {
   shares_total_supply: string;
   amp: number;
   rates: string[];
+  pool_kind: StablePoolKind;
+}
+
+export interface SmartRoutingInputPool {
+  id: number;
+  token1Id: string;
+  token2Id: string;
+  token1Supply: string;
+  token2Supply: string;
+  fee: number;
+  shares: string;
+  token0_price: string;
 }
