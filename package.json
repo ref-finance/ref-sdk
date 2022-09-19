@@ -12,7 +12,9 @@
   },
   "scripts": {
     "start": "tsdx watch",
-    "build": "tsdx build",
+    "build": "NEAR_ENV=mainnet tsdx build",
+    "build:testnet": "NEAR_ENV=testnet tsdx build",
+    "build:mainnet": "NEAR_ENV=mainnet tsdx build",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
