@@ -13,3 +13,5 @@ export const ZeroInputError = formatError(
 );
 
 export const NoPoolError = formatError('No pool found for the input tokens');
+
+export const NotLoginError = formatError('Please login first');

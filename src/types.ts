@@ -1,3 +1,5 @@
+import Big from 'big.js';
+
 export interface TokenMetadata {
   id: string;
   name: string;
@@ -63,4 +65,60 @@ export interface SmartRoutingInputPool {
   fee: number;
   shares: string;
   token0_price: string;
+}
+
+export interface RoutePool {
+  amounts: string[];
+  fee: number;
+  id: number;
+  shares: string;
+  token0_ref_price: string;
+  token1Id: string;
+  token1Supply: string;
+  token2Id: string;
+  token2Supply: string;
+  updateTime: number;
+  partialAmountIn?: string | number | Big;
+  gamma_bps?: Big;
+  tokenIds?: string[];
+  x?: string;
+  y?: string;
+}
+
+export interface EstimateSwapView {
+  estimate: string;
+  pool: Pool;
+  intl?: any;
+  dy?: string;
+  token?: TokenMetadata;
+  noFeeAmountOut?: string;
+  inputToken?: string;
+  outputToken?: string;
+  nodeRoute?: string[];
+  tokens?: TokenMetadata[];
+  routeInputToken?: string;
+  route?: RoutePool[];
+  allRoutes?: RoutePool[][];
+  allNodeRoutes?: string[][];
+  totalInputAmount?: string;
+}
+
+export interface RefFiViewFunctionOptions {
+  methodName: string;
+  args?: object;
+}
+
+export interface RefFiFunctionCallOptions extends RefFiViewFunctionOptions {
+  gas?: string;
+  amount?: string;
+}
+
+export interface Transaction {
+  receiverId: string;
+  functionCalls: RefFiFunctionCallOptions[];
+}
+
+export interface FTStorageBalance {
+  total: string;
+  available: string;
 }

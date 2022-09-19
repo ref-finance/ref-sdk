@@ -9,7 +9,12 @@ export const config = {
   networkId: 'mainnet',
   nodeUrl: 'https://rpc.mainnet.near.org',
   walletUrl: 'https://wallet.near.org',
+  WRAP_NEAR_CONTRACT_ID: 'wrap.near',
 };
+
+export const STORAGE_TO_REGISTER_WITH_MFT = '0.1';
+
+export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
 
 // export const REF_FI_CONTRACT_ID = 'exchange.ref-dev.testnet';
 
