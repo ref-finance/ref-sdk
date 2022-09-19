@@ -17,7 +17,7 @@
     "build:mainnet": "NEAR_ENV=mainnet tsdx build",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "prepare": "NEAR_ENV=testnet tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
