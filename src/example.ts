@@ -1,6 +1,6 @@
-import { SwapParams } from './swap';
 import { fetchAllRefPools } from './pool';
-// export const callSwap = async (params: SwapParams) => {
+export const callSwap = async () => {
+  const { simplePools, stablePools, ratedPools } = await fetchAllRefPools();
 
-//   const { simplePools, stablePools, ratedPools } = await fetchAllRefPools();
-// };
+  return simplePools;
+};

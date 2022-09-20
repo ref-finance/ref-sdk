@@ -1,12 +1,11 @@
 import { REF_FI_CONTRACT_ID, config } from './constant';
-import { keyStores, Near, utils, WalletConnection } from 'near-api-js';
+import { keyStores, Near, WalletConnection } from 'near-api-js';
 
-import { functionCall } from 'near-api-js/lib/transaction';
-
-import { TokenMetadata, FTStorageBalance } from './types';
-import { NotLoginError } from './error';
-import { Transaction } from '../dist/types';
-import { getGas, getAmount } from './utils';
+import {
+  TokenMetadata,
+  FTStorageBalance,
+  RefFiViewFunctionOptions,
+} from './types';
 
 export const keyStore = new keyStores.BrowserLocalStorageKeyStore();
 
@@ -17,11 +16,6 @@ export const near = new Near({
 });
 
 export const wallet = new WalletConnection(near, REF_FI_CONTRACT_ID);
-
-export interface RefFiViewFunctionOptions {
-  methodName: string;
-  args?: object;
-}
 
 export const refFiViewFunction = ({
   methodName,
