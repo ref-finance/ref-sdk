@@ -1,9 +1,4 @@
-import {
-  TokenMetadata,
-  EstimateSwapView,
-  Transaction,
-  RefFiFunctionCallOptions,
-} from './types';
+import { TokenMetadata, EstimateSwapView, Transaction } from './types';
 import { wallet, ftGetStorageBalance } from './ref';
 import {
   STORAGE_TO_REGISTER_WITH_MFT,
