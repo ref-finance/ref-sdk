@@ -21,10 +21,9 @@ import {
 import {
   getSmartRouteSwapActions,
   stableSmart,
-  getExpectedOutputFromActions,
   getExpectedOutputFromActionsORIG,
   //@ts-ignore
-} from './smartRouteLogic';
+} from './smartRoutingLogic.js';
 
 // core function
 
@@ -33,7 +32,7 @@ export interface SwapParams {
   tokenOut: TokenMetadata;
   amountIn: string;
   simplePools: Pool[];
-  options: SwapOptions;
+  options?: SwapOptions;
 }
 
 export interface SwapOptions {
@@ -91,6 +90,8 @@ export const getStablePoolEstimate = ({
 }) => {
   const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
 
+  console.log(amountIn, 'amount in stable pool estimate');
+
   const [amount_swapped, fee, dy] = getSwappedAmount(
     tokenIn.id,
     tokenOut.id,
@@ -100,14 +101,16 @@ export const getStablePoolEstimate = ({
   );
 
   const amountOut =
-    amount_swapped < 0
+    amount_swapped < 0 || isNaN(amount_swapped)
       ? '0'
       : toPrecision(scientificNotationToString(amount_swapped.toString()), 0);
 
   const dyOut =
-    amount_swapped < 0
+    amount_swapped < 0 || isNaN(amount_swapped) || isNaN(dy)
       ? '0'
       : toPrecision(scientificNotationToString(dy.toString()), 0);
+
+  console.log(amountOut, dyOut, amount_swapped);
 
   return {
     estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
@@ -142,7 +145,11 @@ export const singlePoolSwap = ({
 
   // const pools = simplePools.concat(stablePools);
 
-  const estimatesSimplePool = simplePools.map(pool =>
+  const simplePoolsThisPair = simplePools.filter(
+    p => p.tokenIds.includes(tokenIn.id) && p.tokenIds.includes(tokenOut.id)
+  );
+
+  const estimatesSimplePool = simplePoolsThisPair.map(pool =>
     getSimplePoolEstimate({
       tokenIn,
       tokenOut,
@@ -151,8 +158,14 @@ export const singlePoolSwap = ({
     })
   );
 
+  const stablePoolThisPair = stablePools?.filter(
+    sp =>
+      sp.token_account_ids.includes(tokenIn.id) &&
+      sp.token_account_ids.includes(tokenOut.id)
+  );
+
   // different stable lp token decimal for different type of pools
-  const estimatesStablePool = stablePools?.map(stablePool =>
+  const estimatesStablePool = stablePoolThisPair?.map(stablePool =>
     getStablePoolEstimate({
       tokenIn,
       tokenOut,
@@ -252,7 +265,7 @@ export async function getHybridStableSmart(
 ) {
   if (
     !isStablePoolToken(stablePoolsDetail, tokenIn.id) &&
-    !isStablePoolToken(stablePoolsDetail, tokenIn.id)
+    !isStablePoolToken(stablePoolsDetail, tokenOut.id)
   ) {
     return { actions: [], estimate: '0' };
   }
@@ -281,6 +294,9 @@ export async function getHybridStableSmart(
    *
    *
    */
+
+  console.log(stablePoolsDetail, 'stablepools detail');
+
   if (isStablePoolToken(stablePoolsDetail, tokenIn.id)) {
     // first hop will be through stable pool.
     pools1 = stablePools.filter(pool => pool.tokenIds.includes(tokenIn.id));
@@ -344,6 +360,8 @@ export async function getHybridStableSmart(
     }
   }
 
+  console.log(pools1, pools2);
+
   // find candidate pools
 
   for (let p1 of pools1) {
@@ -396,6 +414,8 @@ export async function getHybridStableSmart(
       }
     }
   }
+
+  console.log(candidatePools, 'candpools');
 
   if (candidatePools.length > 0) {
     const tokensMedata = await ftGetTokensMetadata(
@@ -456,7 +476,7 @@ export async function getHybridStableSmart(
                   })
                 : getSimplePoolEstimate({
                     tokenIn,
-                    tokenOut,
+                    tokenOut: tokenMidMeta,
                     amountIn,
                     pool: tmpPool1,
                   })),
@@ -471,16 +491,28 @@ export async function getHybridStableSmart(
                     stablePool: stablePoolsDetailById[tmpPool2.id],
                   })
                 : getSimplePoolEstimate({
-                    tokenIn,
+                    tokenIn: tokenMidMeta,
                     tokenOut,
                     pool: tmpPool2,
-                    amountIn,
+                    amountIn: estimate1.estimate,
                   })),
             };
+
+            console.log(
+              poolPair[0].id,
+              poolPair[1].id,
+              estimate1.estimate,
+              estimate2.estimate,
+              tmpPool1,
+              tokenMidId,
+              isStablePool(stablePoolsDetail, tmpPool1.id),
+              isStablePool(stablePoolsDetail, tmpPool2.id)
+            );
 
             return Number(estimate2.estimate);
           });
 
+    console.log(BestPoolPair, 'best pool pair');
     // one pool case only get best price
 
     if (!BestPoolPair) return { actions: [], estimate: '0' };
@@ -490,7 +522,7 @@ export async function getHybridStableSmart(
       const estimate = await getPoolEstimate({
         tokenIn,
         tokenOut,
-        amountIn: parsedAmountIn,
+        amountIn,
         pool: bestPool,
         stablePoolDetail: stablePoolsDetailById[bestPool.id],
       });
@@ -529,7 +561,7 @@ export async function getHybridStableSmart(
           })
         : getSimplePoolEstimate({
             tokenIn,
-            tokenOut,
+            tokenOut: tokenMidMeta,
             amountIn,
             pool: pool1,
           })),
@@ -548,9 +580,9 @@ export async function getHybridStableSmart(
             stablePool: stablePoolsDetailById[pool2.id],
           })
         : getSimplePoolEstimate({
-            tokenIn,
+            tokenIn: tokenMidMeta,
             tokenOut,
-            amountIn,
+            amountIn: estimate1.estimate,
             pool: pool2,
           })),
 
@@ -577,7 +609,7 @@ export const estimateSwap = async ({
 
   if (ONLY_ZEROS.test(amountIn)) throw ZeroInputError;
 
-  const { smartRouting, stablePools, stablePoolsDetail } = options;
+  const { smartRouting, stablePools, stablePoolsDetail } = options || {};
 
   const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
 
@@ -611,6 +643,8 @@ export const estimateSwap = async ({
       tokenOut.id
     ).toString();
 
+    console.log(simplePoolSmartRoutingEstimate, simplePoolSmartRoutingActions);
+
     const hybridSmartRoutingRes = await getHybridStableSmart(
       tokenIn,
       tokenOut,
@@ -621,6 +655,8 @@ export const estimateSwap = async ({
     );
 
     const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
+
+    console.log(hybridSmartRoutingEstimate, hybridSmartRoutingRes);
 
     if (
       new Big(simplePoolSmartRoutingEstimate || '0').gte(

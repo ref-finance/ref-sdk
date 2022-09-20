@@ -64,6 +64,7 @@
     "@types/big.js": "^6.1.5",
     "@types/bn.js": "^5.1.1",
     "@types/lodash": "^4.14.182",
+    "big.js": "^6.2.1",
     "mathjs": "^9.3.0",
     "near-api-js": "0.44.2"
   }

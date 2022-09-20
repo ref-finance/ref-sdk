@@ -54,7 +54,7 @@ export const ftGetTokenMetadata = async (
     methodName: 'ft_metadata',
   });
 
-  return metadata;
+  return { ...metadata, id };
 };
 
 export const ftGetTokensMetadata = async (tokenIds: string[]) => {

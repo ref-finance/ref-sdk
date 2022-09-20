@@ -1,26 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////
 // SMART ROUTE SWAP LOGIC
 ////////////////////////////////////////////////////////////////////////////
-import { STABLE_POOL_ID, STABLE_TOKEN_IDS } from './near';
 import Big from 'big.js';
 import { checkIntegerSumOfAllocations } from './parallelSwapLogic';
-import {
-  instantSwapGetTransactions,
-  getSwappedAmount as getStableSwappedAmount,
-} from './stable-swap';
-import { STABLE_LP_TOKEN_DECIMALS } from '../components/stableswap/AddLiquidity';
-import { getStablePool, getPool } from './pool';
-import {
-  ftGetStorageBalance,
-  ftGetTokenMetadata,
-  TokenMetadata,
-} from './ft-contract';
-import {
-  percentLess,
-  separateRoutes,
-  toNonDivisibleNumber,
-} from '../utils/numbers';
-import { getPoolEstimate } from './swap';
+
+import { TokenMetadata } from './types';
+
+import { ftGetTokenMetadata } from './ref';
+
+import { percentLess } from './utils';
+import { toNonDivisibleNumber } from './number';
 
 Big.RM = 0;
 Big.DP = 40;
@@ -2299,59 +2288,6 @@ function getGraphFromPoolList(poolList) {
 
 //TRYING: GETSTABLESWAPACTION <==> instantSwapGetTransactions
 
-async function GETSTABLESWAPACTION(
-  inputToken,
-  outputToken,
-  amountIn,
-  slippageTolerance
-) {
-  var pool_id = STABLE_POOL_ID;
-  // console.log('POOL ID IS...');
-  // console.log(pool_id);
-  if (!pool_id) {
-    var pool_id = STABLE_POOL_ID;
-  }
-  let stablePool = await getStablePool(pool_id);
-  // let StablePoolInfo = await getPoolInfo() from stable-swap?
-  // console.log('STABLE POOL VAR IS...');
-  // console.log(stablePool);
-  // console.log('INPUT TOKEN IS...');
-  // console.log(inputToken);
-  // console.log('OUTPUT TOKEN IS...');
-  // console.log(outputToken);
-  let inputTokenMeta = await ftGetTokenMetadata(inputToken);
-  let amountInScaled = new Big(amountIn)
-    // .div(new Big(10).pow(inputTokenMeta.decimals))
-    // .round()
-    .toString();
-  // console.log('amountInScaled is ...');
-  // console.log(amountInScaled);
-  const [amount_swapped, fee, dy] = getStableSwappedAmount(
-    inputToken,
-    outputToken,
-    amountInScaled,
-    stablePool
-  );
-  let amount_swapped_scaled = new Big(amount_swapped)
-    .div(new Big(10).pow(STABLE_LP_TOKEN_DECIMALS))
-    .round()
-    .toString();
-
-  let minAmountOut = new Big(amount_swapped_scaled)
-    .times(new Big(1).minus(new Big(slippageTolerance).div(100)))
-    .round()
-    .toString();
-  let stableAction = {
-    pool_id: pool_id,
-    token_in: inputToken,
-    token_out: outputToken,
-    amount_in: amountIn.toString(),
-    min_amount_out: minAmountOut,
-    amount_swapped: amount_swapped,
-  };
-  return stableAction;
-}
-
 export async function stableSmart(
   pools,
   inputToken,
@@ -2374,97 +2310,6 @@ export function getExpectedOutputFromActionsORIG(actions, outputToken) {
     .filter(item => item.outputToken === outputToken)
     .map(item => new Big(item.estimate))
     .reduce((a, b) => a.plus(b), new Big(0));
-}
-
-export async function getExpectedOutputFromActions(
-  actions,
-  outputToken,
-  slippageTolerance
-) {
-  // TODO: on cross swap case
-
-  let expectedOutput = new Big(0);
-
-  if (!actions || actions.length === 0) return expectedOutput;
-
-  const routes = separateRoutes(actions, outputToken);
-
-  for (let i = 0; i < routes.length; i++) {
-    const curRoute = routes[i];
-
-    if (curRoute.length === 1) {
-      expectedOutput = expectedOutput.plus(curRoute[0].estimate);
-    } else {
-      if (
-        curRoute.every(r => r.pool.Dex !== 'tri') ||
-        curRoute.every(r => r.pool.Dex === 'tri')
-      )
-        expectedOutput = expectedOutput.plus(curRoute[1].estimate);
-      else {
-        const secondHopAmountIn = percentLess(
-          slippageTolerance,
-          curRoute[0].estimate
-        );
-        const secondEstimateOut = await getPoolEstimate({
-          tokenIn: curRoute[1].tokens[1],
-          tokenOut: curRoute[1].tokens[2],
-          amountIn: toNonDivisibleNumber(
-            curRoute[1].tokens[1].decimals,
-            secondHopAmountIn
-          ),
-          Pool: curRoute[1].pool,
-        });
-
-        expectedOutput = expectedOutput.plus(secondEstimateOut.estimate);
-      }
-    }
-  }
-
-  return expectedOutput;
-}
-
-async function convertActionToEstimatesFormat(action) {
-  let hopOutputTokenMeta = await ftGetTokenMetadata(action.token_out);
-  let hopOutputTokenDecimals = hopOutputTokenMeta.decimals;
-  let pool = await getPool(action.pool_id);
-}
-
-async function convertStableActionToEstimatesFormat(action) {
-  let hopInputTokenMeta = await ftGetTokenMetadata(action.token_in);
-  let hopOutputTokenMeta = await ftGetTokenMetadata(action.token_out);
-  let hopOutputTokenDecimals = hopOutputTokenMeta.decimals;
-  // NEED TO CACHE THIS RESULT!
-  let pool = await getStablePool(action.pool_id);
-
-  let amount_swapped = new Big(action.amount_swapped)
-    .div(new Big(10).pow(STABLE_LP_TOKEN_DECIMALS))
-    .div(new Big(10).pow(hopOutputTokenDecimals));
-  let decimalEstimate = amount_swapped;
-
-  let poolFee = pool.fee ? pool.fee : pool.total_fee;
-  let newAction = {
-    estimate: decimalEstimate,
-    pool: {
-      fee: poolFee,
-      gamma_bps: new Big(10000).minus(new Big(poolFee)), //.div(new Big(10000)), //hops[i].pool.gamma, //new Big(10000).minus(new Big(hops[i].pool.fee)).div(new Big(10000));
-      id: pool.id,
-      partialAmountIn: new Big(action.amount_in).round().toString(),
-      supplies: {
-        [pool.token1Id]: pool.token1Supply,
-        [pool.token2Id]: pool.token2Supply,
-      },
-      token0_ref_price: '', //hops[i].pool.token0_price,
-      tokenIds: [pool.token1Id, pool.token2Id],
-    },
-    status: 'stableSmart',
-    token: hopInputTokenMeta,
-    outputToken: action.token_out,
-  };
-
-  newAction.pool.x = newAction.pool.supplies[action.token_in];
-  newAction.pool.y = newAction.pool.supplies[action.token_out];
-
-  return newAction;
 }
 
 function getFeeForRoute(route) {
