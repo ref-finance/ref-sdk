@@ -2,8 +2,6 @@ export * from './constant';
 
 export * from './error';
 
-export * from './number';
-
 export * from './utils';
 
 export * from './instantSwap';

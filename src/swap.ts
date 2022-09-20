@@ -3,13 +3,12 @@ import {
   toReadableNumber,
   toNonDivisibleNumber,
   scientificNotationToString,
-} from './number';
+} from './utils';
 import Big from 'big.js';
 import { SameInputTokenError, ZeroInputError, NoPoolError } from './error';
-import { ONLY_ZEROS, toPrecision } from './number';
+import { ONLY_ZEROS, toPrecision } from './utils';
 import _ from 'lodash';
 import { FEE_DIVISOR } from './constant';
-import { fetchAllRefPools } from './pool';
 import { getSwappedAmount } from './stable-swap';
 import { ftGetTokenMetadata, ftGetTokensMetadata } from './ref';
 import { isStablePool } from './utils';
@@ -19,7 +18,6 @@ import {
   poolFormatter,
 } from './utils';
 import {
-  getSmartRouteSwapActions,
   stableSmart,
   getExpectedOutputFromActionsORIG,
   //@ts-ignore
@@ -90,8 +88,6 @@ export const getStablePoolEstimate = ({
 }) => {
   const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
 
-  console.log(amountIn, 'amount in stable pool estimate');
-
   const [amount_swapped, fee, dy] = getSwappedAmount(
     tokenIn.id,
     tokenOut.id,
@@ -109,8 +105,6 @@ export const getStablePoolEstimate = ({
     amount_swapped < 0 || isNaN(amount_swapped) || isNaN(dy)
       ? '0'
       : toPrecision(scientificNotationToString(dy.toString()), 0);
-
-  console.log(amountOut, dyOut, amount_swapped);
 
   return {
     estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
@@ -295,8 +289,6 @@ export async function getHybridStableSmart(
    *
    */
 
-  console.log(stablePoolsDetail, 'stablepools detail');
-
   if (isStablePoolToken(stablePoolsDetail, tokenIn.id)) {
     // first hop will be through stable pool.
     pools1 = stablePools.filter(pool => pool.tokenIds.includes(tokenIn.id));
@@ -360,8 +352,6 @@ export async function getHybridStableSmart(
     }
   }
 
-  console.log(pools1, pools2);
-
   // find candidate pools
 
   for (let p1 of pools1) {
@@ -414,8 +404,6 @@ export async function getHybridStableSmart(
       }
     }
   }
-
-  console.log(candidatePools, 'candpools');
 
   if (candidatePools.length > 0) {
     const tokensMedata = await ftGetTokensMetadata(
@@ -498,21 +486,9 @@ export async function getHybridStableSmart(
                   })),
             };
 
-            console.log(
-              poolPair[0].id,
-              poolPair[1].id,
-              estimate1.estimate,
-              estimate2.estimate,
-              tmpPool1,
-              tokenMidId,
-              isStablePool(stablePoolsDetail, tmpPool1.id),
-              isStablePool(stablePoolsDetail, tmpPool2.id)
-            );
-
             return Number(estimate2.estimate);
           });
 
-    console.log(BestPoolPair, 'best pool pair');
     // one pool case only get best price
 
     if (!BestPoolPair) return { actions: [], estimate: '0' };
@@ -643,8 +619,6 @@ export const estimateSwap = async ({
       tokenOut.id
     ).toString();
 
-    console.log(simplePoolSmartRoutingEstimate, simplePoolSmartRoutingActions);
-
     const hybridSmartRoutingRes = await getHybridStableSmart(
       tokenIn,
       tokenOut,
@@ -655,8 +629,6 @@ export const estimateSwap = async ({
     );
 
     const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
-
-    console.log(hybridSmartRoutingEstimate, hybridSmartRoutingRes);
 
     if (
       new Big(simplePoolSmartRoutingEstimate || '0').gte(

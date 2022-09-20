@@ -2,7 +2,7 @@ import { getTotalPools, refFiViewFunction } from './ref';
 import { Pool, PoolRPCView } from './types';
 import { parsePool } from './utils';
 import { unNamedError } from './error';
-import { toNonDivisibleNumber } from './number';
+import { toNonDivisibleNumber } from './utils';
 import { STABLE_LP_TOKEN_DECIMALS } from './constant';
 
 export const DEFAULT_PAGE_LIMIT = 100;
@@ -71,7 +71,7 @@ export const fetchAllRefPools = async () => {
     simplePools: pools.filter(
       p => p.pool_kind && p.pool_kind === 'SIMPLE_POOL'
     ),
-    stablePools: pools.filter(
+    unRatedPools: pools.filter(
       p => p.pool_kind && p.pool_kind === 'STABLE_SWAP'
     ),
     ratedPools: pools.filter(p => p.pool_kind && p.pool_kind === 'RATED_SWAP'),

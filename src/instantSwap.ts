@@ -11,7 +11,7 @@ import {
   ONE_YOCTO_NEAR,
 } from './constant';
 import { round, percentLess } from './utils';
-import { toNonDivisibleNumber } from './number';
+import { toNonDivisibleNumber } from './utils';
 import { config } from './constant';
 import { NotLoginError } from './error';
 

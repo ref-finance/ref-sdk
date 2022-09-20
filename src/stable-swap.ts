@@ -4,7 +4,7 @@ import {
   toReadableNumber,
   toNonDivisibleNumber,
   scientificNotationToString,
-} from './number';
+} from './utils';
 
 import Big from 'big.js';
 
