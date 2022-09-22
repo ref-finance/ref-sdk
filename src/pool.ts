@@ -2,46 +2,45 @@ import { getTotalPools, refFiViewFunction } from './ref';
 import { Pool, PoolRPCView } from './types';
 import { parsePool } from './utils';
 import { unNamedError } from './error';
-import { toNonDivisibleNumber } from './utils';
-import { STABLE_LP_TOKEN_DECIMALS } from './constant';
 
 export const DEFAULT_PAGE_LIMIT = 100;
 
-export const getRatedPools = async ({ ids }: { ids: (string | number)[] }) => {
-  return Promise.all(
-    ids.map(id =>
-      refFiViewFunction({
-        methodName: 'get_rated_pool',
-        args: { pool_id: Number(id) },
-      }).then(pool_info => ({
-        ...pool_info,
-        pool_kind: 'RATED_SWAP',
-        id: Number(id),
-      }))
-    )
-  ).catch(() => {
-    throw unNamedError;
-  });
+export const getRatedPoolDetail = async ({ id }: { id: string | number }) => {
+  return refFiViewFunction({
+    methodName: 'get_rated_pool',
+    args: { pool_id: Number(id) },
+  })
+    .then(pool_info => ({
+      ...pool_info,
+      pool_kind: 'RATED_SWAP',
+    }))
+    .catch(() => {
+      throw unNamedError;
+    });
 };
 
-export const getStablePools = async ({ ids }: { ids: (string | number)[] }) => {
+export const getUnRatedPoolDetail = async ({ id }: { id: string | number }) => {
+  return refFiViewFunction({
+    methodName: 'get_stable_pool',
+    args: { pool_id: Number(id) },
+  })
+    .then(pool_info => ({
+      ...pool_info,
+      pool_kind: 'STABLE_SWAP',
+    }))
+    .catch(() => {
+      throw unNamedError;
+    });
+};
+
+export const getStablePoolsDetail = async (stablePools: Pool[]) => {
   return Promise.all(
-    ids.map(id =>
-      refFiViewFunction({
-        methodName: 'get_stable_pool',
-        args: { pool_id: Number(id) },
-      }).then(pool_info => ({
-        ...pool_info,
-        pool_kind: 'STABLE_SWAP',
-        id: Number(id),
-        rates: pool_info.c_amounts.map((_: any) =>
-          toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
-        ),
-      }))
+    stablePools.map(pool =>
+      pool.pool_kind === 'RATED_SWAP'
+        ? getRatedPoolDetail({ id: pool.id })
+        : getUnRatedPoolDetail({ id: pool.id })
     )
-  ).catch(() => {
-    throw unNamedError;
-  });
+  );
 };
 
 export const getRefPools = async (

@@ -88,7 +88,7 @@ export const getStablePoolEstimate = ({
 }) => {
   const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
 
-  const [amount_swapped, fee, dy] = getSwappedAmount(
+  const [amount_swapped, _, dy] = getSwappedAmount(
     tokenIn.id,
     tokenOut.id,
     amountIn,

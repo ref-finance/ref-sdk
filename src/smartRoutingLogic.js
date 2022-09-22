@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 ////////////////////////////////////////////////////////////////////////////
 // SMART ROUTE SWAP LOGIC
 ////////////////////////////////////////////////////////////////////////////
@@ -8,8 +9,7 @@ import { TokenMetadata } from './types';
 
 import { ftGetTokenMetadata } from './ref';
 
-import { percentLess } from './utils';
-import { toNonDivisibleNumber } from './number';
+import { percentLess, toNonDivisibleNumber } from './utils';
 
 Big.RM = 0;
 Big.DP = 40;

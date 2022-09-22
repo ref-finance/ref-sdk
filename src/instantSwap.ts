@@ -8,7 +8,7 @@ import {
 import { round, percentLess } from './utils';
 import { toNonDivisibleNumber } from './utils';
 import { config } from './constant';
-import { NotLoginError } from './error';
+import { SwapRouteError } from './error';
 
 export const instantSwap = async ({
   tokenIn,
@@ -25,7 +25,7 @@ export const instantSwap = async ({
 }) => {
   const transactions: Transaction[] = [];
 
-  if (!!wallet.isSignedIn()) return NotLoginError;
+  if (swapTodos.at(-1)?.outputToken !== tokenOut.id) return SwapRouteError;
 
   const registerToken = async (token: TokenMetadata) => {
     const tokenRegistered = await ftGetStorageBalance(token.id).catch(() => {
@@ -120,7 +120,7 @@ export const instantSwap = async ({
   if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
     const registered = await ftGetStorageBalance(config.WRAP_NEAR_CONTRACT_ID);
     if (registered === null) {
-      registerToken(tokenIn);
+      await registerToken(tokenIn);
     }
   }
 

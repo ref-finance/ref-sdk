@@ -1,5 +1,6 @@
 import { REF_FI_CONTRACT_ID, config } from './constant';
 import { keyStores, Near, WalletConnection } from 'near-api-js';
+import { TokenNotExistError } from './error';
 
 import {
   TokenMetadata,
@@ -52,7 +53,7 @@ export const ftGetTokenMetadata = async (
 ): Promise<TokenMetadata> => {
   const metadata = await ftViewFunction(id, {
     methodName: 'ft_metadata',
-  });
+  }).catch(() => TokenNotExistError);
 
   return { ...metadata, id };
 };

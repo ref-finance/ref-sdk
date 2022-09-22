@@ -1,5 +1,7 @@
+import { getConfig } from './constant';
+
 export const formatError = (msg: string) => {
-  return new Error(msg);
+  throw new Error(msg);
 };
 
 export const unNamedError = formatError('Something wrong happened');
@@ -14,4 +16,12 @@ export const ZeroInputError = formatError(
 
 export const NoPoolError = formatError('No pool found for the input tokens');
 
-export const NotLoginError = formatError('Please login first');
+export const NotLoginError = formatError('Please login in first');
+
+export const SwapRouteError = formatError(
+  "Something wrong happened, we don't get correct routes corrreponding to current input"
+);
+
+export const TokenNotExistError = formatError(
+  `This token doesn't exist in ${getConfig().networkId}`
+);
