@@ -1,11 +1,11 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { Thing } from '../src/Example';
+// import * as React from 'react';
+// import * as ReactDOM from 'react-dom';
+// import { Thing } from '../src/Example';
 
-describe('it', () => {
-  it('renders without crashing', () => {
-    const div = document.createElement('div');
-    ReactDOM.render(<Thing />, div);
-    ReactDOM.unmountComponentAtNode(div);
-  });
-});
+// describe('it', () => {
+//   it('renders without crashing', () => {
+//     const div = document.createElement('div');
+//     ReactDOM.render(<Thing />, div);
+//     ReactDOM.unmountComponentAtNode(div);
+//   });
+// });

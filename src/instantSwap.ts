@@ -51,7 +51,7 @@ export const instantSwap = async ({
   };
 
   await registerToken(tokenOut);
-  let actionsList = [];
+  let actionsList: any = [];
   let allSwapsTokens = swapTodos.map(s => [s.inputToken, s.outputToken]); // to get the hop tokens
   for (let i in allSwapsTokens) {
     let swapTokens = allSwapsTokens[i];

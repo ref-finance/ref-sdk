@@ -7,7 +7,7 @@ import {
 import Big from 'big.js';
 import { SameInputTokenError, ZeroInputError, NoPoolError } from './error';
 import { ONLY_ZEROS, toPrecision } from './utils';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { FEE_DIVISOR } from './constant';
 import { getSwappedAmount } from './stable-swap';
 import { ftGetTokenMetadata, ftGetTokensMetadata } from './ref';
@@ -22,8 +22,6 @@ import {
   getExpectedOutputFromActionsORIG,
   //@ts-ignore
 } from './smartRoutingLogic.js';
-
-// core function
 
 export interface SwapParams {
   tokenIn: TokenMetadata;
