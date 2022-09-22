@@ -182,7 +182,3 @@ export const sendTransactionsByMemoryKey = async ({
     throw err;
   }
 };
-
-export const signAndSendTransactionsByWallets = (
-  transactionsRef: Transaction[]
-) => {};
