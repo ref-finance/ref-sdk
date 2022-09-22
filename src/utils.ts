@@ -1,14 +1,21 @@
-import { Pool, PoolRPCView, StablePool, SmartRoutingInputPool } from './types';
+import {
+  Pool,
+  PoolRPCView,
+  StablePool,
+  SmartRoutingInputPool,
+  Transaction,
+} from './types';
 import {
   RATED_POOL_LP_TOKEN_DECIMALS,
   STABLE_LP_TOKEN_DECIMALS,
 } from './constant';
 
-import { utils } from 'near-api-js';
+import { transactions, utils } from 'near-api-js';
 
 import BN from 'bn.js';
 
 import * as math from 'mathjs';
+import { REF_FI_CONTRACT_ID } from './constant';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(id && id >= 0 ? id : pool.id),
@@ -86,7 +93,7 @@ export const percentLess = (percent: number, num: number | string) => {
   });
 };
 
-export const getGas = (gas: string) =>
+export const getGas = (gas: string | undefined) =>
   gas ? new BN(gas) : new BN('100000000000000');
 
 export const getAmount = (amount: string) =>
@@ -209,4 +216,29 @@ export const toPrecision = (
   }
 
   return str;
+};
+
+export const transformTransactions = (
+  transactions: Transaction[],
+  AccountId: string
+) => {
+  return transactions.map((t: Transaction) => {
+    return {
+      signerId: AccountId,
+      receiverId: t.receiverId,
+      actions: t.functionCalls.map(fc => {
+        return {
+          type: 'FunctionCall',
+          params: {
+            methodName: fc.methodName,
+            args: fc.args || {},
+            gas: getGas(fc.gas)
+              .toNumber()
+              .toFixed(),
+            deposit: utils.format.parseNearAmount(fc.amount || '0')!,
+          },
+        };
+      }),
+    };
+  });
 };

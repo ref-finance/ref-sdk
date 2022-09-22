@@ -32,7 +32,7 @@ export interface SwapParams {
 }
 
 export interface SwapOptions {
-  smartRouting?: boolean;
+  enableSmartRouting?: boolean;
   stablePools?: Pool[];
   stablePoolsDetail?: StablePool[];
 }
@@ -584,11 +584,11 @@ export const estimateSwap = async ({
 
   if (ONLY_ZEROS.test(amountIn)) throw ZeroInputError;
 
-  const { smartRouting, stablePools, stablePoolsDetail } = options || {};
+  const { enableSmartRouting, stablePools, stablePoolsDetail } = options || {};
 
   const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
 
-  if (!smartRouting) {
+  if (!enableSmartRouting) {
     const estimate = singlePoolSwap({
       tokenIn,
       tokenOut,

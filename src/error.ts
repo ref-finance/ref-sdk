@@ -25,3 +25,15 @@ export const SwapRouteError = formatError(
 export const TokenNotExistError = formatError(
   `This token doesn't exist in ${getConfig().networkId}`
 );
+
+export const NoPuiblicKeyError = formatError('No public key found');
+
+export const NoLocalSignerError = formatError('No local signer found');
+
+export const InValidAccessKeyError = formatError('Invalid access key');
+
+export const AccountIdMisMatch = formatError(
+  "Your input account id doesn't match the account id in the credential"
+);
+
+export const NoCredential = formatError('No Credential to such path');

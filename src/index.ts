@@ -15,3 +15,5 @@ export * from './ref';
 export * from './stable-swap';
 
 export * from './swap';
+
+export * from './near';

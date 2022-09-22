@@ -1,5 +1,5 @@
 import { TokenMetadata, EstimateSwapView, Transaction } from './types';
-import { wallet, ftGetStorageBalance } from './ref';
+import { ftGetStorageBalance } from './ref';
 import {
   STORAGE_TO_REGISTER_WITH_MFT,
   REF_FI_CONTRACT_ID,
@@ -16,41 +16,46 @@ export const instantSwap = async ({
   amountIn,
   slippageTolerance,
   swapTodos,
+  AccountId,
 }: {
   tokenIn: TokenMetadata;
   tokenOut: TokenMetadata;
   amountIn: string;
   slippageTolerance: number;
   swapTodos: EstimateSwapView[];
+  AccountId: string;
 }) => {
   const transactions: Transaction[] = [];
 
   if (swapTodos.at(-1)?.outputToken !== tokenOut.id) throw SwapRouteError;
 
-  // const registerToken = async (token: TokenMetadata) => {
-  //   const tokenRegistered = await ftGetStorageBalance(token.id).catch(() => {
-  //     throw new Error(`${token.id} doesn't exist.`);
-  //   });
+  const registerToken = async (token: TokenMetadata) => {
+    const tokenRegistered = await ftGetStorageBalance(
+      token.id,
+      AccountId
+    ).catch(() => {
+      throw new Error(`${token.id} doesn't exist.`);
+    });
 
-  //   if (tokenRegistered === null) {
-  //     transactions.push({
-  //       receiverId: token.id,
-  //       functionCalls: [
-  //         {
-  //           methodName: 'storage_deposit',
-  //           args: {
-  //             registration_only: true,
-  //             account_id: wallet.getAccountId(),
-  //           },
-  //           gas: '30000000000000',
-  //           amount: STORAGE_TO_REGISTER_WITH_MFT,
-  //         },
-  //       ],
-  //     });
-  //   }
-  // };
+    if (tokenRegistered === null) {
+      transactions.push({
+        receiverId: token.id,
+        functionCalls: [
+          {
+            methodName: 'storage_deposit',
+            args: {
+              registration_only: true,
+              account_id: AccountId,
+            },
+            gas: '30000000000000',
+            amount: STORAGE_TO_REGISTER_WITH_MFT,
+          },
+        ],
+      });
+    }
+  };
 
-  // await registerToken(tokenOut);
+  await registerToken(tokenOut);
   let actionsList: any = [];
   let allSwapsTokens = swapTodos.map(s => [s.inputToken, s.outputToken]); // to get the hop tokens
   for (let i in allSwapsTokens) {
@@ -117,12 +122,12 @@ export const instantSwap = async ({
     ],
   });
 
-  // if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
-  //   const registered = await ftGetStorageBalance(config.WRAP_NEAR_CONTRACT_ID);
-  //   if (registered === null) {
-  //     await registerToken(tokenIn);
-  //   }
-  // }
+  if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
+    const registered = await ftGetStorageBalance(config.WRAP_NEAR_CONTRACT_ID);
+    if (registered === null) {
+      await registerToken(tokenIn);
+    }
+  }
 
   return transactions;
 };

@@ -119,6 +119,20 @@ export interface Transaction {
   functionCalls: RefFiFunctionCallOptions[];
 }
 
+export interface TransformedTransaction {
+  signerId: string;
+  receiverId: string;
+  actions: {
+    type: string;
+    params: {
+      methodName: string;
+      args: object;
+      gas: string;
+      deposit: string;
+    };
+  }[];
+}
+
 export interface FTStorageBalance {
   total: string;
   available: string;

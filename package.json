@@ -1,23 +1,23 @@
 {
-  "version": "0.1.11",
+  "version": "0.1.5",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
+  "type": "module",
   "engines": {
     "node": ">=10"
   },
   "scripts": {
     "start": "tsdx watch",
-    "build": "NEAR_ENV=mainnet tsdx build",
-    "build:testnet": "NEAR_ENV=testnet tsdx build",
-    "build:mainnet": "NEAR_ENV=mainnet tsdx build",
+    "build": "NEAR_ENV=mainnet tsdx build --format esm,cjs,umd",
+    "build:testnet": "NEAR_ENV=testnet tsdx build --format esm,cjs,umd",
+    "build:mainnet": "NEAR_ENV=mainnet tsdx build --format esm,cjs,umd",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
-    "prepare": "NEAR_ENV=testnet tsdx build",
+    "prepare": "NEAR_ENV=testnet tsdx build --format esm,cjs,umd",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
@@ -65,6 +65,7 @@
     "@types/bn.js": "^5.1.1",
     "@types/lodash": "^4.14.182",
     "big.js": "^6.2.1",
+    "lodash-es": "^4.17.21",
     "mathjs": "^9.3.0",
     "near-api-js": "0.44.2"
   }
