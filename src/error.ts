@@ -1,7 +1,7 @@
 import { getConfig } from './constant';
 
 export const formatError = (msg: string) => {
-  throw new Error(msg);
+  return new Error(msg);
 };
 
 export const unNamedError = formatError('Something wrong happened');

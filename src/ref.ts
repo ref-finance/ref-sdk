@@ -53,7 +53,9 @@ export const ftGetTokenMetadata = async (
 ): Promise<TokenMetadata> => {
   const metadata = await ftViewFunction(id, {
     methodName: 'ft_metadata',
-  }).catch(() => TokenNotExistError);
+  }).catch(() => {
+    throw TokenNotExistError;
+  });
 
   return { ...metadata, id };
 };

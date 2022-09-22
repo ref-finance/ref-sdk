@@ -25,37 +25,37 @@ export const instantSwap = async ({
 }) => {
   const transactions: Transaction[] = [];
 
-  if (swapTodos.at(-1)?.outputToken !== tokenOut.id) return SwapRouteError;
+  if (swapTodos.at(-1)?.outputToken !== tokenOut.id) throw SwapRouteError;
 
-  const registerToken = async (token: TokenMetadata) => {
-    const tokenRegistered = await ftGetStorageBalance(token.id).catch(() => {
-      throw new Error(`${token.id} doesn't exist.`);
-    });
+  // const registerToken = async (token: TokenMetadata) => {
+  //   const tokenRegistered = await ftGetStorageBalance(token.id).catch(() => {
+  //     throw new Error(`${token.id} doesn't exist.`);
+  //   });
 
-    if (tokenRegistered === null) {
-      transactions.push({
-        receiverId: token.id,
-        functionCalls: [
-          {
-            methodName: 'storage_deposit',
-            args: {
-              registration_only: true,
-              account_id: wallet.getAccountId(),
-            },
-            gas: '30000000000000',
-            amount: STORAGE_TO_REGISTER_WITH_MFT,
-          },
-        ],
-      });
-    }
-  };
+  //   if (tokenRegistered === null) {
+  //     transactions.push({
+  //       receiverId: token.id,
+  //       functionCalls: [
+  //         {
+  //           methodName: 'storage_deposit',
+  //           args: {
+  //             registration_only: true,
+  //             account_id: wallet.getAccountId(),
+  //           },
+  //           gas: '30000000000000',
+  //           amount: STORAGE_TO_REGISTER_WITH_MFT,
+  //         },
+  //       ],
+  //     });
+  //   }
+  // };
 
-  await registerToken(tokenOut);
+  // await registerToken(tokenOut);
   let actionsList: any = [];
   let allSwapsTokens = swapTodos.map(s => [s.inputToken, s.outputToken]); // to get the hop tokens
   for (let i in allSwapsTokens) {
     let swapTokens = allSwapsTokens[i];
-    if (swapTokens[0] == tokenIn.id && swapTokens[1] == tokenOut.id) {
+    if (swapTokens[0] === tokenIn.id && swapTokens[1] === tokenOut.id) {
       // parallel, direct hop route.
       actionsList.push({
         pool_id: swapTodos[i].pool.id,
@@ -70,7 +70,7 @@ export const instantSwap = async ({
           )
         ),
       });
-    } else if (swapTokens[0] == tokenIn.id) {
+    } else if (swapTokens[0] === tokenIn.id) {
       // first hop in double hop route
       //TODO -- put in a check to make sure this first hop matches with the next (i+1) hop as a second hop.
       actionsList.push({
@@ -117,12 +117,12 @@ export const instantSwap = async ({
     ],
   });
 
-  if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
-    const registered = await ftGetStorageBalance(config.WRAP_NEAR_CONTRACT_ID);
-    if (registered === null) {
-      await registerToken(tokenIn);
-    }
-  }
+  // if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
+  //   const registered = await ftGetStorageBalance(config.WRAP_NEAR_CONTRACT_ID);
+  //   if (registered === null) {
+  //     await registerToken(tokenIn);
+  //   }
+  // }
 
   return transactions;
 };

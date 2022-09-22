@@ -7,7 +7,7 @@ import {
 import Big from 'big.js';
 import { SameInputTokenError, ZeroInputError, NoPoolError } from './error';
 import { ONLY_ZEROS, toPrecision } from './utils';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { FEE_DIVISOR } from './constant';
 import { getSwappedAmount } from './stable-swap';
 import { ftGetTokenMetadata, ftGetTokensMetadata } from './ref';
@@ -179,7 +179,7 @@ export const singlePoolSwap = ({
       : _.maxBy(estimatesStablePool, estimate => Number(estimate.estimate));
 
   return Number(maxSimplePoolEstimate?.estimate) >
-    Number(maxSimplePoolEstimate?.estimate)
+    Number(maxStablePoolEstimate?.estimate)
     ? maxSimplePoolEstimate
     : maxStablePoolEstimate;
 };
@@ -326,7 +326,7 @@ export async function getHybridStableSmart(
     const otherStables = pools2Right
       .map(pool => pool.tokenIds.filter(id => id !== tokenOut.id))
       .flat();
-    for (var otherStable of otherStables) {
+    for (let otherStable of otherStables) {
       let stablePoolsThisPair = getStablePoolsThisPair({
         tokenInId: tokenIn.id,
         tokenOutId: otherStable,
@@ -505,7 +505,7 @@ export async function getHybridStableSmart(
         actions: [
           {
             ...estimate,
-            pool: { bestPool, parsedAmountIn: parsedAmountIn },
+            pool: { ...bestPool, parsedAmountIn: parsedAmountIn },
             tokens: [tokenIn, tokenOut],
             inputToken: tokenIn.id,
             outputToken: tokenOut.id,
@@ -539,11 +539,12 @@ export async function getHybridStableSmart(
             amountIn,
             pool: pool1,
           })),
-      partialAmountIn: parsedAmountIn,
       tokens: [tokenIn, tokenMidMeta, tokenOut],
       inputToken: tokenIn.id,
       outputToken: tokenMidMeta.id,
     };
+
+    estimate1.pool.partialAmountIn = parsedAmountIn;
 
     const estimate2 = {
       ...(isStablePool(stablePoolsDetail, pool2.id)
@@ -633,7 +634,7 @@ export const estimateSwap = async ({
         hybridSmartRoutingEstimate || '0'
       )
     ) {
-      if (!simplePoolSmartRoutingActions?.length) return NoPoolError;
+      if (!simplePoolSmartRoutingActions?.length) throw NoPoolError;
       return simplePoolSmartRoutingActions as EstimateSwapView[];
     } else {
       return hybridSmartRoutingRes.actions as EstimateSwapView[];

@@ -1,7 +1,8 @@
 import { getTotalPools, refFiViewFunction } from './ref';
 import { Pool, PoolRPCView } from './types';
-import { parsePool } from './utils';
+import { parsePool, toNonDivisibleNumber } from './utils';
 import { unNamedError } from './error';
+import { STABLE_LP_TOKEN_DECIMALS } from './constant';
 
 export const DEFAULT_PAGE_LIMIT = 100;
 
@@ -12,6 +13,7 @@ export const getRatedPoolDetail = async ({ id }: { id: string | number }) => {
   })
     .then(pool_info => ({
       ...pool_info,
+      id: Number(id),
       pool_kind: 'RATED_SWAP',
     }))
     .catch(() => {
@@ -26,7 +28,11 @@ export const getUnRatedPoolDetail = async ({ id }: { id: string | number }) => {
   })
     .then(pool_info => ({
       ...pool_info,
+      id: Number(id),
       pool_kind: 'STABLE_SWAP',
+      rates: pool_info.c_amounts.map((_: any) =>
+        toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
+      ),
     }))
     .catch(() => {
       throw unNamedError;
