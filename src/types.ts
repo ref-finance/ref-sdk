@@ -91,7 +91,6 @@ export interface EstimateSwapView {
   pool: Pool;
   intl?: any;
   dy?: string;
-  token?: TokenMetadata;
   noFeeAmountOut?: string;
   inputToken?: string;
   outputToken?: string;

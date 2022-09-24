@@ -65,7 +65,6 @@ export const getSimplePoolEstimate = ({
   ).toFixed();
 
   return {
-    token: tokenIn,
     estimate,
     pool,
     outputToken: tokenOut.id,
@@ -108,7 +107,6 @@ export const getStablePoolEstimate = ({
     estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
     noFeeAmountOut: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, dyOut),
     pool: stablePool,
-    token: tokenIn,
     outputToken: tokenOut.id,
     inputToken: tokenIn.id,
   };

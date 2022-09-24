@@ -18,7 +18,7 @@ import * as math from 'mathjs';
 import { REF_FI_CONTRACT_ID } from './constant';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
-  id: Number(id && id >= 0 ? id : pool.id),
+  id: Number(typeof id === 'number' ? id : pool.id),
   tokenIds: pool.token_account_ids,
   supplies: pool.amounts.reduce(
     (acc: { [tokenId: string]: string }, amount: string, i: number) => {

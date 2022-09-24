@@ -12,9 +12,7 @@
   },
   "scripts": {
     "start": "tsdx watch",
-    "build": "NEAR_ENV=mainnet tsdx build --format esm,cjs,umd",
-    "build:testnet": "NEAR_ENV=testnet tsdx build --format esm,cjs,umd",
-    "build:mainnet": "NEAR_ENV=mainnet tsdx build --format esm,cjs,umd",
+    "build": "tsdx build --format esm,cjs,umd",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
     "prepare": "NEAR_ENV=testnet tsdx build --format esm,cjs,umd",

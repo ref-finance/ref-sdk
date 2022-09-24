@@ -39,11 +39,3 @@ export const REF_FI_CONTRACT_ID = config.REF_FI_CONTRACT_ID;
 export const STORAGE_TO_REGISTER_WITH_MFT = '0.1';
 
 export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
-
-// export const REF_FI_CONTRACT_ID = 'exchange.ref-dev.testnet';
-
-// export const config = {
-//   networkId: 'testnet',
-//   nodeUrl: 'https://rpc.testnet.near.org',
-//   walletUrl: 'https://wallet.testnet.near.org',
-// };
