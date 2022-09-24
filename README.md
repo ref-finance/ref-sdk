@@ -190,18 +190,18 @@ const stablePoolsDetail: StablePool[] = await getStablePoolsDetail(stablePools);
 
 ```typescript
 [
-	{
-		amounts: ['1298314415249170366960739764', '80182803630538035347294614770'],
-		amp: 240,
-		c_amounts:["1298314415249170366960739764","80182803630538035347294614770"],
-		decimals:[24,24],
-		id: 568,
-		pool_kind: "RATED_SWAP",
-		rates:["1972101024157559347385372","1000000000000000000000000"],
-		shares_total_supply: "80676034815429711745720012070",
-		token_account_ids:["meta-v2.pool.testnet","wrap.testnet"],
-		total_fee:5
-	},
+  {
+    amounts: ['1298314415249170366960739764', '80182803630538035347294614770'],
+    amp: 240,
+    c_amounts:["1298314415249170366960739764","80182803630538035347294614770"],
+    decimals:[24,24],
+    id: 568,
+    pool_kind: "RATED_SWAP",
+    rates:["1972101024157559347385372","1000000000000000000000000"],
+    shares_total_supply: "80676034815429711745720012070",
+    token_account_ids:["meta-v2.pool.testnet","wrap.testnet"],
+    total_fee:5
+  },
 	...
 ]
 ```
@@ -476,4 +476,37 @@ For makers, it utilizes credentials stored in the local env after `near login` t
 sendTransactionsByMemoryKey({
   signedTransactions,
 });
+```
+
+
+**Response**
+
+```
+[
+  {
+    receipts_outcome: [
+      [Object], [Object],
+      [Object], [Object],
+      [Object], [Object],
+      [Object], [Object],
+      [Object], [Object]
+    ],
+    status: { SuccessValue: 'xxxxxx' },
+    transaction: {
+      actions: [Array],
+      hash: 'xxxxxxxx',
+      nonce: 91940092000042,
+      public_key: 'ed25519:xxxxxxxx',
+      receiver_id: 'ref.fakes.testnet',
+      signature: 'ed25519:xxxxxxxxxxxxx',
+      signer_id: 'your-account-id.testnet'
+    },
+    transaction_outcome: {
+      block_hash: '3QXEF941UvsHzXrMhwbchk7wmy3qmPNs3w9gkfvW84QK',
+      id: 'xxxxxxxx',
+      outcome: [Object],
+      proof: []
+    }
+  }
+]
 ```
