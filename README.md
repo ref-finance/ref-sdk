@@ -162,7 +162,7 @@ const { ratedPools, unRatedPools, simplePools } = await fetchAllRefPools();
     tvl: undefined
   },...]
   unRatedPools:[...],
-	simplePools:[...],
+  simplePools:[...],
 }
 ```
 
