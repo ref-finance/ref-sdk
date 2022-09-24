@@ -2,19 +2,15 @@
 
 Functions to quickly implement AMM feature both for Dapp developers or makers.
 
-
-
 ## Install
 
 For yarn Developers: `yarn add ref-sdk`
 
-For npm Developers: `npm install ref-sdk` 
-
-
+For npm Developers: `npm install ref-sdk`
 
 ## Initialization
 
-ref-sdf identifies env varivable NEAR_ENV to get global configuration, we suggest to `export NEAR_ENV=mainnet `  or `export NEAR_ENV=testnet` to set up NEAR network.
+ref-sdf identifies env varivable NEAR_ENV to get global configuration, we suggest to `export NEAR_ENV=mainnet` or `export NEAR_ENV=testnet` to set up NEAR network.
 
 ```typescript
 export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
@@ -45,18 +41,11 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
       };
   }
 }
-
 ```
-
-
 
 ## Functions
 
-
-
 ### Tokens
-
-
 
 #### ftGetTokenMetadata
 
@@ -65,31 +54,29 @@ View to get token metadata.
 **Parameters**
 
 ```typescript
-id:string
+id: string;
 ```
 
-**Example**  
+**Example**
 
 ```typescript
 const WrapNear = await ftGetTokenMetadata('wrap.testnet');
 ```
 
-**Response**  
+**Response**
 
 ```typescript
 {
-  decimals: 24
-  icon: null
-  id: "wrap.testnet"
-  name: "Wrapped NEAR fungible token"
-  reference: null
-  reference_hash: null
-  spec: "ft-1.0.0"
-  symbol: "wNEAR"
+  decimals: 24;
+  icon: null;
+  id: 'wrap.testnet';
+  name: 'Wrapped NEAR fungible token';
+  reference: null;
+  reference_hash: null;
+  spec: 'ft-1.0.0';
+  symbol: 'wNEAR';
 }
 ```
-
-
 
 ---
 
@@ -103,13 +90,16 @@ Get tokens metadata, set token id as index.
 tokenIds: string[]
 ```
 
-**Example**  
+**Example**
 
 ```typescript
-const tokensMetadata = await ftGetTokensMetadata(['ref.fakes.testnet','wrap.testnet'])
+const tokensMetadata = await ftGetTokensMetadata([
+  'ref.fakes.testnet',
+  'wrap.testnet',
+]);
 ```
 
-**Response**  
+**Response**
 
 ```typescript
 {
@@ -136,29 +126,25 @@ const tokensMetadata = await ftGetTokensMetadata(['ref.fakes.testnet','wrap.test
 }
 ```
 
-
-
 ---
 
 ### Pools
 
-
-
 #### fetchAllRefPools
 
-Fetch all pools in Ref, including simple pools, rated pools and unrated pools. 
+Fetch all pools in Ref, including simple pools, rated pools and unrated pools.
 
 **Parameters**
 
 None
 
-**Example**  
+**Example**
 
 ```typescript
 const { ratedPools, unRatedPools, simplePools } = await fetchAllRefPools();
 ```
 
-**Response**  
+**Response**
 
 ```typescript
 {
@@ -180,9 +166,7 @@ const { ratedPools, unRatedPools, simplePools } = await fetchAllRefPools();
 }
 ```
 
-
-
-----
+---
 
 #### getStablePoolsDetail
 
@@ -197,12 +181,12 @@ stablePools: Pool[]
 **Example**
 
 ```typescript
-const stablePools:Pool[] = unRatedPools.concat(ratedPools)
+const stablePools: Pool[] = unRatedPools.concat(ratedPools);
 
-const stablePoolsDetail:StablePool[] = await getStablePoolsDetail(stablePools)
+const stablePoolsDetail: StablePool[] = await getStablePoolsDetail(stablePools);
 ```
 
-**Response**  
+**Response**
 
 ```typescript
 [
@@ -222,15 +206,9 @@ const stablePoolsDetail:StablePool[] = await getStablePoolsDetail(stablePools)
 ]
 ```
 
-
-
 ---
 
-
-
 ### Swap
-
-
 
 #### estimateSwap
 
@@ -259,12 +237,11 @@ interface SwapOptions {
 **Example**
 
 ```typescript
-
 // enableSmartRouting as false, swap from Ref to wNear, with amount 1
 const tokenIn = await ftGetTokenMetadata('ref.fakes.testnet');
 const tokenOut = await ftGetTokenMetadata('wrap.testnet');
 
-const swapTodos:EstimateSwapView[] = estimateSwap({
+const swapTodos: EstimateSwapView[] = estimateSwap({
   tokenIn,
   tokenOut,
   amountIn: '1',
@@ -281,16 +258,16 @@ const options: SwapOptions = {
   stablePoolsDetail,
 };
 
-const swapTodos:EstimateSwapView[] = estimateSwap({
+const swapTodos: EstimateSwapView[] = estimateSwap({
   tokenIn,
   tokenOut,
   amountIn: '1',
   simplePools,
-  options
+  options,
 });
 ```
 
-**Response**  
+**Response**
 
 ```typescript
 // enableSmartRouting to false, swap from Ref to wNear, with amount 1
@@ -298,24 +275,22 @@ const swapTodos:EstimateSwapView[] = estimateSwap({
 [
   {
     estimate: "0.7338604246699393",
-		inputToken: "ref.fakes.testnet",
-		outputToken: "wrap.testnet",
-		pool:{
+    inputToken: "ref.fakes.testnet",
+    outputToken: "wrap.testnet",
+    pool:{
       fee: 30,
       id: 38,
       partialAmountIn: "1000000000000000000",
-			pool_kind: "SIMPLE_POOL",
-			shareSupply: "1000587315520795219676332",
-			supplies: {ref.fakes.testnet: '7789776060978885018', wrap.testnet: 								'6467670222256390319335181'},
-			token0_ref_price: undefined,
-			tokenIds: (2) ['ref.fakes.testnet', 'wrap.testnet'],
-			tvl: undefined
+      pool_kind: "SIMPLE_POOL",
+      shareSupply: "1000587315520795219676332",
+      supplies: {ref.fakes.testnet: '7789776060978885018', wrap.testnet: 								'6467670222256390319335181'},
+      token0_ref_price: undefined,
+      tokenIds: (2) ['ref.fakes.testnet', 'wrap.testnet'],
+      tvl: undefined
     }
   }
 ]
 ```
-
-
 
 ---
 
@@ -331,29 +306,27 @@ Get estimate output from single pool, which integrates estimate method on simple
   tokenOut: TokenMetadata;
   amountIn: string;
   pool: Pool;
-  // please input stablePoolDetail if to estimate output on stable pool or the pool will be recognized as simple pool 
-  stablePoolDetail?: StablePool; 
+  // please input stablePoolDetail if to estimate output on stable pool or the pool will be recognized as simple pool
+  stablePoolDetail?: StablePool;
 }
 ```
 
 **Example**
 
 ```typescript
-
 // estimate on simple Pool
 const estimate = await getPoolEstimate({
   tokenIn,
   tokenOut,
-  amountIn:'1',
+  amountIn: '1',
   pool: simplePools[0],
 });
-
 
 // estimate on stable pool
 const estimate = await getPoolEstimate({
   tokenIn,
   tokenOut,
-  amountIn:'1',
+  amountIn: '1',
   pool: stablePools[0],
   stablePoolDetail: stablePoolsDetail[0],
 });
@@ -363,40 +336,30 @@ const estimate = await getPoolEstimate({
 
 ```typescript
   {
-    estimate: "0.7338604246699393",
-		inputToken: "ref.fakes.testnet",
-		outputToken: "wrap.testnet",
-		pool:{
-      fee: 30,
-      id: 38,
-      partialAmountIn: "1000000000000000000",
-			pool_kind: "SIMPLE_POOL",
-			shareSupply: "1000587315520795219676332",
-			supplies: {"ref.fakes.testnet": '7789776060978885018', "wrap.testnet": 								'6467670222256390319335181'},
-			token0_ref_price: undefined,
-			tokenIds: (2) ['ref.fakes.testnet', 'wrap.testnet'],
-			tvl: undefined
+  estimate: "0.7338604246699393",
+  inputToken: "ref.fakes.testnet",
+  outputToken: "wrap.testnet",
+  pool:{
+    fee: 30,
+    id: 38,
+    partialAmountIn: "1000000000000000000",
+    pool_kind: "SIMPLE_POOL",
+    shareSupply: "1000587315520795219676332",
+    supplies: {"ref.fakes.testnet": '7789776060978885018', "wrap.testnet": 								'6467670222256390319335181'},
+    token0_ref_price: undefined,
+    tokenIds: (2) ['ref.fakes.testnet', 'wrap.testnet'],
+    tvl: undefined
     }
   }
 ```
 
-
-
-
-
-
-
 ---
-
-
 
 ### Transactions
 
-
-
 #### instantSwap
 
-Set up transactions from swap routest. Especially, we have to make sure the AccountId had balance storaged in the token in contract, **otherwise the transaction would fail and user  lost the input token** **amount**. 
+Set up transactions from swap routest. Especially, we have to make sure the AccountId had balance storaged in the token in contract, **otherwise the transaction would fail and user lost the input token** **amount**.
 
 For Dapp Developers, we only need to create transactions then fed to wallets.
 
@@ -417,41 +380,39 @@ For Dapp Developers, we only need to create transactions then fed to wallets.
 **Example**
 
 ```typescript
-const transactionsRef:Transaction[] =  await instantSwap({
-    tokenIn,
-    tokenOut,
-    amountIn:'1',
-    swapTodos,
-    slippageTolerance = 0.01,
-  });
+const transactionsRef: Transaction[] = await instantSwap({
+  tokenIn,
+  tokenOut,
+  amountIn: '1',
+  swapTodos,
+  slippageTolerance = 0.01,
+});
 ```
 
 **Response**
 
 ```typescript
-[{
-  functionCalls: [
-    {
-      amount: "0.000000000000000000000001",
-      args:{
-        amount:"1000000000000000000",
-        msg: "{\"force\":0,\"actions\":[{\"pool_id\":38,\"token_in\":\"ref.fakes.testnet\",\"token_out\":\"wrap.testnet\",\"amount_in\":\"1000000000000000000\",\"min_amount_out\":\"730191122546589600000000\"}]}",
-        receiver_id: "ref-finance-101.testnet"
+[
+  {
+    functionCalls: [
+      {
+        amount: '0.000000000000000000000001',
+        args: {
+          amount: '1000000000000000000',
+          msg:
+            '{"force":0,"actions":[{"pool_id":38,"token_in":"ref.fakes.testnet","token_out":"wrap.testnet","amount_in":"1000000000000000000","min_amount_out":"730191122546589600000000"}]}',
+          receiver_id: 'ref-finance-101.testnet',
+        },
+        gas: '180000000000000',
+        methodName: 'ft_transfer_call',
       },
-      gas: "180000000000000",
-      methodName: "ft_transfer_call",
-    }
-  ],
-  receiverId:"ref.fakes.testnet",
-}]
-
+    ],
+    receiverId: 'ref.fakes.testnet',
+  },
+];
 ```
 
-
-
-----
-
-
+---
 
 #### getSignedTransactionsByMemoryKey (Node)
 
@@ -495,11 +456,7 @@ const signedTransactions:nearTransactions.SignedTransaction[] = getSignedTransac
 ]
 ```
 
-
-
-----
-
-
+---
 
 #### sendTransactionsByMemoryKey (Node)
 
@@ -517,7 +474,6 @@ For makers, it utilizes credentials stored in the local env after `near login` t
 
 ```typescript
 sendTransactionsByMemoryKey({
-	signedTransactions
-})
+  signedTransactions,
+});
 ```
-
