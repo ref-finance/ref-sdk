@@ -39,7 +39,7 @@ export const getUnRatedPoolDetail = async ({ id }: { id: string | number }) => {
     });
 };
 
-export const getStablePoolsDetail = async (stablePools: Pool[]) => {
+export const getStablePools = async (stablePools: Pool[]) => {
   return Promise.all(
     stablePools.map(pool =>
       pool.pool_kind === 'RATED_SWAP'
@@ -63,8 +63,7 @@ export const getRefPools = async (
   return poolData.map((rawPool, i) => parsePool(rawPool, i + index));
 };
 
-// TODO: differentiate by network, include simple pools and stable pools
-export const fetchAllRefPools = async () => {
+export const fetchAllPools = async () => {
   const totalPools = await getTotalPools();
   const pages = Math.ceil(totalPools / DEFAULT_PAGE_LIMIT);
 

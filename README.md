@@ -1,6 +1,6 @@
 # Ref SDK
 
-Functions to quickly implement AMM feature both for Dapp developers or makers.
+This SDK provides functions of AMM features both for Dapp developers or makers.
 
 ## Install
 
@@ -10,7 +10,7 @@ For npm Developers: `npm install ref-sdk`
 
 ## Initialization
 
-ref-sdf identifies env varivable NEAR_ENV to get global configuration, we suggest to `export NEAR_ENV=mainnet` or `export NEAR_ENV=testnet` to set up NEAR network.
+Ref SDK identifies env variable NEAR_ENV to get global configuration. Suggest to use `export NEAR_ENV=mainnet` or `export NEAR_ENV=testnet` to set up NEAR network.
 
 ```typescript
 export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
@@ -49,7 +49,7 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
 
 #### ftGetTokenMetadata
 
-View to get token metadata.
+Get token metadata.
 
 **Parameters**
 
@@ -82,7 +82,7 @@ const WrapNear = await ftGetTokenMetadata('wrap.testnet');
 
 #### ftGetTokensMetadata
 
-Get tokens metadata, set token id as index.
+Get tokens metadata and set token id as index.
 
 **Parameters**
 
@@ -130,7 +130,7 @@ const tokensMetadata = await ftGetTokensMetadata([
 
 ### Pools
 
-#### fetchAllRefPools
+#### fetchAllPools
 
 Fetch all pools in Ref, including simple pools, rated pools and unrated pools.
 
@@ -141,7 +141,7 @@ None
 **Example**
 
 ```typescript
-const { ratedPools, unRatedPools, simplePools } = await fetchAllRefPools();
+const { ratedPools, unRatedPools, simplePools } = await fetchAllPools();
 ```
 
 **Response**
@@ -168,9 +168,9 @@ const { ratedPools, unRatedPools, simplePools } = await fetchAllRefPools();
 
 ---
 
-#### getStablePoolsDetail
+#### getStablePools
 
-We call `unRatedPools` or `ratedPools` as `stablePool`, this function gets stable pools' detail.
+We define `unRatedPools` and `ratedPools` as `stablePool`. You can use this function to get details of stable pools. 
 
 **Parameters**
 
@@ -183,7 +183,7 @@ stablePools: Pool[]
 ```typescript
 const stablePools: Pool[] = unRatedPools.concat(ratedPools);
 
-const stablePoolsDetail: StablePool[] = await getStablePoolsDetail(stablePools);
+const stablePoolsDetail: StablePool[] = await getStablePools(stablePools);
 ```
 
 **Response**
@@ -212,7 +212,7 @@ const stablePoolsDetail: StablePool[] = await getStablePoolsDetail(stablePools);
 
 #### estimateSwap
 
-Get swap routes by pools, tokens, input amount. Especially, there is message constraint on **Ledger**, we set `enableSmartRouting` option for developers.
+Get swap routes by pools, tokens and input amount. Please notice since there is message constraint on **Ledger**, we set `enableSmartRouting` option for developers.
 
 This function integrates smart routing, parallel swap and hybrid stable smart routing algorihtms to get best estimate based on input pools.
 
@@ -234,7 +234,7 @@ interface SwapOptions {
 }
 ```
 
-**Example**
+**Example** (enableSmartRouting == false)
 
 ```typescript
 // enableSmartRouting as false, swap from Ref to wNear, with amount 1
@@ -248,26 +248,9 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
   simplePools,
 });
 
-// enableSmartRouting as true, swap from USDT.e to Dai, with amount 1
-const tokenIn = await ftGetTokenMetadata('usdt.fakes.testnet');
-const tokenOut = await ftGetTokenMetadata('dai.fakes.testnet');
-
-const options: SwapOptions = {
-  enableSmartRouting: true,
-  stablePools,
-  stablePoolsDetail,
-};
-
-const swapTodos: EstimateSwapView[] = estimateSwap({
-  tokenIn,
-  tokenOut,
-  amountIn: '1',
-  simplePools,
-  options,
-});
 ```
 
-**Response**
+**Response** (enableSmartRouting == false)
 
 ```typescript
 // enableSmartRouting to false, swap from Ref to wNear, with amount 1
@@ -292,11 +275,88 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
 ]
 ```
 
+
+
+**Example** (enableSmartRouting == true)
+
+```typescript
+// enableSmartRouting as true, swap from Ref to wNear, with amount 1
+const tokenIn = await ftGetTokenMetadata('ref.fakes.testnet');
+const tokenOut = await ftGetTokenMetadata('wrap.testnet');
+
+const options: SwapOptions = {
+  enableSmartRouting: true,
+  stablePools,
+  stablePoolsDetail,
+};
+
+const swapTodos: EstimateSwapView[] = estimateSwap({
+  tokenIn,
+  tokenOut,
+  amountIn: '1',
+  simplePools,
+  options,
+});
+
+```
+
+**Response** (enableSmartRouting == true)
+
+```typescript
+[
+  {
+    estimate: "0.000225321544275095902371355566972009167",
+    inputToken: "ref.fakes.testnet",
+    outputToken: "nusdt.ft-fin.testnet"
+    pool:{
+      id: 341,
+      partialAmountIn: "836859596261755688",
+     	tokenIds:["ref.fakes.testnet","nusdt.ft-fin.testnet"],
+      ...
+    },
+    ...
+  },{
+    estimate: "0.5203255327171591155634413370660973429264",
+    inputToken: "nusdt.ft-fin.testnet",
+    outputToken: "wrap.testnet",
+    pool:{
+      id:1625,
+    	tokenIds:["nusdt.ft-fin.testnet","wrap.testnet"],
+    	...
+    },
+    ...
+  },{
+    estimate: "5.3206339674140066489000963525772735539612",
+    inputToken: "ref.fakes.testnet",
+    outputToken: "usdn.testnet",
+    pool:{
+      id: 376,
+      tokenIds:["usdn.testnet","ref.fakes.testnet"],
+      partialAmountIn: "163140403738244312",
+      ...
+    },
+    ...
+  },{
+    estimate: "0.2036473132202839680683206178037243543302",
+    inputToken: "usdn.testnet",
+    outputToken: "wrap.testnet",
+   	pool:{
+      id: 385,
+      tokenIds:["usdn.testnet","wrap.testnet"],
+      ...
+    },
+    ...
+  }
+]
+```
+
+
+
 ---
 
 #### getPoolEstimate
 
-Get estimate output from single pool, which integrates estimate method on simple pool and stable pool.
+Get estimate output from single pool, which integrates estimate method of simple pool and stable pool.
 
 **Parameters**
 
@@ -306,12 +366,12 @@ Get estimate output from single pool, which integrates estimate method on simple
   tokenOut: TokenMetadata;
   amountIn: string;
   pool: Pool;
-  // please input stablePoolDetail if to estimate output on stable pool or the pool will be recognized as simple pool
+  // please input stablePoolDetail if you want estimate output on stable pool or the pool will be recognized as simple pool
   stablePoolDetail?: StablePool;
 }
 ```
 
-**Example**
+**Example** (on simple pool)
 
 ```typescript
 // estimate on simple Pool
@@ -319,23 +379,16 @@ const estimate = await getPoolEstimate({
   tokenIn,
   tokenOut,
   amountIn: '1',
-  pool: simplePools[0],
+  pool,
 });
 
-// estimate on stable pool
-const estimate = await getPoolEstimate({
-  tokenIn,
-  tokenOut,
-  amountIn: '1',
-  pool: stablePools[0],
-  stablePoolDetail: stablePoolsDetail[0],
-});
 ```
 
-**Response**
+**Response** (on simple pool)
 
 ```typescript
-  {
+// estimate on simple pool, swap from Ref to wNear, with amount 1
+{
   estimate: "0.7338604246699393",
   inputToken: "ref.fakes.testnet",
   outputToken: "wrap.testnet",
@@ -349,9 +402,47 @@ const estimate = await getPoolEstimate({
     token0_ref_price: undefined,
     tokenIds: (2) ['ref.fakes.testnet', 'wrap.testnet'],
     tvl: undefined
-    }
   }
+}
 ```
+
+**Example** (on stable pool)
+
+```typescript
+// estimate on stable pool, swap from stNear to wNear, with amount 1
+const estimate = await getPoolEstimate({
+  tokenIn,
+  tokenOut,
+  amountIn: '1',
+  pool: stablePool,
+  stablePoolDetail: stablePoolDetail,
+});
+```
+
+**Response** (on stable pool)
+
+```typescript
+{
+  estimate: "2.4898866773442284",
+  inputToken: "meta-v2.pool.testnet",
+  noFeeAmountOut: "2.491132243465961",
+  outputToken: "wrap.testnet",
+  pool:{
+    amounts:["1298314415249170366960739764","80182803630538035347294614770"],
+    amp: 240,
+    c_amounts:["1298314415249170366960739764","80182803630538035347294614770"],
+    decimals:[24,24],
+    id: 568,
+    pool_kind: "RATED_SWAP",
+    rates:["1972204647926836788049038","1000000000000000000000000"],
+    shares_total_supply: "80676034815429711745720012070",
+    token_account_ids:["meta-v2.pool.testnet", "wrap.testnet"],
+    total_fee: 5,
+  }
+}
+```
+
+
 
 ---
 
@@ -359,9 +450,9 @@ const estimate = await getPoolEstimate({
 
 #### instantSwap
 
-Set up transactions from swap routest. Especially, we have to make sure the AccountId had balance storaged in the token in contract, **otherwise the transaction would fail and user lost the input token** **amount**.
+Set up transactions through swap routes. Please notice that you have to make sure the AccountId have a balance storaged in the token-in contract, **otherwise the transaction would fail and user would lose the input token** **amount**.
 
-For Dapp Developers, we only need to create transactions then fed to wallets.
+Dapp developers only need to create transactions then send to wallets.
 
 **Parameters**
 
@@ -416,7 +507,9 @@ const transactionsRef: Transaction[] = await instantSwap({
 
 #### getSignedTransactionsByMemoryKey (Node)
 
-For makers, it utilizes credentials stored in the local env after `near login` to sign transactions..
+In the local env, developers could add credentials by `near login` .
+
+This function utilizes credentials stored in the local env to sign transactions.
 
 **Parameters**
 
@@ -460,7 +553,7 @@ const signedTransactions:nearTransactions.SignedTransaction[] = getSignedTransac
 
 #### sendTransactionsByMemoryKey (Node)
 
-For makers, it utilizes credentials stored in the local env after `near login` to send transactions..
+This function utilizes credentials stored in the local env to send transactions..
 
 **Parameters**
 

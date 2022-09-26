@@ -1,5 +1,6 @@
 import { StablePool } from './types';
 import { FEE_DIVISOR } from './constant';
+
 import {
   toReadableNumber,
   toNonDivisibleNumber,
