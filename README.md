@@ -409,7 +409,7 @@ const estimate = await getPoolEstimate({
 **Example** (on stable pool)
 
 ```typescript
-// estimate on stable pool, swap from stNear to wNear, with amount 1
+// estimate on stable pool
 const estimate = await getPoolEstimate({
   tokenIn,
   tokenOut,
@@ -422,6 +422,7 @@ const estimate = await getPoolEstimate({
 **Response** (on stable pool)
 
 ```typescript
+// estimate on stable pool, swap from stNear to wNear, with amount 1
 {
   estimate: "2.4898866773442284",
   inputToken: "meta-v2.pool.testnet",
