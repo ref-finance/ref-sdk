@@ -555,7 +555,7 @@ const signedTransactions:nearTransactions.SignedTransaction[] = getSignedTransac
 
 #### sendTransactionsByMemoryKey (Node)
 
-This function utilizes credentials stored in the local env to send transactions..
+This function utilizes credentials stored in the local env to send transactions.
 
 **Parameters**
 
