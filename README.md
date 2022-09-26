@@ -308,11 +308,11 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
   {
     estimate: "0.000225321544275095902371355566972009167",
     inputToken: "ref.fakes.testnet",
-    outputToken: "nusdt.ft-fin.testnet"
+    outputToken: "nusdt.ft-fin.testnet",
     pool:{
       id: 341,
       partialAmountIn: "836859596261755688",
-     	tokenIds:["ref.fakes.testnet","nusdt.ft-fin.testnet"],
+      tokenIds: ["ref.fakes.testnet","nusdt.ft-fin.testnet"],
       ...
     },
     ...
@@ -321,9 +321,9 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
     inputToken: "nusdt.ft-fin.testnet",
     outputToken: "wrap.testnet",
     pool:{
-      id:1625,
-    	tokenIds:["nusdt.ft-fin.testnet","wrap.testnet"],
-    	...
+      id: 1625,
+      tokenIds: ["nusdt.ft-fin.testnet","wrap.testnet"],
+      ...
     },
     ...
   },{
@@ -332,7 +332,7 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
     outputToken: "usdn.testnet",
     pool:{
       id: 376,
-      tokenIds:["usdn.testnet","ref.fakes.testnet"],
+      tokenIds: ["usdn.testnet","ref.fakes.testnet"],
       partialAmountIn: "163140403738244312",
       ...
     },
@@ -341,9 +341,9 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
     estimate: "0.2036473132202839680683206178037243543302",
     inputToken: "usdn.testnet",
     outputToken: "wrap.testnet",
-   	pool:{
+    pool:{
       id: 385,
-      tokenIds:["usdn.testnet","wrap.testnet"],
+      tokenIds: ["usdn.testnet","wrap.testnet"],
       ...
     },
     ...
