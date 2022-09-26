@@ -303,6 +303,7 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
 **Response** (enableSmartRouting == true)
 
 ```typescript
+// enableSmartRouting as true, swap from Ref to wNear, with amount 1
 [
   {
     estimate: "0.000225321544275095902371355566972009167",
