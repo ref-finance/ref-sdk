@@ -266,9 +266,9 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
       partialAmountIn: "1000000000000000000",
       pool_kind: "SIMPLE_POOL",
       shareSupply: "1000587315520795219676332",
-      supplies: {ref.fakes.testnet: '7789776060978885018', wrap.testnet: 								'6467670222256390319335181'},
+      supplies: {"ref.fakes.testnet": "7789776060978885018", "wrap.testnet":"6467670222256390319335181"},
       token0_ref_price: undefined,
-      tokenIds: (2) ['ref.fakes.testnet', 'wrap.testnet'],
+      tokenIds: (2) ["ref.fakes.testnet", "wrap.testnet"],
       tvl: undefined
     }
   }
