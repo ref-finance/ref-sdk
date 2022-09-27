@@ -165,21 +165,30 @@ export const singlePoolSwap = ({
   );
 
   const maxSimplePoolEstimate =
-    estimatesSimplePool.length === 1
+    estimatesSimplePool === undefined || estimatesSimplePool.length === 0
+      ? undefined
+      : estimatesSimplePool.length === 1
       ? estimatesSimplePool[0]
       : _.maxBy(estimatesSimplePool, estimate => Number(estimate.estimate));
 
-  if (!estimatesStablePool) return maxSimplePoolEstimate;
-
   const maxStablePoolEstimate =
-    estimatesStablePool.length === 1
+    estimatesStablePool === undefined || estimatesStablePool.length === 0
+      ? undefined
+      : estimatesStablePool.length === 1
       ? estimatesStablePool[0]
       : _.maxBy(estimatesStablePool, estimate => Number(estimate.estimate));
 
-  return Number(maxSimplePoolEstimate?.estimate) >
-    Number(maxStablePoolEstimate?.estimate)
-    ? maxSimplePoolEstimate
-    : maxStablePoolEstimate;
+  if (!maxStablePoolEstimate && !maxSimplePoolEstimate) throw NoPoolError;
+
+  if (!maxStablePoolEstimate) {
+    return maxSimplePoolEstimate;
+  } else if (!maxSimplePoolEstimate) return maxStablePoolEstimate;
+  else {
+    return Number(maxSimplePoolEstimate?.estimate) >
+      Number(maxStablePoolEstimate?.estimate)
+      ? maxSimplePoolEstimate
+      : maxStablePoolEstimate;
+  }
 };
 
 export const getStablePoolsThisPair = ({
@@ -594,6 +603,8 @@ export const estimateSwap = async ({
       amountIn,
       stablePools: stablePoolsDetail,
     });
+
+    console.log(estimate, 'estimate');
 
     return [
       {

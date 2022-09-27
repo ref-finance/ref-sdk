@@ -1,5 +1,5 @@
 {
-  "version": "0.1.5",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -33,8 +33,8 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "ref-sdk",
-  "author": "Max",
+  "name": "@ref_finance/ref-sdk",
+  "author": "Ref Finance",
   "module": "dist/ref-sdk.esm.js",
   "size-limit": [
     {
