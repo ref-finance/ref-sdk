@@ -37,7 +37,7 @@ export const ftViewFunction = async (
 
 export const ftGetStorageBalance = (
   tokenId: string,
-  AccountId: string = ''
+  AccountId: string
 ): Promise<FTStorageBalance | null> => {
   return ftViewFunction(tokenId, {
     methodName: 'storage_balance_of',
