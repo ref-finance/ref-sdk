@@ -4,9 +4,9 @@ This SDK provides functions of AMM features both for Dapp developers or makers.
 
 ## Install
 
-For yarn Developers: `yarn add ref-sdk`
+For yarn Developers: `yarn add @ref_finance/ref-sdk`
 
-For npm Developers: `npm install ref-sdk`
+For npm Developers: `npm install @ref_finance/ref-sdk`
 
 ## Initialization
 
@@ -170,7 +170,7 @@ const { ratedPools, unRatedPools, simplePools } = await fetchAllPools();
 
 #### getStablePools
 
-We define `unRatedPools` and `ratedPools` as `stablePool`. You can use this function to get details of stable pools. 
+We define `unRatedPools` and `ratedPools` as `stablePool`. You can use this function to get details of stable pools.
 
 **Parameters**
 
@@ -247,7 +247,6 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
   amountIn: '1',
   simplePools,
 });
-
 ```
 
 **Response** (enableSmartRouting == false)
@@ -257,25 +256,26 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
 
 [
   {
-    estimate: "0.7338604246699393",
-    inputToken: "ref.fakes.testnet",
-    outputToken: "wrap.testnet",
-    pool:{
+    estimate: '0.7338604246699393',
+    inputToken: 'ref.fakes.testnet',
+    outputToken: 'wrap.testnet',
+    pool: {
       fee: 30,
       id: 38,
-      partialAmountIn: "1000000000000000000",
-      pool_kind: "SIMPLE_POOL",
-      shareSupply: "1000587315520795219676332",
-      supplies: {"ref.fakes.testnet": "7789776060978885018", "wrap.testnet":"6467670222256390319335181"},
+      partialAmountIn: '1000000000000000000',
+      pool_kind: 'SIMPLE_POOL',
+      shareSupply: '1000587315520795219676332',
+      supplies: {
+        'ref.fakes.testnet': '7789776060978885018',
+        'wrap.testnet': '6467670222256390319335181',
+      },
       token0_ref_price: undefined,
-      tokenIds: (2) ["ref.fakes.testnet", "wrap.testnet"],
-      tvl: undefined
-    }
-  }
-]
+      tokenIds: (2)[('ref.fakes.testnet', 'wrap.testnet')],
+      tvl: undefined,
+    },
+  },
+];
 ```
-
-
 
 **Example** (enableSmartRouting == true)
 
@@ -297,7 +297,6 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
   simplePools,
   options,
 });
-
 ```
 
 **Response** (enableSmartRouting == true)
@@ -351,8 +350,6 @@ const swapTodos: EstimateSwapView[] = estimateSwap({
 ]
 ```
 
-
-
 ---
 
 #### getPoolEstimate
@@ -382,7 +379,6 @@ const estimate = await getPoolEstimate({
   amountIn: '1',
   pool,
 });
-
 ```
 
 **Response** (on simple pool)
@@ -443,8 +439,6 @@ const estimate = await getPoolEstimate({
   }
 }
 ```
-
-
 
 ---
 
@@ -572,7 +566,6 @@ sendTransactionsByMemoryKey({
   signedTransactions,
 });
 ```
-
 
 **Response**
 
