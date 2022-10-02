@@ -68,7 +68,9 @@ export const fetchAllPools = async () => {
   const pages = Math.ceil(totalPools / DEFAULT_PAGE_LIMIT);
 
   const pools = (
-    await Promise.all([...Array(pages)].map((_, i) => getRefPools(i + 1)))
+    await Promise.all(
+      [...Array(pages)].fill(0).map((_, i) => getRefPools(i + 1))
+    )
   ).flat() as Pool[];
 
   return {
