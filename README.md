@@ -241,7 +241,7 @@ interface SwapOptions {
 const tokenIn = await ftGetTokenMetadata('ref.fakes.testnet');
 const tokenOut = await ftGetTokenMetadata('wrap.testnet');
 
-const swapTodos: EstimateSwapView[] = estimateSwap({
+const swapTodos: EstimateSwapView[] = await estimateSwap({
   tokenIn,
   tokenOut,
   amountIn: '1',
@@ -290,7 +290,7 @@ const options: SwapOptions = {
   stablePoolsDetail,
 };
 
-const swapTodos: EstimateSwapView[] = estimateSwap({
+const swapTodos: EstimateSwapView[] = await estimateSwap({
   tokenIn,
   tokenOut,
   amountIn: '1',
@@ -473,6 +473,7 @@ const transactionsRef: Transaction[] = await instantSwap({
   amountIn: '1',
   swapTodos,
   slippageTolerance = 0.01,
+  AccountId: 'your-account-id.testnet'
 });
 ```
 

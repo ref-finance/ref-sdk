@@ -604,8 +604,6 @@ export const estimateSwap = async ({
       stablePools: stablePoolsDetail,
     });
 
-    console.log(estimate, 'estimate');
-
     return [
       {
         ...estimate,

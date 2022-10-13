@@ -1,6 +1,6 @@
 import { REF_FI_CONTRACT_ID, config } from './constant';
 import { keyStores, Near, WalletConnection } from 'near-api-js';
-import { TokenNotExistError } from './error';
+import { NoAccountIdFound, TokenNotExistError } from './error';
 import { getKeyStore } from './near';
 
 import {
@@ -39,10 +39,23 @@ export const ftGetStorageBalance = (
   tokenId: string,
   AccountId: string
 ): Promise<FTStorageBalance | null> => {
+  if (!!AccountId) throw NoAccountIdFound;
+
   return ftViewFunction(tokenId, {
     methodName: 'storage_balance_of',
     args: { account_id: AccountId },
   });
+};
+
+export const ftGetBalance = async (tokenId: string, AccountId: string) => {
+  if (!!AccountId) throw NoAccountIdFound;
+
+  return ftViewFunction(tokenId, {
+    methodName: 'ft_balance_of',
+    args: {
+      account_id: AccountId,
+    },
+  }).catch(() => '0');
 };
 
 export const getTotalPools = async () => {
@@ -74,4 +87,22 @@ export const ftGetTokensMetadata = async (tokenIds: string[]) => {
       [tokenIds[i]]: cur,
     };
   }, {}) as Record<string, TokenMetadata>;
+};
+
+export const getGlobalWhitelist = async (): Promise<string[]> => {
+  const globalWhitelist = await refFiViewFunction({
+    methodName: 'get_whitelisted_tokens',
+  });
+  return [...new Set<string>([...globalWhitelist])];
+};
+
+export const getUserRegisteredTokens = async (
+  AccountId: string
+): Promise<string[]> => {
+  if (!AccountId) return [];
+
+  return refFiViewFunction({
+    methodName: 'get_user_whitelisted_tokens',
+    args: { account_id: AccountId },
+  });
 };

@@ -4,8 +4,10 @@ import {
   StablePool,
   SmartRoutingInputPool,
   Transaction,
+  EstimateSwapView,
 } from './types';
 import {
+  FEE_DIVISOR,
   RATED_POOL_LP_TOKEN_DECIMALS,
   STABLE_LP_TOKEN_DECIMALS,
 } from './constant';
@@ -16,6 +18,7 @@ import BN from 'bn.js';
 
 import * as math from 'mathjs';
 import { REF_FI_CONTRACT_ID } from './constant';
+import Big from 'big.js';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(typeof id === 'number' ? id : pool.id),
@@ -241,4 +244,121 @@ export const transformTransactions = (
       }),
     };
   });
+};
+
+export const separateRoutes = (
+  actions: EstimateSwapView[],
+  outputToken: string
+) => {
+  const res = [];
+  let curRoute = [];
+
+  for (let i in actions) {
+    curRoute.push(actions[i]);
+    if (actions[i].outputToken === outputToken) {
+      res.push(curRoute);
+      curRoute = [];
+    }
+  }
+
+  return res;
+};
+
+export const calculateExchangeRate = (
+  from: string,
+  to: string,
+  precision?: number
+) => {
+  return math
+    .floor(math.evaluate(`${to} / ${from}`), precision || 4)
+    .toString();
+};
+
+export const getAvgFee = (
+  estimates: EstimateSwapView[],
+  outputToken: string,
+  parsedAmountIn: string
+) => {
+  if (!estimates || estimates.length === 0) {
+    return 0;
+  }
+
+  const routes = separateRoutes(estimates, outputToken);
+
+  let fee = new Big(0);
+
+  routes.forEach(r => {
+    const partialAmountIn = r[0].pool.partialAmountIn || 0;
+
+    fee = fee.plus(
+      r
+        .reduce((acc, cur) => acc.plus(cur.pool.fee), new Big(0))
+        .times(partialAmountIn)
+        .div(parsedAmountIn)
+    );
+  });
+
+  return fee.toNumber();
+};
+
+export const getAccountName = (AccountId: string) => {
+  if (!AccountId) return AccountId;
+
+  const [account, network] = AccountId.split('.');
+  const niceAccountId = `${account.slice(0, 10)}...${network || ''}`;
+
+  return account.length > 10 ? niceAccountId : AccountId;
+};
+
+export const symbolsArr = ['e', 'E', '+', '-'];
+
+export const multiply = (factor1: string, factor2: string) => {
+  return math.format(math.evaluate(`${factor1} * ${factor2}`), {
+    notation: 'fixed',
+  });
+};
+
+export const toInternationalCurrencySystemLongString = (
+  labelValue: string,
+  percent?: number
+) => {
+  return Math.abs(Number(labelValue)) >= 1.0e9
+    ? (Math.abs(Number(labelValue)) / 1.0e9).toFixed(percent || 2) + 'B'
+    : Math.abs(Number(labelValue)) >= 1.0e6
+    ? (Math.abs(Number(labelValue)) / 1.0e6).toFixed(percent || 2) + 'M'
+    : Math.abs(Number(labelValue)).toFixed(percent || 2);
+};
+
+export const percentOfBigNumber = (
+  percent: number,
+  num: number | string,
+  precision: number
+) => {
+  const valueBig = math.bignumber(num);
+  const percentBig = math.bignumber(percent).div(100);
+
+  return toPrecision(
+    scientificNotationToString(valueBig.mul(percentBig).toString()),
+    precision
+  );
+};
+
+export const toRealSymbol = (symbol: string) => {
+  if (!symbol) return '';
+  const blackList = ['nUSDO'];
+
+  if (symbol === 'nWETH' || symbol === 'WETH') return 'wETH';
+  if (blackList.includes(symbol)) return symbol;
+  return symbol.charAt(0) === 'n' &&
+    symbol.charAt(1) === symbol.charAt(1).toUpperCase()
+    ? symbol.substring(1)
+    : symbol;
+};
+
+export const calculateFeeCharge = (fee: number, total: string) => {
+  return math.floor(math.evaluate(`(${fee} / ${FEE_DIVISOR}) * ${total}`), 3);
+};
+
+export const calculateFeePercent = (fee: number) => {
+  return math.divide(fee, 100);
 };
