@@ -16,16 +16,18 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
+        explorerUrl: 'https://testnet.nearblocks.io',
       };
     case 'testnet':
       return {
         networkId: 'testnet',
-        nodeUrl: 'https://public-rpc.blockpi.io/http/near-testnet',
+        nodeUrl: 'https://rpc.testnet.near.org',
         walletUrl: 'https://wallet.testnet.near.org',
         indexerUrl: 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
         REF_TOKEN_ID: 'ref.fakes.testnet',
+        explorerUrl: 'https://testnet.nearblocks.io',
       };
     default:
       return {
@@ -36,6 +38,7 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
+        explorerUrl: 'https://testnet.nearblocks.io',
       };
   }
 }
@@ -70,18 +73,18 @@ export const REF_META_DATA = {
 };
 
 export const defaultTheme: Theme = {
-  container: '#fff',
-  buttonBg: '#fff',
-  primary: '#000',
-  secondary: '#000',
-  borderRadius: 0,
+  container: '#FFFFFF',
+  buttonBg: '#00C6A2',
+  primary: '#000000',
+  secondary: '#7E8A93',
+  borderRadius: '4px',
   fontFamily: 'sans-serif',
-  hover: '#000',
-  active: '#000',
-  secondaryBg: '#fff',
-  borderColor: '#000',
-  iconDefault: '#000',
-  iconHover: '#000',
+  hover: 'rgba(126, 138, 147, 0.2)',
+  active: 'rgba(126, 138, 147, 0.2)',
+  secondaryBg: '#F7F7F7',
+  borderColor: 'rgba(126, 138, 147, 0.2)',
+  iconDefault: '#7E8A93',
+  iconHover: '#B7C9D6',
 };
 
 export const TokenLinks = {
@@ -126,4 +129,4 @@ export const TokenLinks = {
   NearX: 'https://awesomenear.com/stader',
   SD: 'https://awesomenear.com/stader',
   DISC: 'https://awesomenear.com/discovol',
-};
+} as Record<string, string>;

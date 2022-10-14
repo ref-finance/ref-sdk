@@ -6,7 +6,7 @@ export interface Theme {
   buttonBg: string; // button bg
   primary: string; // primary color for text color
   secondary: string; // color for some details
-  borderRadius: number; // custom border radius
+  borderRadius: string; // custom border radius
   fontFamily: string; // font family
   hover: string; // interactive color, like hover, active, etc
   active: string;
@@ -18,11 +18,11 @@ export interface Theme {
 
 export interface SwapWidgetProps {
   theme?: Theme;
-  tokenList: string[];
+  extraTokenList?: string[] | TokenMetadata[];
   onSwap: (transactionsRef: Transaction[]) => void;
   onDisConnect: () => void;
   width: string;
-  height: string;
+  height?: string;
   enableSmartRouting?: boolean;
   className?: string;
   connection: {
@@ -50,4 +50,5 @@ export interface SwapOutParams {
   makeSwap: () => void;
   canSwap: boolean;
   swapError: Error | null;
+  setAmountOut: (amount: string) => void;
 }

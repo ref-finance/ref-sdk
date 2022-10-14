@@ -16,7 +16,7 @@ import {
   defaultTheme,
 } from '../constant';
 import { ftGetBalance } from '../ref';
-import { getAccountName, toReadableNumber } from '../utils';
+import { getAccountName, toReadableNumber, toPrecision } from '../utils';
 import {
   Slider,
   SlippageSelector,
@@ -30,15 +30,16 @@ import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { TiWarning } from '@react-icons/all-files/ti/TiWarning';
 
 import './style.css';
-import { useTokenPriceList } from './state';
+import { useTokenPriceList, useTokensIndexer, useTokenBalnces } from './state';
 
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon } from './components';
+import Big from 'big.js';
 
 const SwapWidget = (props: SwapWidgetProps) => {
   const {
     theme,
-    tokenList,
+    extraTokenList,
     onSwap,
     connection,
     width,
@@ -61,6 +62,9 @@ const SwapWidget = (props: SwapWidgetProps) => {
     hover,
     active,
     secondaryBg,
+    borderColor,
+    iconDefault,
+    iconHover,
   } = curTheme;
 
   const { AccountId, isSignedIn: isSignedInProp } = connection;
@@ -70,12 +74,22 @@ const SwapWidget = (props: SwapWidgetProps) => {
   const [tokenIn, setTokenIn] = useState<TokenMetadata>();
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
-
   const [tokenInBalance, setTokenInBalance] = useState<string>('');
 
   const [tokenOutBalance, setTokenOutBalance] = useState<string>('');
 
-  const [notLoading, setNotLoading] = useState<boolean>(false);
+  const [swapState, setSwapState] = useState<
+    'pending' | 'success' | 'fail' | null
+  >(null);
+
+  const [notOpen, setNotOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!!transactionState?.state) {
+      setNotOpen(true);
+    }
+    setSwapState(transactionState?.state || null);
+  }, [transactionState]);
 
   const [widgetRoute, setWidgetRoute] = useState<
     'swap' | 'token-selector-in' | 'token-selector-out'
@@ -87,13 +101,17 @@ const SwapWidget = (props: SwapWidgetProps) => {
 
   const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
 
-  const tokens = useTokens(tokenList);
+  const tokens = useTokens(extraTokenList);
+
+  const balances = useTokenBalnces(tokens, AccountId);
 
   const [refreshTrigger, setRreshTrigger] = useState<boolean>(false);
 
   const tokenPriceList = useTokenPriceList();
 
-  const { allPools, allStablePools, success } = useRefPools();
+  const { allPools, allStablePools, poolFetchingState } = useRefPools(
+    refreshTrigger
+  );
 
   useEffect(() => {
     if (!tokenIn) return;
@@ -118,9 +136,10 @@ const SwapWidget = (props: SwapWidgetProps) => {
     canSwap,
     swapError,
     makeSwap,
+    setAmountOut,
   } = useSwap({
-    tokenIn: tokenIn || WNEAR_META_DATA,
-    tokenOut: tokenOut || REF_META_DATA,
+    tokenIn: tokenIn,
+    tokenOut: tokenOut,
     amountIn,
     simplePools: allPools.simplePools,
     options: {
@@ -132,6 +151,7 @@ const SwapWidget = (props: SwapWidgetProps) => {
     onSwap,
     AccountId,
     refreshTrigger,
+    poolFetchingState,
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -142,10 +162,19 @@ const SwapWidget = (props: SwapWidgetProps) => {
 
       return;
     } else {
-      setNotLoading(true);
+      setSwapState('pending');
+      setNotOpen(true);
       makeSwap();
     }
   };
+
+  const canSubmit =
+    tokenIn &&
+    tokenOut &&
+    canSwap &&
+    !swapError &&
+    isSignedIn &&
+    new Big(tokenInBalance).gte(amountIn || '0');
 
   return (
     <ThemeContextProvider customTheme={curTheme}>
@@ -183,6 +212,7 @@ const SwapWidget = (props: SwapWidgetProps) => {
                     style={{
                       color: primary,
                       background: secondaryBg,
+                      border: `1px solid ${borderColor}`,
                     }}
                   >
                     <span
@@ -197,12 +227,13 @@ const SwapWidget = (props: SwapWidgetProps) => {
                   </div>
                 )}
 
-                <Slider showSlip={showSlip} />
+                <Slider showSlip={showSlip} setShowSlip={setShowSlip} />
 
                 <SlippageSelector
                   slippageTolerance={slippageTolerance}
                   onChangeSlippageTolerance={setSlippageTolerance}
                   showSlip={showSlip}
+                  setShowSlip={setShowSlip}
                 />
               </div>
             </div>
@@ -211,47 +242,65 @@ const SwapWidget = (props: SwapWidgetProps) => {
               amount={amountIn}
               balance={tokenInBalance}
               token={tokenIn}
-              price={!tokenIn ? null : tokenPriceList?.[tokenIn.id]}
+              price={!tokenIn ? null : tokenPriceList?.[tokenIn.id]?.price}
               onChangeAmount={setAmountIn}
               onSelectToken={() => {
                 setWidgetRoute('token-selector-in');
+                setTokenIn(tokenIn);
               }}
             />
 
-            <div
-              onClick={() => {
-                setTokenIn(tokenOut);
-                setTokenOut(tokenIn);
-                setRreshTrigger(!refreshTrigger);
-                setAmountIn('1');
-              }}
-              className="__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center"
-            >
-              <CgArrowsExchangeAltV />
+            <div className="__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center">
+              <CgArrowsExchangeAltV
+                style={{
+                  cursor: 'pointer',
+                  color: iconDefault,
+                }}
+                size={30}
+                onClick={() => {
+                  setTokenIn(tokenOut);
+                  setTokenOut(tokenIn);
+                  setAmountIn('1');
+                  setAmountOut('');
+                }}
+              />
             </div>
 
             <TokenAmount
-              amount={amountOut}
+              amount={toPrecision(amountOut, 8)}
               balance={tokenOutBalance}
               token={tokenOut}
-              price={!tokenOut ? null : tokenPriceList?.[tokenOut.id]}
+              price={!tokenOut ? null : tokenPriceList?.[tokenOut.id]?.price}
               onSelectToken={() => {
                 setWidgetRoute('token-selector-out');
+                setTokenOut(tokenOut);
+              }}
+              onForceUpdate={() => {
+                setRreshTrigger(!refreshTrigger);
               }}
             />
-
-            <DetailView
-              fee={fee}
-              rate={rate}
-              amountIn={amountIn}
-              minReceived={minAmountOut}
-              tokenIn={tokenIn}
-              tokenOut={tokenOut}
-            />
+            {canSwap && !swapError && (
+              <DetailView
+                fee={fee}
+                rate={rate}
+                amountIn={amountIn}
+                minReceived={minAmountOut}
+                tokenIn={tokenIn}
+                tokenOut={tokenOut}
+              />
+            )}
 
             {swapError && (
-              <div className="__ref-swap-widget-row-flex-center">
-                <TiWarning fill="#DE5050" />
+              <div
+                className="__ref-swap-widget-row-flex-center"
+                style={{
+                  color: '#DE9450',
+                  fontSize: '14px',
+
+                  paddingTop: '16px',
+                }}
+              >
+                <TiWarning fill="#DE9450" size={20} />
                 &nbsp;
                 {swapError.message}
               </div>
@@ -259,11 +308,13 @@ const SwapWidget = (props: SwapWidgetProps) => {
 
             <button
               type="submit"
-              className="__ref-swap-widget-submit-button"
+              className="__ref-swap-widget-submit-button __ref-swap-widget-button"
               style={{
-                color: primary,
+                color: container,
                 background: buttonBg,
+                opacity: !canSubmit ? 0.5 : 1,
               }}
+              disabled={!canSubmit}
             >
               {isSignedIn ? 'Swap' : 'Connect Wallet'}
             </button>
@@ -273,26 +324,35 @@ const SwapWidget = (props: SwapWidgetProps) => {
               style={{
                 color: secondary,
                 justifyContent: 'center',
+                paddingTop: '12px',
               }}
             >
               <RefIcon />
-              &nsbp; Powered by Ref.finance
+              &nbsp; Powered by Ref.finance
             </div>
 
             <Notification
-              state={notLoading ? 'pending' : transactionState?.state || null}
+              state={swapState}
+              setState={setSwapState}
               amountIn={amountIn}
               amountOut={amountOut}
               tokenIn={tokenIn}
               tokenOut={tokenOut}
+              open={notOpen}
+              setOpen={setNotOpen}
             />
           </form>
         )}
+
         {widgetRoute === 'token-selector-in' && (
           <TokenSelector
+            balances={balances}
             tokens={tokens}
             width={width}
-            onSelect={setTokenIn}
+            onSelect={token => {
+              setTokenIn(token);
+              setWidgetRoute('swap');
+            }}
             onClose={() => setWidgetRoute('swap')}
             AccountId={AccountId}
           />
@@ -301,8 +361,12 @@ const SwapWidget = (props: SwapWidgetProps) => {
         {widgetRoute === 'token-selector-out' && (
           <TokenSelector
             tokens={tokens}
+            balances={balances}
             width={width}
-            onSelect={setTokenOut}
+            onSelect={token => {
+              setTokenOut(token);
+              setWidgetRoute('swap');
+            }}
             onClose={() => setWidgetRoute('swap')}
             AccountId={AccountId}
           />

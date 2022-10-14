@@ -19,7 +19,7 @@ import {
   Transaction,
 } from '../types';
 import { fetchAllPools, getStablePools } from '../pool';
-import { estimateSwap, SwapParams } from '../swap';
+import { estimateSwap, SwapOptions, SwapParams } from '../swap';
 import { SwapOutParams, Theme } from './types';
 import {
   percentLess,
@@ -33,8 +33,8 @@ import { instantSwap } from '../instantSwap';
 
 import { getExpectedOutputFromActionsORIG } from '../smartRoutingLogic.js';
 import { defaultTheme } from '../constant';
-import { getTokenPriceList } from '../indexer';
-import { toReadableNumber } from '../utils';
+import { getTokenPriceList, getTokens } from '../indexer';
+import { toReadableNumber, ONLY_ZEROS } from '../utils';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -53,25 +53,47 @@ export const ThemeContextProvider: React.FC<{
   );
 };
 
-export const useTokens = (tokenList: string[] = [], AccountId: string = '') => {
+export const useTokens = (
+  extraTokenList: string[] | TokenMetadata[] = [],
+  AccountId: string = ''
+) => {
   const [tokens, setTokens] = useState<TokenMetadata[]>([]);
+
+  const extraList = (extraTokenList.length > 0 &&
+  typeof extraTokenList[0] === 'string'
+    ? extraTokenList
+    : []) as string[];
 
   useEffect(() => {
     Promise.all([getGlobalWhitelist(), getUserRegisteredTokens(AccountId)])
       .then(res => {
-        return [...new Set<string>(res.flat().concat(tokenList))];
+        return [...new Set<string>(res.flat().concat(extraList))];
       })
       .then(tokenIds =>
         Promise.all<TokenMetadata>(
           tokenIds.map(id => ftGetTokenMetadata(id))
         ).then(setTokens)
       );
-  }, [tokenList.join('-')]);
+  }, [extraList.join('-')]);
+
+  return tokens.concat(
+    extraList.length === 0 ? [] : (extraTokenList as TokenMetadata[])
+  );
+};
+
+export const useTokensIndexer = () => {
+  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
+
+  useEffect(() => {
+    getTokens().then((tokensView: any) => {
+      setTokens(Object.values(tokensView));
+    });
+  }, []);
 
   return tokens;
 };
 
-export const useRefPools = () => {
+export const useRefPools = (refreshTrigger: boolean) => {
   const [allPools, setAllPools] = useState<{
     simplePools: Pool[];
     ratedPools: Pool[];
@@ -82,11 +104,17 @@ export const useRefPools = () => {
     unRatedPools: [],
   });
 
+  const [poolFetchingState, setPoolFetchingState] = useState<'loading' | 'end'>(
+    'loading'
+  );
+
   const [allStablePools, setAllStablePools] = useState<StablePool[]>([]);
 
   useEffect(() => {
+    setPoolFetchingState('loading');
+
     fetchAllPools().then(setAllPools);
-  }, []);
+  }, [refreshTrigger]);
 
   useEffect(() => {
     if (allPools.ratedPools.length === 0 || allPools.unRatedPools.length === 0)
@@ -94,25 +122,37 @@ export const useRefPools = () => {
 
     const pools: Pool[] = allPools.unRatedPools.concat(allPools.ratedPools);
 
-    getStablePools(pools).then(setAllStablePools);
+    getStablePools(pools)
+      .then(setAllStablePools)
+      .finally(() => {
+        setPoolFetchingState('end');
+      });
   }, [
     allPools.ratedPools.map(p => p.id).join('-'),
     allPools.unRatedPools.map(p => p.id).join('-'),
+    refreshTrigger,
   ]);
 
   return {
     allPools,
     allStablePools,
-    success: allStablePools.length > 0 && allPools.simplePools.length > 0,
+    poolFetchingState,
   };
 };
 
 export const useSwap = (
-  params: SwapParams & {
+  params: {
+    tokenIn?: TokenMetadata;
+    tokenOut?: TokenMetadata;
+    amountIn: string;
+    simplePools: Pool[];
+    options?: SwapOptions;
+  } & {
     slippageTolerance: number;
     refreshTrigger: boolean;
     onSwap: (transactionsRef: Transaction[]) => void;
     AccountId?: string;
+    poolFetchingState?: 'loading' | 'end';
   }
 ): SwapOutParams => {
   const {
@@ -120,6 +160,7 @@ export const useSwap = (
     refreshTrigger,
     onSwap,
     AccountId,
+    poolFetchingState,
     ...swapParams
   } = params;
 
@@ -135,15 +176,23 @@ export const useSwap = (
     ? percentLess(slippageTolerance, amountOut)
     : '';
 
-  const fee = getAvgFee(
-    estimates,
-    params.tokenOut.id,
-    toNonDivisibleNumber(params.tokenIn.decimals, params.amountIn)
+  const fee =
+    !params.tokenOut || !params.tokenIn
+      ? 0
+      : getAvgFee(
+          estimates,
+          params.tokenOut.id,
+          toNonDivisibleNumber(params.tokenIn.decimals, params.amountIn)
+        );
+
+  const rate = calculateExchangeRate(
+    ONLY_ZEROS.test(params.amountIn) ? '1' : params.amountIn,
+    amountOut || '1'
   );
 
-  const rate = calculateExchangeRate(params.amountIn, amountOut);
-
   const makeSwap = async () => {
+    if (!params.tokenIn || !params.tokenOut) return;
+
     const transactionsRef = await instantSwap({
       tokenIn: params.tokenIn,
       tokenOut: params.tokenOut,
@@ -157,10 +206,44 @@ export const useSwap = (
   };
 
   useEffect(() => {
-    if (!params.tokenIn || !params.tokenOut) return;
+    if (
+      !params.tokenIn ||
+      !params.tokenOut ||
+      poolFetchingState === 'loading'
+    ) {
+      setCanSwap(false);
+      return;
+    }
     setCanSwap(false);
-    estimateSwap(swapParams)
+
+    if (
+      ONLY_ZEROS.test(params.amountIn) ||
+      !params.tokenOut ||
+      !params.tokenIn
+    ) {
+      setAmountOut('');
+      return;
+    }
+
+    setSwapError(null);
+
+    estimateSwap({
+      tokenIn: params.tokenIn,
+      tokenOut: params.tokenOut,
+      amountIn: params.amountIn,
+      simplePools: params.simplePools,
+      options: params.options,
+    })
       .then(estimates => {
+        if (
+          ONLY_ZEROS.test(params.amountIn) ||
+          !params.tokenOut ||
+          !params.tokenIn
+        ) {
+          setAmountOut('');
+          return;
+        }
+
         const expectAmountOut = getExpectedOutputFromActionsORIG(
           estimates,
           params.tokenOut.id
@@ -174,13 +257,14 @@ export const useSwap = (
       .catch(e => {
         setSwapError(e);
         setCanSwap(false);
+        setAmountOut('');
       });
   }, [
     params.amountIn,
     params.tokenIn,
     params.tokenOut,
-    slippageTolerance,
     refreshTrigger,
+    poolFetchingState,
   ]);
 
   return {
@@ -192,6 +276,7 @@ export const useSwap = (
     makeSwap,
     canSwap,
     swapError,
+    setAmountOut,
   };
 };
 
@@ -220,26 +305,24 @@ export const TokenPriceContextProvider: React.FC = ({ children }) => {
 };
 
 export const useTokenBalnces = (tokens: TokenMetadata[], AccountId: string) => {
-  const [balanes, setBalances] = useState<Record<string, string>>({});
-
-  const validTokens = tokens.filter(t => !!t?.id);
+  const [balances, setBalances] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (!validTokens || validTokens.length === 0) return;
+    const validTokens = tokens.filter(t => !!t?.id);
 
-    const ids = validTokens.map(token => token.id).filter(id => !id);
+    const ids = validTokens.map(token => token.id);
 
     Promise.all(ids.map(id => ftGetBalance(id, AccountId))).then(balances => {
       const balancesMap = validTokens.reduce((acc, token, index) => {
-        acc[token.id] = toReadableNumber(token.decimals, balances[index]);
-        return acc;
-      }, balanes);
+        return {
+          ...acc,
+          [token.id]: toReadableNumber(token.decimals, balances[index]),
+        };
+      }, {});
 
       setBalances(balancesMap);
     });
+  }, [tokens.map(t => t?.id).join('-')]);
 
-    if (ids.length === 0) return;
-  }, [validTokens?.map(t => t?.id || '').join('-')]);
-
-  return balanes;
+  return balances;
 };

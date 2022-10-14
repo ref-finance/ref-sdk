@@ -288,13 +288,13 @@ export const getAvgFee = (
   let fee = new Big(0);
 
   routes.forEach(r => {
-    const partialAmountIn = r[0].pool.partialAmountIn || 0;
+    const partialAmountIn = r[0].pool.partialAmountIn || '0';
 
     fee = fee.plus(
       r
-        .reduce((acc, cur) => acc.plus(cur.pool.fee), new Big(0))
+        .reduce((acc, cur) => acc.plus(cur.pool.fee || 0), new Big(0))
         .times(partialAmountIn)
-        .div(parsedAmountIn)
+        .div(ONLY_ZEROS.test(parsedAmountIn) ? '1' : parsedAmountIn)
     );
   });
 

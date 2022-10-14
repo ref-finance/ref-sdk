@@ -48,7 +48,7 @@ export const ftGetStorageBalance = (
 };
 
 export const ftGetBalance = async (tokenId: string, AccountId: string) => {
-  if (!!AccountId) throw NoAccountIdFound;
+  if (!!AccountId) '0';
 
   return ftViewFunction(tokenId, {
     methodName: 'ft_balance_of',
