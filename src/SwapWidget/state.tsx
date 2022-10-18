@@ -15,7 +15,7 @@ import {
 } from '../types';
 import { fetchAllPools, getStablePools } from '../pool';
 import { estimateSwap, SwapOptions, SwapParams } from '../swap';
-import { SwapOutParams, Theme } from './types';
+import { SwapOutParams } from './types';
 import {
   percentLess,
   separateRoutes,
@@ -27,7 +27,8 @@ import Big from 'big.js';
 import { instantSwap } from '../instantSwap';
 
 import { getExpectedOutputFromActionsORIG } from '../smartRoutingLogic.js';
-import { defaultTheme } from '../constant';
+import { Theme } from './constant';
+import { defaultTheme } from './constant';
 import {
   getTokenPriceList,
   getTokens,
@@ -51,6 +52,30 @@ export const ThemeContextProvider: React.FC<{
   return (
     <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
   );
+};
+
+export const estimateValidator = (
+  swapTodos: EstimateSwapView[],
+  tokenIn: TokenMetadata,
+  parsedAmountIn: string,
+  tokenOut: TokenMetadata
+) => {
+  const tokenInId = swapTodos[0]?.inputToken;
+  const tokenOutId = swapTodos[swapTodos.length - 1]?.outputToken;
+
+  const totalPartialAmountIn = swapTodos.reduce(
+    (acc, cur, i) => acc.plus(cur.pool.partialAmountIn || 0),
+    new Big(0)
+  );
+
+  if (
+    tokenInId !== tokenIn.id ||
+    tokenOutId !== tokenOut.id ||
+    !totalPartialAmountIn.eq(parsedAmountIn)
+  ) {
+    return false;
+  }
+  return true;
 };
 
 export const useTokens = (
@@ -218,6 +243,10 @@ export const useSwap = (
 
   const [amountOut, setAmountOut] = useState<string>('');
 
+  const [isEstimating, setIsEstimating] = useState<boolean>(false);
+
+  const [forceEstimate, setForceEstimate] = useState<boolean>(false);
+
   const minAmountOut = amountOut
     ? percentLess(slippageTolerance, amountOut)
     : '';
@@ -251,7 +280,7 @@ export const useSwap = (
     onSwap(transactionsRef);
   };
 
-  useEffect(() => {
+  const getEstimate = () => {
     if (
       !params.tokenIn ||
       !params.tokenOut ||
@@ -272,7 +301,7 @@ export const useSwap = (
     }
 
     setSwapError(null);
-
+    setIsEstimating(true);
     estimateSwap({
       tokenIn: params.tokenIn,
       tokenOut: params.tokenOut,
@@ -304,13 +333,46 @@ export const useSwap = (
         setSwapError(e);
         setCanSwap(false);
         setAmountOut('');
+      })
+      .finally(() => {
+        setIsEstimating(false);
+        setForceEstimate(false);
       });
+  };
+
+  useEffect(() => {
+    const estimateValidationPass =
+      estimates.length > 0 &&
+      params.tokenIn &&
+      params.tokenOut &&
+      estimateValidator(
+        estimates,
+        params.tokenIn,
+        toNonDivisibleNumber(params.tokenIn.decimals, params.amountIn),
+        params.tokenOut
+      );
+
+    if (isEstimating && estimates && !forceEstimate) return;
+    if ((estimateValidationPass || swapError) && !forceEstimate) return;
+    getEstimate();
   }, [
     params.amountIn,
     params.tokenIn,
     params.tokenOut,
     refreshTrigger,
     poolFetchingState,
+    isEstimating,
+    forceEstimate,
+  ]);
+
+  useEffect(() => {
+    // setEstimating(false);
+
+    setForceEstimate(true);
+  }, [
+    params.tokenIn?.id,
+    params.tokenOut?.id,
+    params.options?.enableSmartRouting,
   ]);
 
   return {

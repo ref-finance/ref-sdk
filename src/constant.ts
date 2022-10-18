@@ -1,5 +1,5 @@
 import { TokenMetadata } from './types';
-import { Theme } from './SwapWidget/types';
+
 export const FEE_DIVISOR = 10000;
 
 export const STABLE_LP_TOKEN_DECIMALS = 18;
@@ -70,36 +70,6 @@ export const REF_META_DATA = {
   id: REF_TOKEN_ID,
   name: 'Ref Finance Token',
   symbol: 'REF',
-};
-
-export const defaultTheme: Theme = {
-  container: '#FFFFFF',
-  buttonBg: '#00C6A2',
-  primary: '#000000',
-  secondary: '#7E8A93',
-  borderRadius: '4px',
-  fontFamily: 'sans-serif',
-  hover: 'rgba(126, 138, 147, 0.2)',
-  active: 'rgba(126, 138, 147, 0.2)',
-  secondaryBg: '#F7F7F7',
-  borderColor: 'rgba(126, 138, 147, 0.2)',
-  iconDefault: '#7E8A93',
-  iconHover: '#B7C9D6',
-};
-
-export const defaultDarkModeTheme: Theme = {
-  container: '#26343E',
-  buttonBg: '#00C6A2',
-  primary: '#FFFFFF',
-  secondary: '#7E8A93',
-  borderRadius: '4px',
-  fontFamily: 'sans-serif',
-  hover: 'rgba(126, 138, 147, 0.2)',
-  active: 'rgba(126, 138, 147, 0.2)',
-  secondaryBg: 'rgba(0, 0, 0, 0.2)',
-  borderColor: 'rgba(126, 138, 147, 0.2)',
-  iconDefault: '#7E8A93',
-  iconHover: '#B7C9D6',
 };
 
 export const TokenLinks = {

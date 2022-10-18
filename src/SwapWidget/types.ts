@@ -1,20 +1,7 @@
 import { EstimateSwapView } from '../types';
 import { Transaction } from '../types';
 import { TokenMetadata } from '../../dist/types';
-export interface Theme {
-  container: string; // container bg
-  buttonBg: string; // button bg
-  primary: string; // primary color for text color
-  secondary: string; // color for some details
-  borderRadius: string; // custom border radius
-  fontFamily: string; // font family
-  hover: string; // interactive color, like hover, active, etc
-  active: string;
-  secondaryBg: string; // secondary bg color
-  borderColor: string; // border color
-  iconDefault: string; // default icon color
-  iconHover: string; // icon color when hover
-}
+import { Theme } from './constant';
 
 export interface SwapWidgetProps {
   theme?: Theme;

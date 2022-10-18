@@ -1091,16 +1091,17 @@ export const Slider = ({
   );
 };
 
-export const RefIcon = () => {
+export const RefIcon = (props: any) => {
   return (
     <svg
+      {...props}
       width="10"
       height="10"
       viewBox="0 0 10 10"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M6.36365 10H10L6.36365 6.36363V10Z" fill="black" />
+      <path d="M6.36365 10H10L6.36365 6.36363V10Z" fill="currentColor" />
       <path
         d="M10 4.05312e-06L7.87879 3.86767e-06L10 2.12122L10 4.05312e-06Z"
         fill="#00C6A2"
@@ -1109,19 +1110,19 @@ export const RefIcon = () => {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M6.51531 6.36364C6.46444 6.36364 6.41387 6.36232 6.36365 6.35971V4.08371L8.83901 1.78516C9.18802 2.26148 9.3941 2.8491 9.3941 3.48485C9.3941 5.07476 8.10522 6.36364 6.51531 6.36364ZM8.19255 1.14486L6.36365 2.84313V0.60999C6.41387 0.607383 6.46444 0.606064 6.51531 0.606064C7.14111 0.606064 7.72027 0.805743 8.19255 1.14486Z"
-        fill="black"
+        fill="currentColor"
       />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
         d="M6.06046 0.606064H3.33319V3.29661L4.55696 4.52039L6.06046 3.12428V0.606064ZM6.06046 4.36486L4.5336 5.78267L3.33319 4.58226V10H6.06046V4.36486Z"
-        fill="black"
+        fill="currentColor"
       />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
         d="M3.0303 0.606064H0V4.50881L2.27284 2.23598L3.0303 2.99344V0.606064ZM3.0303 4.27909L2.27284 3.52162L0 5.79446V10H3.0303V4.27909Z"
-        fill="black"
+        fill="currentColor"
       />
     </svg>
   );

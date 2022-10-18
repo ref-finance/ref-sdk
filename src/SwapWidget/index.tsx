@@ -9,12 +9,7 @@ import {
   ThemeContextProvider,
   TokenPriceContextProvider,
 } from './state';
-import {
-  REF_TOKEN_ID,
-  REF_META_DATA,
-  WNEAR_META_DATA,
-  defaultTheme,
-} from '../constant';
+import { REF_TOKEN_ID, REF_META_DATA, WNEAR_META_DATA } from '../constant';
 import { ftGetBalance, ftGetTokenMetadata } from '../ref';
 import { getAccountName, toReadableNumber, toPrecision } from '../utils';
 import {
@@ -35,8 +30,7 @@ import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon } from './components';
 import Big from 'big.js';
-import { defaultDarkModeTheme } from '../constant';
-
+import { defaultTheme, defaultDarkModeTheme } from './constant';
 const SwapWidget = (props: SwapWidgetProps) => {
   const {
     theme,
@@ -70,6 +64,7 @@ const SwapWidget = (props: SwapWidgetProps) => {
     borderColor,
     iconDefault,
     iconHover,
+    refIcon,
   } = curTheme;
 
   const { AccountId, isSignedIn: isSignedInProp } = connection;
@@ -304,7 +299,7 @@ const SwapWidget = (props: SwapWidgetProps) => {
                 setRreshTrigger(!refreshTrigger);
               }}
             />
-            {canSwap && !swapError && (
+            {!swapError && (
               <DetailView
                 fee={fee}
                 rate={rate}
@@ -354,7 +349,11 @@ const SwapWidget = (props: SwapWidgetProps) => {
                 fontSize: '14px',
               }}
             >
-              <RefIcon />
+              <RefIcon
+                style={{
+                  color: refIcon || 'black',
+                }}
+              />
               &nbsp; Powered by Ref.finance
             </div>
 
