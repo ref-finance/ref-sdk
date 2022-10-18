@@ -15,7 +15,7 @@ import {
   WNEAR_META_DATA,
   defaultTheme,
 } from '../constant';
-import { ftGetBalance } from '../ref';
+import { ftGetBalance, ftGetTokenMetadata } from '../ref';
 import { getAccountName, toReadableNumber, toPrecision } from '../utils';
 import {
   Slider,
@@ -30,11 +30,12 @@ import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { TiWarning } from '@react-icons/all-files/ti/TiWarning';
 
 import './style.css';
-import { useTokenPriceList, useTokensIndexer, useTokenBalnces } from './state';
+import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
 
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon } from './components';
 import Big from 'big.js';
+import { defaultDarkModeTheme } from '../constant';
 
 const SwapWidget = (props: SwapWidgetProps) => {
   const {
@@ -48,9 +49,13 @@ const SwapWidget = (props: SwapWidgetProps) => {
     className,
     transactionState,
     onConnect,
+    defaultTokenIn,
+    defaultTokenOut,
+    onDisConnect,
+    darkMode,
   } = props;
 
-  const curTheme = theme || defaultTheme;
+  const curTheme = theme || (darkMode ? defaultDarkModeTheme : defaultTheme);
 
   const {
     container,
@@ -101,7 +106,7 @@ const SwapWidget = (props: SwapWidgetProps) => {
 
   const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
 
-  const tokens = useTokens(extraTokenList);
+  const tokens = useTokensIndexer({ extraTokenList, AccountId });
 
   const balances = useTokenBalnces(tokens, AccountId);
 
@@ -113,12 +118,25 @@ const SwapWidget = (props: SwapWidgetProps) => {
     refreshTrigger
   );
 
+  const [hoverAccount, setHoverAccount] = useState<boolean>(false);
+
   useEffect(() => {
     if (!tokenIn) return;
     ftGetBalance(tokenIn.id, AccountId).then(available => {
       setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
     });
   }, [tokenIn]);
+
+  useEffect(() => {
+    console.log(defaultTokenIn);
+
+    if (defaultTokenIn) {
+      ftGetTokenMetadata(defaultTokenIn).then(setTokenIn);
+    }
+    if (defaultTokenOut) {
+      ftGetTokenMetadata(defaultTokenOut).then(setTokenOut);
+    }
+  }, [defaultTokenIn, defaultTokenOut]);
 
   useEffect(() => {
     if (!tokenOut) return;
@@ -211,19 +229,21 @@ const SwapWidget = (props: SwapWidgetProps) => {
                     className="__ref-swap-widget-header-button-account __ref-swap-widget-row-flex-center"
                     style={{
                       color: primary,
-                      background: secondaryBg,
+                      background: hoverAccount
+                        ? 'rgba(255,104,158,0.2)'
+                        : secondaryBg,
                       border: `1px solid ${borderColor}`,
+                      cursor: 'pointer',
                     }}
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      hoverAccount && onDisConnect();
+                    }}
+                    onMouseEnter={() => setHoverAccount(true)}
+                    onMouseLeave={() => setHoverAccount(false)}
                   >
-                    <span
-                      style={{
-                        paddingRight: '2px',
-                      }}
-                    >
-                      {getAccountName(AccountId)}
-                    </span>
-
-                    <FiChevronDown />
+                    {hoverAccount ? 'Diconnect' : getAccountName(AccountId)}
                   </div>
                 )}
 
@@ -250,12 +270,17 @@ const SwapWidget = (props: SwapWidgetProps) => {
               }}
             />
 
-            <div className="__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center">
+            <div
+              className="__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center"
+              style={{
+                color: iconDefault,
+              }}
+            >
               <CgArrowsExchangeAltV
                 style={{
                   cursor: 'pointer',
-                  color: iconDefault,
                 }}
+                className="__ref-swap-widget-exchange-button-icon"
                 size={30}
                 onClick={() => {
                   setTokenIn(tokenOut);
@@ -310,9 +335,10 @@ const SwapWidget = (props: SwapWidgetProps) => {
               type="submit"
               className="__ref-swap-widget-submit-button __ref-swap-widget-button"
               style={{
-                color: container,
+                color: 'white',
                 background: buttonBg,
                 opacity: !canSubmit ? 0.5 : 1,
+                cursor: !canSubmit ? 'not-allowed' : 'pointer',
               }}
               disabled={!canSubmit}
             >
@@ -325,6 +351,7 @@ const SwapWidget = (props: SwapWidgetProps) => {
                 color: secondary,
                 justifyContent: 'center',
                 paddingTop: '12px',
+                fontSize: '14px',
               }}
             >
               <RefIcon />

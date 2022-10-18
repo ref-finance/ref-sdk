@@ -770,6 +770,7 @@ const Token = ({
             fill={hoverPin && hoverIndex == index ? iconHover : iconDefault}
             style={{
               marginLeft: '10px',
+              cursor: 'pointer',
             }}
             onClick={e => {
               e.preventDefault();
@@ -781,6 +782,7 @@ const Token = ({
           <AiOutlinePushpin
             style={{
               marginLeft: '10px',
+              cursor: 'pointer',
             }}
             onMouseEnter={() => setHoverPin(true)}
             onMouseLeave={() => setHoverPin(false)}
@@ -857,8 +859,11 @@ export const TokenListTable = ({
       } else return Number(b2) - Number(b1);
     } else {
       if (v1) return -1;
-      if (v2) return 1;
-      return 0;
+      else if (v2) return 1;
+      else
+        return currentSort === 'up'
+          ? Number(b1) - Number(b2)
+          : Number(b2) - Number(b1);
     }
   };
 
@@ -981,11 +986,13 @@ export const TokenSelector = ({
       style={{
         position: 'relative',
         width,
+        background: container,
       }}
     >
       <FiChevronLeft
         onClick={onClose}
         style={{
+          color: primary,
           position: 'absolute',
           cursor: 'pointer',
         }}

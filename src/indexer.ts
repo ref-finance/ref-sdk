@@ -31,3 +31,19 @@ export const getTokens = async () => {
       return newTokens;
     });
 };
+
+export const getWhiteListTokensIndexer = async (whiteListIds: string[]) => {
+  return await fetch(config.indexerUrl + '/list-token', {
+    method: 'GET',
+    headers: { 'Content-type': 'application/json; charset=UTF-8' },
+  })
+    .then(res => res.json())
+    .then(res => {
+      return whiteListIds.reduce((acc, cur, i) => {
+        return {
+          ...acc,
+          cur: res[cur],
+        };
+      }, {});
+    });
+};

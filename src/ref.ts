@@ -97,7 +97,7 @@ export const getGlobalWhitelist = async (): Promise<string[]> => {
 };
 
 export const getUserRegisteredTokens = async (
-  AccountId: string
+  AccountId?: string
 ): Promise<string[]> => {
   if (!AccountId) return [];
 

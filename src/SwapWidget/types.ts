@@ -18,17 +18,21 @@ export interface Theme {
 
 export interface SwapWidgetProps {
   theme?: Theme;
-  extraTokenList?: string[] | TokenMetadata[];
+  extraTokenList?: string[];
   onSwap: (transactionsRef: Transaction[]) => void;
   onDisConnect: () => void;
   width: string;
   height?: string;
   enableSmartRouting?: boolean;
   className?: string;
+  darkMode?: boolean;
   connection: {
     AccountId: string;
     isSignedIn: boolean;
   };
+
+  defaultTokenIn?: string;
+  defaultTokenOut?: string;
   transactionState?: {
     state: 'success' | 'fail' | null;
     tx?: string;

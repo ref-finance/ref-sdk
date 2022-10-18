@@ -87,6 +87,21 @@ export const defaultTheme: Theme = {
   iconHover: '#B7C9D6',
 };
 
+export const defaultDarkModeTheme: Theme = {
+  container: '#26343E',
+  buttonBg: '#00C6A2',
+  primary: '#FFFFFF',
+  secondary: '#7E8A93',
+  borderRadius: '4px',
+  fontFamily: 'sans-serif',
+  hover: 'rgba(126, 138, 147, 0.2)',
+  active: 'rgba(126, 138, 147, 0.2)',
+  secondaryBg: 'rgba(0, 0, 0, 0.2)',
+  borderColor: 'rgba(126, 138, 147, 0.2)',
+  iconDefault: '#7E8A93',
+  iconHover: '#B7C9D6',
+};
+
 export const TokenLinks = {
   NEAR: 'https://awesomenear.com/near-protocol',
   wNEAR: 'https://awesomenear.com/near-protocol',

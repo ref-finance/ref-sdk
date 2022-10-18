@@ -5,12 +5,7 @@ import React, {
   createContext,
   ReactNode,
 } from 'react';
-import {
-  ftGetBalance,
-  ftGetTokenMetadata,
-  getGlobalWhitelist,
-  getUserRegisteredTokens,
-} from '../ref';
+import { ftGetBalance, ftGetTokenMetadata, getGlobalWhitelist } from '../ref';
 import {
   EstimateSwapView,
   Pool,
@@ -33,8 +28,13 @@ import { instantSwap } from '../instantSwap';
 
 import { getExpectedOutputFromActionsORIG } from '../smartRoutingLogic.js';
 import { defaultTheme } from '../constant';
-import { getTokenPriceList, getTokens } from '../indexer';
+import {
+  getTokenPriceList,
+  getTokens,
+  getWhiteListTokensIndexer,
+} from '../indexer';
 import { toReadableNumber, ONLY_ZEROS } from '../utils';
+import { getUserRegisteredTokens } from '../ref';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -81,7 +81,53 @@ export const useTokens = (
   );
 };
 
-export const useTokensIndexer = () => {
+export const useTokensIndexer = ({
+  extraTokenList,
+  AccountId,
+}: {
+  extraTokenList?: string[];
+  AccountId?: string;
+}) => {
+  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
+
+  useEffect(() => {
+    const userRegister = getUserRegisteredTokens(AccountId);
+
+    userRegister
+      .then((list: string[]) => {
+        const tokenList = list.concat(extraTokenList || []);
+        const tokenListUnique = [...new Set(tokenList)];
+        if (tokenListUnique && tokenListUnique.length > 0)
+          return Promise.all(tokenListUnique.map(id => ftGetTokenMetadata(id)));
+      })
+      .then(async tokenList => {
+        const whiteList = await getGlobalWhitelist();
+
+        const globalWhiteListTokens = (await getWhiteListTokensIndexer(
+          whiteList
+        )) as TokenMetadata[];
+
+        if (!!tokenList) {
+          const tokenListMap = tokenList.concat(globalWhiteListTokens).reduce(
+            (acc, cur, i) => ({
+              ...acc,
+              [cur.id]: cur,
+            }),
+            {}
+          );
+
+          return Object.values(tokenListMap) as TokenMetadata[];
+        }
+
+        return globalWhiteListTokens;
+      })
+      .then(setTokens);
+  }, [AccountId, extraTokenList]);
+
+  return tokens;
+};
+
+export const useAllTokensIndexer = () => {
   const [tokens, setTokens] = useState<TokenMetadata[]>([]);
 
   useEffect(() => {

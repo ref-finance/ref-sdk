@@ -28,8 +28,10 @@
 .__ref-swap-widget-header-button-account {
   font-size: 14px;
   margin-right: 8px;
-  padding: 4px 11px;
+  padding: 4px 13px;
   border-radius: 25px;
+  min-width: 120px;
+  justify-content: center;
 }
 
 .__ref-swap-widget_slippage_selector {
@@ -241,4 +243,20 @@ button.__ref-swap-widget-button {
 
 .__ref-swap-widget-submit-button:hover {
   opacity: 0.5;
+}
+.__ref-swap-widget-exchange-button-icon:hover {
+  color: #00c6a2;
+}
+.__ref-swap-widget_token_list_table_content::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  border-radius: 3px;
+}
+
+.__ref-swap-widget_token_list_table_content::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0);
+}
+.__ref-swap-widget_token_list_table_content::-webkit-scrollbar-thumb {
+  background: #00c6a2;
+  border-radius: 8px;
 }
