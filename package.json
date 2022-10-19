@@ -62,7 +62,9 @@
     "tslib": "^2.4.0",
     "typescript": "^4.7.4",
     "@near-wallet-selector/core": "^7.1.0",
-    "@near-wallet-selector/modal-ui": "^7.1.0"
+    "buffer": "^6.0.3",
+    "os-browserify": "^0.3.0",
+    "process": "^0.11.10"
   },
   "dependencies": {
     "@types/big.js": "^6.1.5",

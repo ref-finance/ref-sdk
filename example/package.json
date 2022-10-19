@@ -1,0 +1,47 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "NEAR_ENV=testnet parcel index.html --dist-dir doc",
+    "build": "parcel build index.html  --dist-dir doc"
+  },
+  "dependencies": {
+    "@near-wallet-selector/core": "^6.0.0",
+    "@near-wallet-selector/modal-ui": "^6.0.0",
+    "@near-wallet-selector/near-wallet": "^6.0.0",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "near-api-js": "^0.44.2",
+    "react-app-polyfill": "^1.0.0",
+    "rxjs": "^7.5.5",
+    "react-dom": "^16.0.0 || ^17.0.0",
+    "react": "^16.0.0 || ^17.0.0",
+    "@types/big.js": "^6.1.5",
+    "@types/bn.js": "^5.1.1",
+    "@types/lodash": "^4.14.182",
+    "big.js": "^6.2.1",
+    "mathjs": "^9.3.0"
+  },
+  "alias": {
+    "react": "../node_modules/react",
+    "react-dom": "../node_modules/react-dom",
+    "scheduler/tracing": "../node_modules/scheduler/tracing-profiling"
+  },
+  "devDependencies": {
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2",
+    "buffer": "^6.0.3",
+    "os-browserify": "^0.3.0",
+    "parcel": "^2.0.0",
+    "process": "^0.11.10",
+    "typescript": "^3.4.5"
+  },
+  "resolutions": {
+    "process": "^0.11.10",
+    "buffer": "^6.0.3",
+    "os-browserify": "^0.3.0"
+  }
+}
