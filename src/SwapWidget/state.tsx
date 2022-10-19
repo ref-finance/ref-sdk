@@ -121,33 +121,36 @@ export const useTokensIndexer = ({
     userRegister
       .then((list: string[]) => {
         const tokenList = list.concat(extraTokenList || []);
-        const tokenListUnique = [...new Set(tokenList)];
-        if (tokenListUnique && tokenListUnique.length > 0)
+        const tokenListUnique =
+          tokenList.length === 0 ? [] : Array.from(new Set<string>(tokenList));
+
+        if (tokenList.length > 0)
           return Promise.all(tokenListUnique.map(id => ftGetTokenMetadata(id)));
-        return null;
+        else return [];
       })
       .then(async tokenList => {
         const whiteList = await getGlobalWhitelist();
 
-        const globalWhiteListTokens = (await getWhiteListTokensIndexer(
-          whiteList
-        )) as TokenMetadata[];
+        const globalWhiteListTokens = (
+          await getWhiteListTokensIndexer(whiteList)
+        ).filter(token => !!token) as TokenMetadata[];
 
-        if (!!tokenList) {
-          const tokenListMap = tokenList.concat(globalWhiteListTokens).reduce(
-            (acc, cur, i) => ({
-              ...acc,
-              [cur.id]: cur,
-            }),
-            {}
-          );
+        if (tokenList && tokenList.length > 0) {
+          const tokenListMap = tokenList
+            .filter(t => !!t)
+            .concat(globalWhiteListTokens)
+            .reduce(
+              (acc, cur, i) => ({
+                ...acc,
+                [cur.id]: cur,
+              }),
+              {}
+            );
 
           return Object.values(tokenListMap) as TokenMetadata[];
         }
 
-        return Object.values(globalWhiteListTokens).filter(
-          token => !!token
-        ) as TokenMetadata[];
+        return globalWhiteListTokens;
       })
       .then(setTokens);
   }, [AccountId, extraTokenList]);

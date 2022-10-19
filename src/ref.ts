@@ -93,7 +93,7 @@ export const getGlobalWhitelist = async (): Promise<string[]> => {
   const globalWhitelist = await refFiViewFunction({
     methodName: 'get_whitelisted_tokens',
   });
-  return [...new Set<string>([...globalWhitelist])];
+  return Array.from(new Set(globalWhitelist));
 };
 
 export const getUserRegisteredTokens = async (
