@@ -65,7 +65,8 @@ export const getTotalPools = async () => {
 };
 
 export const ftGetTokenMetadata = async (
-  id: string
+  id: string,
+  tag?: string
 ): Promise<TokenMetadata> => {
   const metadata = await ftViewFunction(id, {
     methodName: 'ft_metadata',
@@ -76,9 +77,12 @@ export const ftGetTokenMetadata = async (
   return { ...metadata, id };
 };
 
-export const ftGetTokensMetadata = async (tokenIds: string[]) => {
+export const ftGetTokensMetadata = async (
+  tokenIds: string[],
+  allTokens: Record<string, TokenMetadata>
+) => {
   const tokensMetadata = await Promise.all(
-    tokenIds.map((id: string) => ftGetTokenMetadata(id))
+    tokenIds.map((id: string) => allTokens[id] || ftGetTokenMetadata(id))
   );
 
   return tokensMetadata.reduce((pre, cur, i) => {

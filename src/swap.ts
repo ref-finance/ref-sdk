@@ -261,7 +261,8 @@ export async function getHybridStableSmart(
   amountIn: string,
   stablePools: Pool[],
   stablePoolsDetail: StablePool[],
-  simplePools: Pool[]
+  simplePools: Pool[],
+  allTokens: Record<string, TokenMetadata>
 ) {
   if (
     !isStablePoolToken(stablePoolsDetail, tokenIn.id) &&
@@ -413,7 +414,8 @@ export async function getHybridStableSmart(
 
   if (candidatePools.length > 0) {
     const tokensMedata = await ftGetTokensMetadata(
-      candidatePools.map(cp => cp.map(p => p.tokenIds).flat()).flat()
+      candidatePools.map(cp => cp.map(p => p.tokenIds).flat()).flat(),
+      allTokens
     );
 
     const BestPoolPair =
@@ -531,7 +533,9 @@ export async function getHybridStableSmart(
       BestPoolPair[1].tokenIds.includes(t)
     ) as string;
 
-    const tokenMidMeta = await ftGetTokenMetadata(tokenMidId);
+    const tokenMidMeta =
+      allTokens[tokenMidId] ||
+      (await ftGetTokenMetadata(tokenMidId, 'hybridSmartRoutingEstimate'));
 
     const estimate1 = {
       ...(isStablePool(stablePoolsDetail, pool1.id)
@@ -635,7 +639,8 @@ export const estimateSwap = async ({
       amountIn,
       stablePools || [],
       stablePoolsDetail || [],
-      simplePools
+      simplePools,
+      allTokens
     );
 
     const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();

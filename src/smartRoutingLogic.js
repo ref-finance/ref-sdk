@@ -10,7 +10,7 @@ import { TokenMetadata } from './types';
 import { ftGetTokenMetadata } from './ref';
 
 import { percentLess, toNonDivisibleNumber } from './utils';
-
+import { getTokens } from './indexer';
 Big.RM = 0;
 Big.DP = 40;
 Big.NE = -40;
@@ -1677,12 +1677,13 @@ export async function getSmartRouteSwapActions(
   // console.log(hops);
 
   for (var i in hops) {
-    let hopInputTokenMeta =
-      allTokens[hops[i].inputToken] ||
-      (await ftGetTokenMetadata(hops[i].inputToken));
-    let hopOutputTokenMeta =
-      allTokens[hops[i].outputToken] ||
-      (await ftGetTokenMetadata(hops[i].outputToken));
+    let hopInputTokenMeta = allTokens[hops[i].inputToken]
+      ? allTokens[hops[i].inputToken]
+      : await ftGetTokenMetadata(hops[i].inputToken, 'token input');
+
+    let hopOutputTokenMeta = allTokens[hops[i].outputToken]
+      ? allTokens[hops[i].outputToken]
+      : await ftGetTokenMetadata(hops[i].outputToken, 'token sm');
     let hopOutputTokenDecimals = hopOutputTokenMeta.decimals;
 
     let expectedHopOutput = getOutputSingleHop(
@@ -1724,8 +1725,8 @@ export async function getSmartRouteSwapActions(
     }
 
     let tokens = await Promise.all(
-      hops[i].nodeRoute.map(
-        async t => allTokens[t] || (await ftGetTokenMetadata(t))
+      hops[i].nodeRoute.map(async t =>
+        allTokens[t] ? allTokens[t] : await ftGetTokenMetadata(t, 'smart')
       )
     );
 
@@ -1816,7 +1817,13 @@ async function calculateSmartRouteV2PriceImpact(actions, allTokens) {
     let route = routes[i];
     let nodeRoute = nodeRoutes[i];
     let tokens = await Promise.all(
-      nodeRoute.map(async t => allTokens[t] || (await ftGetTokenMetadata(t)))
+      nodeRoute.map(async t => {
+        console.log(allTokens[t]);
+
+        return allTokens[t]
+          ? allTokens[t]
+          : await ftGetTokenMetadata(t, 'sm routes');
+      })
     );
     let weight = weights[i];
     if (route.length == 1) {

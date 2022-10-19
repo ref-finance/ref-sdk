@@ -150,22 +150,12 @@ export const useTokensIndexer = ({
           return Object.values(tokenListMap) as TokenMetadata[];
         }
 
+        console.log('globalWhiteListTokens', globalWhiteListTokens);
+
         return globalWhiteListTokens;
       })
       .then(setTokens);
   }, [AccountId, extraTokenList]);
-
-  return tokens;
-};
-
-export const useAllTokensIndexer = () => {
-  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
-
-  useEffect(() => {
-    getTokens().then((tokensView: any) => {
-      setTokens(Object.values(tokensView));
-    });
-  }, []);
 
   return tokens;
 };
@@ -324,7 +314,7 @@ export const useSwap = (
           setAmountOut('');
           return;
         }
-
+        setSwapError(null);
         const expectAmountOut = getExpectedOutputFromActionsORIG(
           estimates,
           params.tokenOut.id
