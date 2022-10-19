@@ -1,14 +1,13 @@
 import * as React from 'react';
-import SwapWidget from '../src/SwapWidget';
+import { SwapWidget } from '../dist/index';
 import { useWalletSelector } from './WalletSelectorContext';
-import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 import '@near-wallet-selector/modal-ui/styles.css';
-import { Transaction } from '../src/types';
+import { Transaction } from '../dist/index';
 import {
   transformTransactions,
   WalletSelectorTransactions,
-} from '../src/utils';
-import { NotLoginError } from '../src/error';
+} from '../dist/index';
+import { NotLoginError } from '../dist/index';
 
 export const Content = () => {
   const { modal, selector, accountId } = useWalletSelector();

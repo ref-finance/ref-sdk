@@ -32,7 +32,7 @@ import { RefIcon } from './components';
 import Big from 'big.js';
 import { defaultTheme, defaultDarkModeTheme } from './constant';
 
-const SwapWidget = (props: SwapWidgetProps) => {
+export const SwapWidget = (props: SwapWidgetProps) => {
   const {
     theme,
     extraTokenList,
@@ -408,5 +408,3 @@ const SwapWidget = (props: SwapWidgetProps) => {
     </ThemeContextProvider>
   );
 };
-
-export default SwapWidget;

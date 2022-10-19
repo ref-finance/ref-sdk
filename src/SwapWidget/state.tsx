@@ -124,6 +124,7 @@ export const useTokensIndexer = ({
         const tokenListUnique = [...new Set(tokenList)];
         if (tokenListUnique && tokenListUnique.length > 0)
           return Promise.all(tokenListUnique.map(id => ftGetTokenMetadata(id)));
+        return null;
       })
       .then(async tokenList => {
         const whiteList = await getGlobalWhitelist();
