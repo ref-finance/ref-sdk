@@ -144,7 +144,9 @@ export const useTokensIndexer = ({
           return Object.values(tokenListMap) as TokenMetadata[];
         }
 
-        return globalWhiteListTokens;
+        return Object.values(globalWhiteListTokens).filter(
+          token => !!token
+        ) as TokenMetadata[];
       })
       .then(setTokens);
   }, [AccountId, extraTokenList]);

@@ -12,13 +12,18 @@ import {
   STABLE_LP_TOKEN_DECIMALS,
 } from './constant';
 
-import { transactions, utils } from 'near-api-js';
+import {
+  transactions,
+  utils,
+  transactions as nearTransactions,
+} from 'near-api-js';
 
 import BN from 'bn.js';
 
 import * as math from 'mathjs';
 import { REF_FI_CONTRACT_ID } from './constant';
 import Big from 'big.js';
+import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(typeof id === 'number' ? id : pool.id),
@@ -225,7 +230,7 @@ export const transformTransactions = (
   transactions: Transaction[],
   AccountId: string
 ) => {
-  return transactions.map((t: Transaction) => {
+  const parsedTransactions = transactions.map((t: Transaction) => {
     return {
       signerId: AccountId,
       receiverId: t.receiverId,
@@ -244,6 +249,35 @@ export const transformTransactions = (
       }),
     };
   });
+
+  return parsedTransactions;
+};
+
+export const WalletSelectorTransactions = (
+  transactions: Transaction[],
+  AccountId: string
+) => {
+  const parsedTransactions = transactions.map((t: Transaction) => {
+    return {
+      signerId: AccountId,
+      receiverId: t.receiverId,
+      actions: t.functionCalls.map(fc => {
+        return {
+          type: 'FunctionCall',
+          params: {
+            methodName: fc.methodName,
+            args: fc.args || {},
+            gas: getGas(fc.gas)
+              .toNumber()
+              .toFixed(),
+            deposit: utils.format.parseNearAmount(fc.amount || '0')!,
+          },
+        };
+      }),
+    };
+  });
+
+  return { transactions: parsedTransactions } as SignAndSendTransactionsParams;
 };
 
 export const separateRoutes = (

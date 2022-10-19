@@ -23,12 +23,9 @@ export interface SwapWidgetProps {
   transactionState?: {
     state: 'success' | 'fail' | null;
     tx?: string;
+    detail?: string;
   };
 
-  successSwap?: {
-    tx?: string;
-    onSwapSuccess: () => void;
-  };
   onConnect: () => void;
 }
 

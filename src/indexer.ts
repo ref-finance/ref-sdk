@@ -42,7 +42,7 @@ export const getWhiteListTokensIndexer = async (whiteListIds: string[]) => {
       return whiteListIds.reduce((acc, cur, i) => {
         return {
           ...acc,
-          cur: res[cur],
+          [cur]: res[cur],
         };
       }, {});
     });

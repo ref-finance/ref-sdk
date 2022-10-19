@@ -1143,14 +1143,14 @@ export const Loading = () => {
         cy="19"
         r="16"
         stroke="#EEEEEE"
-        stroke-width="6"
-        stroke-linecap="round"
+        strokeWidth="6"
+        strokeLinecap="round"
       />
       <path
         d="M19 35C27.8366 35 35 27.8366 35 19C35 10.1634 27.8366 3 19 3C10.1634 3 3 10.1634 3 19"
         stroke="#00C6A2"
-        stroke-width="4"
-        stroke-linecap="round"
+        strokeWidth="4"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -1168,8 +1168,8 @@ export const Warning = () => {
       <path
         d="M21.0359 5.99999C22.5755 3.33333 26.4245 3.33333 27.9641 6L42.2535 30.75C43.7931 33.4167 41.8686 36.75 38.7894 36.75H10.2106C7.13137 36.75 5.20688 33.4167 6.74648 30.75L21.0359 5.99999Z"
         stroke="#FF689E"
-        stroke-width="4"
-        stroke-linecap="round"
+        strokeWidth="4"
+        strokeLinecap="round"
       />
       <line
         x1="24"
@@ -1177,8 +1177,8 @@ export const Warning = () => {
         x2="24"
         y2="24"
         stroke="#FF689E"
-        stroke-width="4"
-        stroke-linecap="round"
+        strokeWidth="4"
+        strokeLinecap="round"
       />
       <circle cx="24" cy="30" r="2" fill="#FF689E" />
     </svg>
@@ -1190,6 +1190,8 @@ export const Success = () => {
     <div
       style={{
         position: 'relative',
+        height: '32px',
+        width: '32px',
       }}
     >
       <svg
@@ -1209,8 +1211,8 @@ export const Success = () => {
           cy="19"
           r="16"
           stroke="#EEEEEE"
-          stroke-width="6"
-          stroke-linecap="round"
+          strokeWidth="6"
+          strokeLinecap="round"
         />
       </svg>
 
@@ -1229,8 +1231,8 @@ export const Success = () => {
         <path
           d="M2 11.2727L10.4898 20L28 2"
           stroke="#00C6A2"
-          stroke-width="4"
-          stroke-linecap="round"
+          strokeWidth="4"
+          strokeLinecap="round"
         />
       </svg>
     </div>
@@ -1240,20 +1242,15 @@ export const Success = () => {
 export const Notification = ({
   state,
   tx,
-  tokenIn,
-  tokenOut,
-  amountIn,
-  amountOut,
+  detail,
   open,
   setOpen,
 }: {
   state: 'pending' | 'success' | 'fail' | null;
   setState: (state: 'pending' | 'success' | 'fail' | null) => void;
   tx?: string;
-  tokenIn?: TokenMetadata;
-  tokenOut?: TokenMetadata;
-  amountIn: string;
-  amountOut: string;
+  detail?: string;
+
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
@@ -1302,22 +1299,21 @@ export const Notification = ({
       >
         {state === 'pending' && <p>Waiting for confirmation</p>}
         {state === 'fail' && !!tx && (
-          <p
+          <a
+            className="text-primary font-semibold"
+            href={`${config.explorerUrl}/txns/${tx}`}
+            target="_blank"
             style={{
               textDecoration: 'underline',
               fontSize: '14px',
-              position: 'relative',
-              bottom: '20px',
+              color: primary,
             }}
           >
             Click to view.
-          </p>
+          </a>
         )}
 
-        {state === 'success' &&
-          `Swap ${toPrecision(amountIn || '1', 2)} ${
-            tokenIn?.symbol
-          } for ${toPrecision(amountOut || '0', 3)} ${tokenOut?.symbol}`}
+        {detail}
       </div>
 
       <button

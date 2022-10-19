@@ -31,6 +31,7 @@ import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchange
 import { RefIcon } from './components';
 import Big from 'big.js';
 import { defaultTheme, defaultDarkModeTheme } from './constant';
+
 const SwapWidget = (props: SwapWidgetProps) => {
   const {
     theme,
@@ -170,15 +171,9 @@ const SwapWidget = (props: SwapWidgetProps) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!isSignedIn) {
-      onConnect();
-
-      return;
-    } else {
-      setSwapState('pending');
-      setNotOpen(true);
-      makeSwap();
-    }
+    setSwapState('pending');
+    setNotOpen(true);
+    makeSwap();
   };
 
   const canSubmit =
@@ -325,20 +320,34 @@ const SwapWidget = (props: SwapWidgetProps) => {
                 {swapError.message}
               </div>
             )}
-
-            <button
-              type="submit"
-              className="__ref-swap-widget-submit-button __ref-swap-widget-button"
-              style={{
-                color: 'white',
-                background: buttonBg,
-                opacity: !canSubmit ? 0.5 : 1,
-                cursor: !canSubmit ? 'not-allowed' : 'pointer',
-              }}
-              disabled={!canSubmit}
-            >
-              {isSignedIn ? 'Swap' : 'Connect Wallet'}
-            </button>
+            {isSignedIn ? (
+              <button
+                type="submit"
+                className="__ref-swap-widget-submit-button __ref-swap-widget-button"
+                style={{
+                  color: 'white',
+                  background: buttonBg,
+                  opacity: !canSubmit ? 0.5 : 1,
+                  cursor: !canSubmit ? 'not-allowed' : 'pointer',
+                }}
+                disabled={!canSubmit}
+              >
+                {'Swap'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="__ref-swap-widget-submit-button __ref-swap-widget-button"
+                onClick={onConnect}
+                style={{
+                  color: 'white',
+                  background: buttonBg,
+                  cursor: 'pointer',
+                }}
+              >
+                {'Connect Wallet'}
+              </button>
+            )}
 
             <div
               className="__ref-swap-widget-row-flex-center"
@@ -360,12 +369,10 @@ const SwapWidget = (props: SwapWidgetProps) => {
             <Notification
               state={swapState}
               setState={setSwapState}
-              amountIn={amountIn}
-              amountOut={amountOut}
-              tokenIn={tokenIn}
-              tokenOut={tokenOut}
               open={notOpen}
               setOpen={setNotOpen}
+              tx={transactionState?.tx}
+              detail={transactionState?.detail}
             />
           </form>
         )}

@@ -39,7 +39,7 @@ export const ftGetStorageBalance = (
   tokenId: string,
   AccountId: string
 ): Promise<FTStorageBalance | null> => {
-  if (!!AccountId) throw NoAccountIdFound;
+  if (!AccountId) throw NoAccountIdFound;
 
   return ftViewFunction(tokenId, {
     methodName: 'storage_balance_of',
