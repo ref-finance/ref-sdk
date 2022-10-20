@@ -8,6 +8,7 @@ import {
   useSwap,
   ThemeContextProvider,
   TokenPriceContextProvider,
+  useAllTokens,
 } from './state';
 import { REF_TOKEN_ID, REF_META_DATA, WNEAR_META_DATA } from '../constant';
 import { ftGetBalance, ftGetTokenMetadata } from '../ref';
@@ -104,7 +105,8 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const tokens = useTokensIndexer({ extraTokenList, AccountId });
 
-  console.log(tokens, 'tokens swap ');
+  // cache list tokens
+  useAllTokens({ reload: true });
 
   const balances = useTokenBalnces(tokens, AccountId);
 
@@ -293,6 +295,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               onForceUpdate={() => {
                 setRreshTrigger(!refreshTrigger);
               }}
+              poolFetchingState={poolFetchingState}
             />
             {!swapError && (
               <DetailView

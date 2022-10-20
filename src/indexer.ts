@@ -12,9 +12,9 @@ export const getTokenPriceList = async (): Promise<any> => {
     });
 };
 
-export const getTokens = async () => {
+export const getTokens = async (reload?: boolean) => {
   const storagedTokens =
-    typeof window !== 'undefined'
+    typeof window !== 'undefined' && !reload
       ? localStorage.getItem(REF_WIDGET_ALL_TOKENS_LIST_KEY)
       : null;
 

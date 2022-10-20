@@ -15,6 +15,8 @@ import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 
 import { FaSearch } from '@react-icons/all-files/fa/FaSearch';
 
+import { RiRefreshLine } from '@react-icons/all-files/ri/RiRefreshLine';
+
 import { IoCloseCircle } from '@react-icons/all-files/io5/IoCloseCircle';
 
 import { TiArrowSortedUp } from '@react-icons/all-files/ti/TiArrowSortedUp';
@@ -58,6 +60,7 @@ interface TokenAmountProps {
   onChangeAmount?: (amount: string) => void;
   price?: string;
   onForceUpdate?: () => void;
+  poolFetchingState?: 'loading' | 'end';
 }
 
 export const DetailView = ({
@@ -267,6 +270,8 @@ export const TokenAmount = (props: TokenAmountProps) => {
     amount,
     onChangeAmount,
     price,
+    onForceUpdate,
+    poolFetchingState,
   } = props;
 
   const theme = useContext(ThemeContext);
@@ -343,6 +348,26 @@ export const TokenAmount = (props: TokenAmountProps) => {
             }}
           />
         </div>
+
+        {onForceUpdate && (
+          <RiRefreshLine
+            className={`${
+              poolFetchingState === 'loading'
+                ? '__ref-swap-widget-loading '
+                : ''
+            }`}
+            style={{
+              cursor: 'pointer',
+              color: secondary,
+              position: 'relative',
+              top: '8px',
+            }}
+            size={20}
+            onClick={() => {
+              onForceUpdate();
+            }}
+          />
+        )}
         <div className=" __ref-swap-widget-token-amount_input">
           <input
             ref={ref}

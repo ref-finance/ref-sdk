@@ -78,6 +78,22 @@ export const estimateValidator = (
   return true;
 };
 
+export const useAllTokens = ({ reload }: { reload?: boolean }) => {
+  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
+  const [tokensLoading, setTokensLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      const tokens = await getTokens(reload);
+      setTokens(tokens);
+      setTokensLoading(false);
+    };
+    fetchTokens();
+  }, []);
+
+  return { tokens, tokensLoading };
+};
+
 export const useTokens = (
   extraTokenList: string[] | TokenMetadata[] = [],
   AccountId: string = ''
@@ -150,8 +166,6 @@ export const useTokensIndexer = ({
           return Object.values(tokenListMap) as TokenMetadata[];
         }
 
-        console.log('globalWhiteListTokens', globalWhiteListTokens);
-
         return globalWhiteListTokens;
       })
       .then(setTokens);
@@ -180,25 +194,21 @@ export const useRefPools = (refreshTrigger: boolean) => {
   useEffect(() => {
     setPoolFetchingState('loading');
 
-    fetchAllPools().then(setAllPools);
-  }, [refreshTrigger]);
+    fetchAllPools()
+      .then(allPools => {
+        setAllPools(allPools);
 
-  useEffect(() => {
-    if (allPools.ratedPools.length === 0 || allPools.unRatedPools.length === 0)
-      return;
+        return allPools;
+      })
+      .then(allPools => {
+        const pools: Pool[] = allPools.unRatedPools.concat(allPools.ratedPools);
 
-    const pools: Pool[] = allPools.unRatedPools.concat(allPools.ratedPools);
-
-    getStablePools(pools)
-      .then(setAllStablePools)
+        return getStablePools(pools).then(setAllStablePools);
+      })
       .finally(() => {
         setPoolFetchingState('end');
       });
-  }, [
-    allPools.ratedPools.map(p => p.id).join('-'),
-    allPools.unRatedPools.map(p => p.id).join('-'),
-    refreshTrigger,
-  ]);
+  }, [refreshTrigger]);
 
   return {
     allPools,
@@ -359,6 +369,7 @@ export const useSwap = (
     poolFetchingState,
     isEstimating,
     forceEstimate,
+    params.simplePools,
   ]);
 
   useEffect(() => {
@@ -381,6 +392,7 @@ export const useSwap = (
     canSwap,
     swapError,
     setAmountOut,
+    isEstimating,
   };
 };
 

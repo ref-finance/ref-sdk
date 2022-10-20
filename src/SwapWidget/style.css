@@ -176,7 +176,7 @@
 }
 
 .__ref-swap-widget-loading {
-  animation: spin 1s steps(60) infinite;
+  animation: spin 2s linear infinite;
 }
 
 .__ref-swap-widget-notification {

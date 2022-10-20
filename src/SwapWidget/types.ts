@@ -39,4 +39,5 @@ export interface SwapOutParams {
   canSwap: boolean;
   swapError: Error | null;
   setAmountOut: (amount: string) => void;
+  isEstimating: boolean;
 }
