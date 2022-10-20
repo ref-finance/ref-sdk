@@ -34,7 +34,11 @@ import {
   getTokens,
   getWhiteListTokensIndexer,
 } from '../indexer';
-import { toReadableNumber, ONLY_ZEROS } from '../utils';
+import {
+  toReadableNumber,
+  ONLY_ZEROS,
+  getExpectedOutputFromSwapTodos,
+} from '../utils';
 import { getUserRegisteredTokens } from '../ref';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
@@ -325,7 +329,8 @@ export const useSwap = (
           return;
         }
         setSwapError(null);
-        const expectAmountOut = getExpectedOutputFromActionsORIG(
+
+        const expectAmountOut = getExpectedOutputFromSwapTodos(
           estimates,
           params.tokenOut.id
         ).toString();

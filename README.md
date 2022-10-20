@@ -1,6 +1,6 @@
 # Ref SDK
 
-This SDK provides functions of AMM features both for Dapp developers or makers.
+This SDK provides Ref AMM features both for Dapp developers or makers.
 
 ## Install
 
@@ -45,7 +45,7 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
 
 ## Swap Widget
 
-A QuickStart Ref Swap component.
+A QuickStart of Ref Swap component.
 
 ### Props
 
@@ -78,17 +78,17 @@ export interface SwapWidgetProps {
 - **theme:** widget theme for customization.
 - **extraTokenList:** introduce extra tokens with ref whitelist into default token list in the widget.
 - **onSwap:** Swap button triggers this function.
-- **width: ** width of widget component.
-- **height: ** height of widget component.
-- **enableSmartRouting: ** option to choose if enable smart routing in swap routes estimation.
-- **className: ** extra className added to widget component.
+- **width:** width of widget component.
+- **height:** height of widget component.
+- **enableSmartRouting:** option to choose if enable smart routing in swap routes estimation.
+- **className:** extra className added to widget component.
 - **darkMode:** if true, will automatically set theme to default dark mode.
 - **connection:** connection to wallets, input { AccountId:"", isSignedIn:false } if wallet not connected.
-- **defaultTokenIn: ** default token-in.
-- **defaultTokenOut: ** default token-out.
+- **defaultTokenIn:** default token-in.
+- **defaultTokenOut:** default token-out.
 - **transactionState:** entry to input transaction states after you send transactions.
-- **onDisConnect: **Disconnect button triggers this function.
-- **onConnect: ** Connect to Near Wallet button triggers this function.
+- **onDisConnect:** Disconnect button triggers this function.
+- **onConnect:** Connect to Near Wallet button triggers this function.
 
 
 
@@ -146,9 +146,7 @@ export const defaultDarkModeTheme: Theme = {
 
 ```
 
-
-
-#### React Component
+#### Component
 
 ```typescript
 // an example of combining SwapWidget with wallet-selector
@@ -511,6 +509,43 @@ const swapTodos: EstimateSwapView[] = await estimateSwap({
   }
 ]
 ```
+
+
+
+---
+
+#### getExpectedOutputFromSwapTodos
+
+Get token output amount from swapTodos.
+
+**Parameters**
+
+```typescript
+(swapTodos: EstimateSwapView[], outputToken: string)
+```
+
+**Example**
+
+```typescript
+const swapTodos: EstimateSwapView[] = await estimateSwap({
+  tokenIn,
+  tokenOut,
+  amountIn: '1',
+  simplePools,
+  options,
+});
+
+const amountOut:string = getExpectedOutputFromSwapTodos(swapTodos, tokenOut.id);
+
+```
+
+**Response**
+
+```typescript
+"0.723972845937443"
+```
+
+
 
 ---
 

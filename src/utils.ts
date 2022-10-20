@@ -396,3 +396,13 @@ export const calculateFeeCharge = (fee: number, total: string) => {
 export const calculateFeePercent = (fee: number) => {
   return math.divide(fee, 100);
 };
+
+export function getExpectedOutputFromSwapTodos(
+  estimates: EstimateSwapView[],
+  outputToken: string
+) {
+  return estimates
+    .filter(item => item.outputToken === outputToken)
+    .map(item => new Big(item.estimate))
+    .reduce((a, b) => a.plus(b), new Big(0));
+}
