@@ -49,6 +49,13 @@ export const getStablePools = async (stablePools: Pool[]) => {
   );
 };
 
+export const getPool = async (id: number): Promise<Pool> => {
+  return await refFiViewFunction({
+    methodName: 'get_pool',
+    args: { pool_id: id },
+  }).then((pool: PoolRPCView) => parsePool(pool, id));
+};
+
 export const getRefPools = async (
   page: number = 1,
   perPage: number = DEFAULT_PAGE_LIMIT
