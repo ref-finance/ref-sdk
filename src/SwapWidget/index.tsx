@@ -104,6 +104,8 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const tokens = useTokensIndexer({ extraTokenList, AccountId });
 
+  console.log(tokens, 'tokens swap ');
+
   const balances = useTokenBalnces(tokens, AccountId);
 
   const [refreshTrigger, setRreshTrigger] = useState<boolean>(false);
@@ -124,8 +126,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   }, [tokenIn]);
 
   useEffect(() => {
-    console.log(defaultTokenIn);
-
     if (defaultTokenIn) {
       ftGetTokenMetadata(defaultTokenIn).then(setTokenIn);
     }

@@ -974,10 +974,7 @@ export const TokenSelector = ({
 
     const searchValueLower = searchValue.toLowerCase();
 
-    return (
-      token.symbol?.toLowerCase().includes(searchValueLower) ||
-      token.name?.toLowerCase().includes(searchValueLower)
-    );
+    return token.symbol?.toLowerCase().includes(searchValueLower) || false;
   };
 
   return (
