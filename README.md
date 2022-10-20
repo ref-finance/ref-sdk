@@ -43,6 +43,168 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
 }
 ```
 
+## Swap Widget
+
+A QuickStart Ref Swap component.
+
+### Props
+
+```typescript
+export interface SwapWidgetProps {
+    theme?: Theme;
+    extraTokenList?: string[];
+    onSwap: (transactionsRef: Transaction[]) => void;
+    onDisConnect: () => void;
+    width: string;
+    height?: string;
+    enableSmartRouting?: boolean;
+    className?: string;
+    darkMode?: boolean;
+    connection: {
+        AccountId: string;
+        isSignedIn: boolean;
+    };
+    defaultTokenIn?: string;
+    defaultTokenOut?: string;
+    transactionState?: {
+        state: 'success' | 'fail' | null;
+        tx?: string;
+        detail?: string;
+    };
+    onConnect: () => void;
+}
+```
+
+- **theme:** widget theme for customization.
+- **extraTokenList:** introduce extra tokens with ref whitelist into default token list in the widget.
+- **onSwap:** Swap button triggers this function.
+- **width: ** width of widget component.
+- **height: ** height of widget component.
+- **enableSmartRouting: ** option to choose if enable smart routing in swap routes estimation.
+- **className: ** extra className added to widget component.
+- **darkMode:** if true, will automatically set theme to default dark mode.
+- **connection:** connection to wallets, input { AccountId:"", isSignedIn:false } if wallet not connected.
+- **defaultTokenIn: ** default token-in.
+- **defaultTokenOut: ** default token-out.
+- **transactionState:** entry to input transaction states after you send transactions.
+- **onDisConnect: **Disconnect button triggers this function.
+- **onConnect: ** Connect to Near Wallet button triggers this function.
+
+
+
+### Usage
+
+#### Theme
+
+```typescript
+export interface Theme {
+  container: string; // container background
+  buttonBg: string; // button background
+  primary: string; // primary theme color
+  secondary: string; // secondary theme color
+  borderRadius: string; // border radius
+  fontFamily: string; // font family
+  hover: string; // hovering color
+  active: string; // active color
+  secondaryBg: string; // secondary background color
+  borderColor: string; // border color
+  iconDefault: string; // default icon color
+  iconHover: string; // icon hovering color
+  refIcon?: string; // ref icon color, default to be black
+}
+
+export const defaultTheme: Theme = {
+  container: '#FFFFFF',
+  buttonBg: '#00C6A2',
+  primary: '#000000',
+  secondary: '#7E8A93',
+  borderRadius: '4px',
+  fontFamily: 'sans-serif',
+  hover: 'rgba(126, 138, 147, 0.2)',
+  active: 'rgba(126, 138, 147, 0.2)',
+  secondaryBg: '#F7F7F7',
+  borderColor: 'rgba(126, 138, 147, 0.2)',
+  iconDefault: '#7E8A93',
+  iconHover: '#B7C9D6',
+};
+
+export const defaultDarkModeTheme: Theme = {
+  container: '#26343E',
+  buttonBg: '#00C6A2',
+  primary: '#FFFFFF',
+  secondary: '#7E8A93',
+  borderRadius: '4px',
+  fontFamily: 'sans-serif',
+  hover: 'rgba(126, 138, 147, 0.2)',
+  active: 'rgba(126, 138, 147, 0.2)',
+  secondaryBg: 'rgba(0, 0, 0, 0.2)',
+  borderColor: 'rgba(126, 138, 147, 0.2)',
+  iconDefault: '#7E8A93',
+  iconHover: '#B7C9D6',
+  refIcon: 'white',
+};
+
+```
+
+
+
+#### React Component
+
+```typescript
+// an example of combining SwapWidget with wallet-selector
+
+import { SwapWidget } from '@ref_finance/ref-sdk';
+
+// please check on wallet-selector example about how to set WalletSelectorContext
+import { useWalletSelector } from './WalletSelectorContext';
+
+import { WalletSelectorTransactions, NotLoginError } from '@ref_finance/ref-sdk';
+
+export const Widget = ()=>{
+  
+  const { modal, selector, accountId } = useWalletSelector();
+  
+  const onSwap = async (transactionsRef: Transaction[]) => {
+    const wallet = await selector.wallet();
+    if (!accountId) throw NotLoginError;
+
+    wallet.signAndSendTransactions(
+      WalletSelectorTransactions(transactionsRef, accountId)
+    );
+  };
+  
+  const onConnect = () => {
+    modal.show();
+  };
+
+  const onDisConnect = async () => {
+    const wallet = await selector.wallet();
+    return await wallet.signOut();
+  };
+
+  return (
+    <SwapWidget
+      onSwap={onSwap}
+      onDisConnect={onDisConnect}
+      width={'400px'}
+      connection={{
+        AccountId: accountId || '',
+        isSignedIn: !!accountId,
+      }}
+      enableSmartRouting={true}
+      onConnect={onConnect}
+      defaultTokenIn={'wrap.testnet'}
+      defaultTokenOut={'ref.fakes.testnet'}
+    />
+  );
+}
+
+```
+
+
+
+
+
 ## Functions
 
 ### Tokens

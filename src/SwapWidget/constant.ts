@@ -12,19 +12,19 @@ export const DEFAULT_START_TOKEN_LIST = [
 ];
 
 export interface Theme {
-  container: string; // container bg
-  buttonBg: string; // button bg
-  primary: string; // primary color for text color
-  secondary: string; // color for some details
-  borderRadius: string; // custom border radius
+  container: string; // container background
+  buttonBg: string; // button background
+  primary: string; // primary theme color
+  secondary: string; // secondary theme color
+  borderRadius: string; // border radius
   fontFamily: string; // font family
-  hover: string; // interactive color, like hover, active, etc
-  active: string;
-  secondaryBg: string; // secondary bg color
+  hover: string; // hovering color
+  active: string; // active color
+  secondaryBg: string; // secondary background color
   borderColor: string; // border color
   iconDefault: string; // default icon color
-  iconHover: string; // icon color when hover
-  refIcon?: string;
+  iconHover: string; // icon hovering color
+  refIcon?: string; // ref icon color
 }
 
 export const defaultTheme: Theme = {
