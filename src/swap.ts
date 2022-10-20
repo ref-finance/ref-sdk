@@ -134,6 +134,8 @@ export const singlePoolSwap = ({
     throw NoPoolError;
   }
 
+  const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
+
   // const pools = simplePools.concat(stablePools);
 
   const simplePoolsThisPair = simplePools.filter(
@@ -181,10 +183,20 @@ export const singlePoolSwap = ({
 
   if (!maxStablePoolEstimate && !maxSimplePoolEstimate) throw NoPoolError;
 
+  maxSimplePoolEstimate &&
+    (maxSimplePoolEstimate.pool.partialAmountIn = parsedAmountIn);
+
+  maxStablePoolEstimate &&
+    (maxStablePoolEstimate.pool.partialAmountIn = parsedAmountIn);
+
   if (!maxStablePoolEstimate) {
+    maxSimplePoolEstimate &&
+      (maxSimplePoolEstimate.pool.partialAmountIn = parsedAmountIn);
+
     return maxSimplePoolEstimate;
-  } else if (!maxSimplePoolEstimate) return maxStablePoolEstimate;
-  else {
+  } else if (!maxSimplePoolEstimate) {
+    return maxStablePoolEstimate;
+  } else {
     return Number(maxSimplePoolEstimate?.estimate) >
       Number(maxStablePoolEstimate?.estimate)
       ? maxSimplePoolEstimate
@@ -515,7 +527,7 @@ export async function getHybridStableSmart(
         actions: [
           {
             ...estimate,
-            pool: { ...bestPool, parsedAmountIn: parsedAmountIn },
+            pool: { ...bestPool, partialAmountIn: parsedAmountIn },
             tokens: [tokenIn, tokenOut],
             inputToken: tokenIn.id,
             outputToken: tokenOut.id,
@@ -556,7 +568,10 @@ export async function getHybridStableSmart(
       outputToken: tokenMidMeta.id,
     };
 
-    estimate1.pool.partialAmountIn = parsedAmountIn;
+    estimate1.pool = {
+      ...estimate1.pool,
+      partialAmountIn: parsedAmountIn,
+    };
 
     const estimate2 = {
       ...(isStablePool(stablePoolsDetail, pool2.id)

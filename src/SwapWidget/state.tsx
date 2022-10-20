@@ -67,10 +67,13 @@ export const estimateValidator = (
   const tokenInId = swapTodos[0]?.inputToken;
   const tokenOutId = swapTodos[swapTodos.length - 1]?.outputToken;
 
-  const totalPartialAmountIn = swapTodos.reduce(
-    (acc, cur, i) => acc.plus(cur.pool.partialAmountIn || 0),
-    new Big(0)
-  );
+  const totalPartialAmountIn =
+    swapTodos.length === 0
+      ? new Big(swapTodos[0].pool.partialAmountIn || 0)
+      : swapTodos.reduce(
+          (acc, cur, i) => acc.plus(cur.pool.partialAmountIn || 0),
+          new Big(0)
+        );
 
   if (
     tokenInId !== tokenIn.id ||
@@ -368,13 +371,12 @@ export const useSwap = (
     getEstimate();
   }, [
     params.amountIn,
-    params.tokenIn,
-    params.tokenOut,
+    params.tokenIn?.id,
+    params.tokenOut?.id,
     refreshTrigger,
     poolFetchingState,
     isEstimating,
     forceEstimate,
-    params.simplePools,
   ]);
 
   useEffect(() => {

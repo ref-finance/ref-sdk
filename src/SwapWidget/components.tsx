@@ -1076,7 +1076,13 @@ export const TokenSelector = ({
         onClick={onSelect}
         balances={balances}
         starList={starList}
-        setStarList={setStarList}
+        setStarList={starList => {
+          setStarList(starList);
+          localStorage.setItem(
+            REF_WIDGET_STAR_TOKEN_LIST_KEY,
+            JSON.stringify(starList)
+          );
+        }}
         onDelete={onDelete}
       />
     </div>
