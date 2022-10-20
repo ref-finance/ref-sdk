@@ -362,7 +362,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
               position: 'relative',
               top: '8px',
             }}
-            size={20}
+            size={22}
             onClick={() => {
               onForceUpdate();
             }}
