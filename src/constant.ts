@@ -5,7 +5,10 @@ export const FEE_DIVISOR = 10000;
 export const STABLE_LP_TOKEN_DECIMALS = 18;
 export const RATED_POOL_LP_TOKEN_DECIMALS = 24;
 
-export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
+export function getConfig(
+  env: string | undefined = process.env.NEAR_ENV ||
+    process.env.REACT_APP_REF_SDK_ENV
+) {
   switch (env) {
     case 'mainnet':
       return {
