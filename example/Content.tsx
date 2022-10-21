@@ -1,13 +1,16 @@
 import * as React from 'react';
-import { SwapWidget } from '../dist/index';
+import { SwapWidget } from '../src/index';
 import { useWalletSelector } from './WalletSelectorContext';
 import '@near-wallet-selector/modal-ui/styles.css';
-import { Transaction } from '../dist/index';
+import { Transaction } from '../src/index';
+
 import {
   transformTransactions,
   WalletSelectorTransactions,
-} from '../dist/index';
-import { NotLoginError } from '../dist/index';
+} from '../src/index';
+import { NotLoginError } from '../src/index';
+import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
+import { Theme } from '../src/SwapWidget/constant';
 
 export const Content = () => {
   const { modal, selector, accountId } = useWalletSelector();
@@ -22,17 +25,43 @@ export const Content = () => {
   };
 
   const [swapState, setSwapState] = React.useState<'success' | 'fail' | null>(
-    'fail'
+    null
   );
+
+  const [tx, setTx] = React.useState<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    const errorCode = new URLSearchParams(window.location.search).get(
+      'errorCode'
+    );
+
+    const transactions = new URLSearchParams(window.location.search).get(
+      'transactionHashes'
+    );
+
+    const lastTX = transactions?.split(',').pop();
+
+    setTx(lastTX);
+
+    setSwapState(!!errorCode ? 'fail' : !!lastTX ? 'success' : null);
+
+    window.history.replaceState(
+      {},
+      '',
+      window.location.origin + window.location.pathname
+    );
+  }, []);
 
   const onSwap = async (transactionsRef: Transaction[]) => {
     const wallet = await selector.wallet();
 
     if (!accountId) throw NotLoginError;
 
-    wallet.signAndSendTransactions(
-      WalletSelectorTransactions(transactionsRef, accountId)
-    );
+    const WalletSelectorTransactions = {
+      transactions: transformTransactions(transactionsRef, accountId),
+    } as SignAndSendTransactionsParams;
+
+    return wallet.signAndSendTransactions(WalletSelectorTransactions);
   };
 
   return (
@@ -43,6 +72,12 @@ export const Content = () => {
       connection={{
         AccountId: accountId || '',
         isSignedIn: !!accountId,
+      }}
+      transactionState={{
+        state: swapState,
+        setState: setSwapState,
+        tx,
+        detail: '(success details show here)',
       }}
       enableSmartRouting={true}
       onConnect={onConnect}

@@ -22,6 +22,7 @@ export interface SwapWidgetProps {
   defaultTokenOut?: string;
   transactionState?: {
     state: 'success' | 'fail' | null;
+    setState: (state: 'success' | 'fail' | null) => void;
     tx?: string;
     detail?: string;
   };

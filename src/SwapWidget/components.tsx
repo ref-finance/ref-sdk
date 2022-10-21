@@ -1321,9 +1321,10 @@ export const Notification = ({
   detail,
   open,
   setOpen,
+  setState,
 }: {
-  state: 'pending' | 'success' | 'fail' | null;
-  setState: (state: 'pending' | 'success' | 'fail' | null) => void;
+  state?: 'success' | 'fail' | null;
+  setState?: (state: 'success' | 'fail' | null) => void;
   tx?: string;
   detail?: string;
 
@@ -1354,7 +1355,7 @@ export const Notification = ({
       }}
     >
       <div className="__ref-swap-widget-notification__icon">
-        {state === 'pending' && <Loading />}
+        {state === null && <Loading />}
         {state === 'fail' && <Warning />}
         {state === 'success' && <Success />}
       </div>
@@ -1373,7 +1374,9 @@ export const Notification = ({
           color: primary,
         }}
       >
-        {state === 'pending' && <p>Waiting for confirmation</p>}
+        {(state === null || state === undefined) && (
+          <p>Waiting for confirmation</p>
+        )}
         {state === 'fail' && !!tx && (
           <a
             className="text-primary font-semibold"
@@ -1389,20 +1392,21 @@ export const Notification = ({
           </a>
         )}
 
-        {detail}
+        {state === 'success' && detail}
       </div>
-      {state !== 'pending' && (
+      {state !== null && (
         <button
           className="__ref-swap-widget-notification__button __ref-swap-widget-button"
           style={{
             background: buttonBg,
             fontWeight: 700,
-            color: container,
+            color: 'white',
           }}
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
             setOpen(false);
+            setState && setState(null);
           }}
         >
           Close

@@ -71,6 +71,7 @@ export interface SwapWidgetProps {
     defaultTokenOut?: string;
     transactionState?: {
         state: 'success' | 'fail' | null;
+        setState: (state: 'success' | 'fail' | null) => void;
         tx?: string;
         detail?: string;
     };
@@ -90,6 +91,16 @@ export interface SwapWidgetProps {
 - **defaultTokenIn:** default token-in.
 - **defaultTokenOut:** default token-out.
 - **transactionState:** entry to input transaction states after you send transactions.
+  - **state:** denote if last transaction is failed or successfull.
+  - **setState**: used to change setState to interact with pop-up.
+  - **tx:** will add link to near explorer according to this tx.
+  - **detail:** you could input some tips to show on sucess pop-up.
+
+
+![image-20221021214215620](/Users/everythingismax/Library/Application Support/typora-user-images/image-20221021214215620.png)
+
+
+
 - **onDisConnect:** Disconnect button triggers this function.
 - **onConnect:** Connect to Near Wallet button triggers this function.
 
@@ -153,7 +164,7 @@ export const defaultDarkModeTheme: Theme = {
 
 ```typescript
 // an example of combining SwapWidget with wallet-selector
-
+import * as React from 'react';
 import { SwapWidget } from '@ref_finance/ref-sdk';
 
 // please check on wallet-selector example about how to set WalletSelectorContext
@@ -164,6 +175,32 @@ import { WalletSelectorTransactions, NotLoginError } from '@ref_finance/ref-sdk'
 export const Widget = ()=>{
   
   const { modal, selector, accountId } = useWalletSelector();
+  
+  const [swapState, setSwapState] = React.useState<'success' | 'fail' | null>(
+    null
+  );
+  const [tx, setTx] = React.useState<string | undefined>(undefined);
+  React.useEffect(() => {
+    const errorCode = new URLSearchParams(window.location.search).get(
+      'errorCode'
+    );
+
+    const transactions = new URLSearchParams(window.location.search).get(
+      'transactionHashes'
+    );
+
+    const lastTX = transactions?.split(',').pop();
+
+    setTx(lastTX);
+
+    setSwapState(!!errorCode ? 'fail' : !!lastTX ? 'success' : null);
+
+    window.history.replaceState(
+      {},
+      '',
+      window.location.origin + window.location.pathname
+    );
+  }, []);
   
   const onSwap = async (transactionsRef: Transaction[]) => {
     const wallet = await selector.wallet();
@@ -191,6 +228,12 @@ export const Widget = ()=>{
       connection={{
         AccountId: accountId || '',
         isSignedIn: !!accountId,
+      }}
+      transactionState={{
+        state: swapState,
+        setState: setSwapState,
+        tx,
+        detail: '(success details show here)',
       }}
       enableSmartRouting={true}
       onConnect={onConnect}

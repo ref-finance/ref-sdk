@@ -103,17 +103,15 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const [tokenOutBalance, setTokenOutBalance] = useState<string>('');
 
-  const [swapState, setSwapState] = useState<
-    'pending' | 'success' | 'fail' | null
-  >(null);
-
   const [notOpen, setNotOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!!transactionState?.state) {
+    if (!transactionState) return;
+
+    if (transactionState && transactionState.state !== null) {
       setNotOpen(true);
     }
-    setSwapState(transactionState?.state || null);
+    transactionState?.setState(transactionState?.state || null);
   }, [transactionState]);
 
   const [widgetRoute, setWidgetRoute] = useState<
@@ -222,7 +220,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setSwapState('pending');
     setNotOpen(true);
     makeSwap();
   };
@@ -418,8 +415,8 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             </div>
 
             <Notification
-              state={swapState}
-              setState={setSwapState}
+              state={transactionState?.state}
+              setState={transactionState?.setState}
               open={notOpen}
               setOpen={setNotOpen}
               tx={transactionState?.tx}
