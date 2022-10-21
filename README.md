@@ -97,7 +97,7 @@ export interface SwapWidgetProps {
   - **detail:** you could input some tips to show on sucess pop-up.
 
 
-![WechatIMG754](https://user-images.githubusercontent.com/50706666/197215817-ee3a70aa-58d9-426c-8edb-907e998b2f3b.jpeg)
+![IMG754](https://user-images.githubusercontent.com/50706666/197215817-ee3a70aa-58d9-426c-8edb-907e998b2f3b.jpeg)
 
 
 
