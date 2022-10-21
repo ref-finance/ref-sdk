@@ -1,5 +1,17 @@
-import { REF_FI_CONTRACT_ID, config } from './constant';
-import { keyStores, Near, WalletConnection } from 'near-api-js';
+import {
+  REF_FI_CONTRACT_ID,
+  config,
+  WRAP_NEAR_CONTRACT_ID,
+  NEAR_META_DATA,
+  getConfig,
+} from './constant';
+import {
+  keyStores,
+  Near,
+  providers,
+  WalletConnection,
+  utils,
+} from 'near-api-js';
 import { NoAccountIdFound, TokenNotExistError } from './error';
 import { getKeyStore } from './near';
 
@@ -8,6 +20,9 @@ import {
   FTStorageBalance,
   RefFiViewFunctionOptions,
 } from './types';
+import { AccountView } from 'near-api-js/lib/providers/provider';
+import { Transaction } from './types';
+import { ONE_YOCTO_NEAR, REF_TOKEN_ID, REF_META_DATA } from './constant';
 
 // export const keyStore = new keyStores.BrowserLocalStorageKeyStore();
 
@@ -48,14 +63,22 @@ export const ftGetStorageBalance = (
 };
 
 export const ftGetBalance = async (tokenId: string, AccountId: string) => {
-  if (!!AccountId) '0';
+  if (!AccountId) return '0';
+
+  if (tokenId === 'NEAR') {
+    return getAccountNearBalance(AccountId).catch(() => '0');
+  }
 
   return ftViewFunction(tokenId, {
     methodName: 'ft_balance_of',
     args: {
       account_id: AccountId,
     },
-  }).catch(() => '0');
+  })
+    .then(res => {
+      return res;
+    })
+    .catch(() => '0');
 };
 
 export const getTotalPools = async () => {
@@ -68,6 +91,8 @@ export const ftGetTokenMetadata = async (
   id: string,
   tag?: string
 ): Promise<TokenMetadata> => {
+  if (id === REF_TOKEN_ID) return REF_META_DATA;
+
   const metadata = await ftViewFunction(id, {
     methodName: 'ft_metadata',
   }).catch(() => {
@@ -109,4 +134,48 @@ export const getUserRegisteredTokens = async (
     methodName: 'get_user_whitelisted_tokens',
     args: { account_id: AccountId },
   });
+};
+
+export const getAccountNearBalance = async (accountId: string) => {
+  const provider = new providers.JsonRpcProvider({
+    url: getConfig().nodeUrl,
+  });
+
+  return provider
+    .query<AccountView>({
+      request_type: 'view_account',
+      finality: 'final',
+      account_id: accountId,
+    })
+    .then(data => data.amount);
+};
+
+export const nearDepositTransaction = (amount: string) => {
+  const transaction: Transaction = {
+    receiverId: WRAP_NEAR_CONTRACT_ID,
+    functionCalls: [
+      {
+        methodName: 'near_deposit',
+        args: {},
+        gas: '50000000000000',
+        amount,
+      },
+    ],
+  };
+
+  return transaction;
+};
+
+export const nearWithdrawTransaction = (amount: string) => {
+  const transaction: Transaction = {
+    receiverId: WRAP_NEAR_CONTRACT_ID,
+    functionCalls: [
+      {
+        methodName: 'near_withdraw',
+        args: { amount: utils.format.parseNearAmount(amount) },
+        amount: ONE_YOCTO_NEAR,
+      },
+    ],
+  };
+  return transaction;
 };

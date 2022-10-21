@@ -76,6 +76,7 @@ export const DetailView = ({
   fee,
   minReceived,
   amountIn,
+  amountOut,
 }: {
   tokenIn: TokenMetadata | undefined;
   tokenOut: TokenMetadata | undefined;
@@ -83,6 +84,7 @@ export const DetailView = ({
   fee: number;
   minReceived: string;
   amountIn: string;
+  amountOut: string;
 }) => {
   const theme = useContext(ThemeContext);
 
@@ -116,6 +118,8 @@ export const DetailView = ({
     iconHover,
   } = theme;
 
+  console.log(tokenIn, tokenOut, rate, fee, minReceived, amountIn, amountOut);
+
   return (
     <div
       className="__ref-widget-swap-detail-view __ref-swap-widget-col-flex-start"
@@ -144,23 +148,25 @@ export const DetailView = ({
           </span>
         </div>
 
-        <div>
-          {isRateReverse ? revertDisplayRate : displayRate}
+        {amountIn && amountOut && (
+          <div>
+            {isRateReverse ? revertDisplayRate : displayRate}
 
-          <RiExchangeFill
-            onClick={() => {
-              setIsRateReverse(!isRateReverse);
-            }}
-            size={16}
-            style={{
-              marginLeft: '4px',
-              cursor: 'pointer',
-              position: 'relative',
-              top: '2px',
-            }}
-            fill={iconDefault}
-          />
-        </div>
+            <RiExchangeFill
+              onClick={() => {
+                setIsRateReverse(!isRateReverse);
+              }}
+              size={16}
+              style={{
+                marginLeft: '4px',
+                cursor: 'pointer',
+                position: 'relative',
+                top: '2px',
+              }}
+              fill={iconDefault}
+            />
+          </div>
+        )}
       </div>
       {!showDetail ? null : (
         <>
@@ -173,9 +179,11 @@ export const DetailView = ({
             <div>Fee</div>
 
             <div>
-              {`${calculateFeeCharge(fee, amountIn)} ${toRealSymbol(
-                tokenIn.symbol
-              )}(${toPrecision(calculateFeePercent(fee).toString(), 2)}%)`}
+              {!amountIn
+                ? '0'
+                : `${calculateFeeCharge(fee, amountIn)} ${toRealSymbol(
+                    tokenIn.symbol
+                  )}(${toPrecision(calculateFeePercent(fee).toString(), 2)}%)`}
             </div>
           </div>
         </>
@@ -329,7 +337,9 @@ export const TokenAmount = (props: TokenAmountProps) => {
             <span
               style={{
                 whiteSpace: 'nowrap',
+                height: '26px',
               }}
+              className="__ref-swap-widget-row-flex-center"
             >
               Select Token
             </span>
@@ -1092,6 +1102,8 @@ export const TokenSelector = ({
 
       <div className="__ref-swap-widget_token-selector-star-tokens __ref-swap-widget-row-flex-center">
         {starList.map(id => {
+          if (!tokens || tokens.length === 0) return null;
+
           const token = tokens.find(token => token.id === id);
 
           return !token ? null : (

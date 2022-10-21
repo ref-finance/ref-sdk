@@ -3,6 +3,7 @@
   padding: 28px;
   padding-bottom: 16px;
   position: relative;
+  max-width: 90%;
 }
 
 .__ref-swap-widget-row-flex-center {

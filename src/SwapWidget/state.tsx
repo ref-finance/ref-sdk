@@ -5,7 +5,13 @@ import React, {
   createContext,
   ReactNode,
 } from 'react';
-import { ftGetBalance, ftGetTokenMetadata, getGlobalWhitelist } from '../ref';
+import {
+  ftGetBalance,
+  ftGetTokenMetadata,
+  getGlobalWhitelist,
+  nearDepositTransaction,
+  nearWithdrawTransaction,
+} from '../ref';
 import {
   EstimateSwapView,
   Pool,
@@ -40,6 +46,8 @@ import {
   getExpectedOutputFromSwapTodos,
 } from '../utils';
 import { getUserRegisteredTokens } from '../ref';
+import { WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from '../constant';
+import { scientificNotationToString } from '../utils';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -175,6 +183,16 @@ export const useTokensIndexer = ({
 
         return globalWhiteListTokens;
       })
+      .then(tokens => {
+        return tokens.map(t => {
+          return t.id === WRAP_NEAR_CONTRACT_ID
+            ? {
+                ...NEAR_META_DATA,
+                id: t.id,
+              }
+            : t;
+        });
+      })
       .then(setTokens);
   }, [AccountId, extraTokenList]);
 
@@ -248,6 +266,8 @@ export const useSwap = (
     ...swapParams
   } = params;
 
+  const { tokenIn, tokenOut, amountIn } = params;
+
   const [estimates, setEstimates] = useState<EstimateSwapView[]>([]);
 
   const [canSwap, setCanSwap] = useState(false);
@@ -289,6 +309,26 @@ export const useSwap = (
       slippageTolerance,
       AccountId: AccountId || '',
     });
+    if (tokenIn && tokenIn.id === WRAP_NEAR_CONTRACT_ID) {
+      transactionsRef.unshift(nearDepositTransaction(amountIn));
+    }
+    if (tokenOut && tokenOut.id === WRAP_NEAR_CONTRACT_ID) {
+      let outEstimate = new Big(0);
+      const routes = separateRoutes(estimates, tokenOut.id);
+
+      const bigEstimate = routes.reduce((acc, cur) => {
+        const curEstimate = cur[cur.length - 1].estimate;
+        return acc.plus(curEstimate);
+      }, outEstimate);
+
+      const minAmountOut = percentLess(
+        slippageTolerance,
+
+        scientificNotationToString(bigEstimate.toString())
+      );
+
+      transactionsRef.push(nearWithdrawTransaction(minAmountOut));
+    }
 
     onSwap(transactionsRef);
   };
@@ -310,6 +350,7 @@ export const useSwap = (
       !params.tokenIn
     ) {
       setAmountOut('');
+      setEstimates([]);
       return;
     }
 
@@ -435,7 +476,11 @@ export const useTokenBalnces = (tokens: TokenMetadata[], AccountId: string) => {
 
     const ids = validTokens.map(token => token.id);
 
-    Promise.all(ids.map(id => ftGetBalance(id, AccountId))).then(balances => {
+    Promise.all(
+      ids.map(id =>
+        ftGetBalance(id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : id, AccountId)
+      )
+    ).then(balances => {
       const balancesMap = validTokens.reduce((acc, token, index) => {
         return {
           ...acc,

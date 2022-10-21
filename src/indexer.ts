@@ -1,4 +1,4 @@
-import { config } from './constant';
+import { config, WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from './constant';
 import { REF_WIDGET_ALL_TOKENS_LIST_KEY } from './SwapWidget/constant';
 
 export const getTokenPriceList = async (): Promise<any> => {
@@ -28,11 +28,12 @@ export const getTokens = async (reload?: boolean) => {
         .then(tokens => {
           const newTokens = Object.values(tokens).reduce(
             (acc: any, cur: any, i) => {
+              const id = Object.keys(tokens)[i];
               return {
                 ...acc,
-                [Object.keys(tokens)[i]]: {
+                [id]: {
                   ...cur,
-                  id: Object.keys(tokens)[i],
+                  id,
                 },
               };
             },

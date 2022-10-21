@@ -10,7 +10,6 @@ import {
   TokenPriceContextProvider,
   useAllTokens,
 } from './state';
-import { REF_TOKEN_ID, REF_META_DATA, WNEAR_META_DATA } from '../constant';
 import { ftGetBalance, ftGetTokenMetadata } from '../ref';
 import { getAccountName, toReadableNumber, toPrecision } from '../utils';
 import {
@@ -31,7 +30,17 @@ import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon } from './components';
 import Big from 'big.js';
-import { defaultTheme, defaultDarkModeTheme } from './constant';
+import {
+  defaultTheme,
+  defaultDarkModeTheme,
+  REF_FI_SWAP_IN_KEY,
+  REF_FI_SWAP_OUT_KEY,
+} from './constant';
+import {
+  WRAP_NEAR_CONTRACT_ID,
+  NEAR_META_DATA,
+  REF_TOKEN_ID,
+} from '../constant';
 
 export const SwapWidget = (props: SwapWidgetProps) => {
   const {
@@ -52,6 +61,10 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   } = props;
 
   const curTheme = theme || (darkMode ? defaultDarkModeTheme : defaultTheme);
+
+  const STORAGED_TOKEN_IN = localStorage.getItem(REF_FI_SWAP_IN_KEY);
+
+  const STORAGED_TOKEN_OUT = localStorage.getItem(REF_FI_SWAP_OUT_KEY);
 
   const {
     container,
@@ -74,6 +87,16 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   const isSignedIn = !!AccountId && isSignedInProp;
 
   const [tokenIn, setTokenIn] = useState<TokenMetadata>();
+
+  const handleSetTokenIn = (token: TokenMetadata) => {
+    setTokenIn(token);
+    localStorage.setItem(REF_FI_SWAP_IN_KEY, token.id);
+  };
+
+  const handleSetTokenOut = (token: TokenMetadata) => {
+    setTokenOut(token);
+    localStorage.setItem(REF_FI_SWAP_OUT_KEY, token.id);
+  };
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
   const [tokenInBalance, setTokenInBalance] = useState<string>('');
@@ -121,27 +144,53 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   const [hoverAccount, setHoverAccount] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!tokenIn) return;
-    ftGetBalance(tokenIn.id, AccountId).then(available => {
-      setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
-    });
-  }, [tokenIn]);
+    const defaultIn =
+      STORAGED_TOKEN_IN || defaultTokenIn || WRAP_NEAR_CONTRACT_ID;
+
+    const defaultOut = STORAGED_TOKEN_OUT || defaultTokenOut || REF_TOKEN_ID;
+
+    if (defaultIn) {
+      if (defaultIn === WRAP_NEAR_CONTRACT_ID || defaultIn === 'NEAR') {
+        handleSetTokenIn({
+          ...NEAR_META_DATA,
+          id: WRAP_NEAR_CONTRACT_ID,
+        });
+      } else {
+        ftGetTokenMetadata(defaultIn).then(handleSetTokenIn);
+      }
+    }
+    if (defaultOut) {
+      if (defaultOut === WRAP_NEAR_CONTRACT_ID || defaultOut === 'NEAR') {
+        handleSetTokenOut({
+          ...NEAR_META_DATA,
+          id: WRAP_NEAR_CONTRACT_ID,
+        });
+      } else {
+        ftGetTokenMetadata(defaultOut).then(handleSetTokenOut);
+      }
+    }
+  }, [defaultTokenIn, defaultTokenOut, STORAGED_TOKEN_IN, STORAGED_TOKEN_OUT]);
 
   useEffect(() => {
-    if (defaultTokenIn) {
-      ftGetTokenMetadata(defaultTokenIn).then(setTokenIn);
-    }
-    if (defaultTokenOut) {
-      ftGetTokenMetadata(defaultTokenOut).then(setTokenOut);
-    }
-  }, [defaultTokenIn, defaultTokenOut]);
+    if (!tokenIn) return;
+
+    ftGetBalance(
+      tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id,
+      AccountId
+    ).then(available => {
+      setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
+    });
+  }, [tokenIn, AccountId]);
 
   useEffect(() => {
     if (!tokenOut) return;
-    ftGetBalance(tokenOut.id, AccountId).then(available => {
+    ftGetBalance(
+      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id,
+      AccountId
+    ).then(available => {
       setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
     });
-  }, [tokenOut]);
+  }, [tokenOut, AccountId]);
 
   const {
     amountOut,
@@ -258,7 +307,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               onChangeAmount={setAmountIn}
               onSelectToken={() => {
                 setWidgetRoute('token-selector-in');
-                setTokenIn(tokenIn);
               }}
             />
 
@@ -275,8 +323,8 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 className="__ref-swap-widget-exchange-button-icon"
                 size={30}
                 onClick={() => {
-                  setTokenIn(tokenOut);
-                  setTokenOut(tokenIn);
+                  tokenOut && handleSetTokenIn(tokenOut);
+                  tokenIn && handleSetTokenOut(tokenIn);
                   setAmountIn('1');
                   setAmountOut('');
                 }}
@@ -290,14 +338,13 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               price={!tokenOut ? null : tokenPriceList?.[tokenOut.id]?.price}
               onSelectToken={() => {
                 setWidgetRoute('token-selector-out');
-                setTokenOut(tokenOut);
               }}
               onForceUpdate={() => {
                 setRreshTrigger(!refreshTrigger);
               }}
               poolFetchingState={poolFetchingState}
             />
-            {!swapError && (
+            {!swapError && amountIn && amountOut && (
               <DetailView
                 fee={fee}
                 rate={rate}
@@ -305,6 +352,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 minReceived={minAmountOut}
                 tokenIn={tokenIn}
                 tokenOut={tokenOut}
+                amountOut={amountOut}
               />
             )}
 
@@ -386,7 +434,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             tokens={tokens}
             width={width}
             onSelect={token => {
-              setTokenIn(token);
+              handleSetTokenIn(token);
               setWidgetRoute('swap');
             }}
             onClose={() => setWidgetRoute('swap')}
@@ -400,7 +448,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             balances={balances}
             width={width}
             onSelect={token => {
-              setTokenOut(token);
+              handleSetTokenOut(token);
               setWidgetRoute('swap');
             }}
             onClose={() => setWidgetRoute('swap')}

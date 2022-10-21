@@ -4,6 +4,10 @@ export const REF_WIDGET_STAR_TOKEN_LIST_KEY =
 export const REF_WIDGET_ALL_TOKENS_LIST_KEY =
   'REF_WIDGET_ALL_TOKENS_LIST_VALUE';
 
+export const REF_FI_SWAP_IN_KEY = 'REF_FI_SWAP_IN_VALUE';
+
+export const REF_FI_SWAP_OUT_KEY = 'REF_FI_SWAP_Out_VALUE';
+
 export const DEFAULT_START_TOKEN_LIST = [
   'wrap.testnet',
   'ref.fakes.testnet',
