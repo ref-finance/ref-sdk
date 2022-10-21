@@ -10,10 +10,13 @@ For npm Developers: `npm install @ref_finance/ref-sdk`
 
 ## Initialization
 
-Ref SDK identifies env variable NEAR_ENV to get global configuration. Suggest to use `export NEAR_ENV=mainnet` or `export NEAR_ENV=testnet` to set up NEAR network.
+Ref SDK identifies env variable NEAR_ENV or REACT_APP_REF_SDK_ENV to set up NEAR network configuration.
 
 ```typescript
-export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
+export function getConfig(
+  env: string | undefined = process.env.NEAR_ENV ||
+    process.env.REACT_APP_REF_SDK_ENV
+) {
   switch (env) {
     case 'mainnet':
       return {
