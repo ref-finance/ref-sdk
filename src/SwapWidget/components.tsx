@@ -1052,6 +1052,7 @@ export const TokenSelector = ({
           onChange={evt => handleSearch(evt.target.value)}
           style={{
             fontSize: '14px',
+            color: primary,
           }}
         />
       </div>
