@@ -492,6 +492,7 @@ export const SlippageSelector = ({
       onClick={e => e.stopPropagation()}
       style={{
         background: container,
+        border: `1px solid ${borderColor}`,
       }}
     >
       <span
@@ -534,6 +535,7 @@ export const SlippageSelector = ({
             onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
               width: '100%',
+              color: primary,
             }}
             className="__ref-swap-widget-input-class"
           />
