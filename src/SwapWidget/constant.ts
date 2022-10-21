@@ -38,8 +38,8 @@ export const defaultTheme: Theme = {
   active: 'rgba(126, 138, 147, 0.2)',
   secondaryBg: '#F7F7F7',
   borderColor: 'rgba(126, 138, 147, 0.2)',
-  iconDefault: '#7E8A93',
-  iconHover: '#B7C9D6',
+  iconDefault: 'rgba(126, 138, 147, 1)',
+  iconHover: 'rgba(62, 62, 62, 1)',
 };
 
 export const defaultDarkModeTheme: Theme = {
@@ -53,7 +53,7 @@ export const defaultDarkModeTheme: Theme = {
   active: 'rgba(126, 138, 147, 0.2)',
   secondaryBg: 'rgba(0, 0, 0, 0.2)',
   borderColor: 'rgba(126, 138, 147, 0.2)',
-  iconDefault: '#7E8A93',
-  iconHover: '#B7C9D6',
+  iconDefault: 'rgba(126, 138, 147, 1)',
+  iconHover: 'rgba(183, 201, 214, 1)',
   refIcon: 'white',
 };

@@ -31,6 +31,12 @@ import { AiOutlinePushpin } from '@react-icons/all-files/ai/AiOutlinePushpin';
 
 import { RiExchangeFill } from '@react-icons/all-files/ri/RiExchangeFill';
 
+import { IoWarning } from '@react-icons/all-files/io5/IoWarning';
+
+import { IoCloseOutline } from '@react-icons/all-files/io5/IoCloseOutline';
+
+import { AiOutlineClose } from '@react-icons/all-files/ai/AiOutlineClose';
+
 import './style.css';
 import {
   getAccountName,
@@ -187,7 +193,7 @@ export const HalfAndMaxAmount = ({
   max: string;
   token: TokenMetadata;
   onChangeAmount: (amount: string) => void;
-  amount?: string;
+  amount: string;
 }) => {
   const halfValue = percentOfBigNumber(50, max, token.decimals);
 
@@ -430,6 +436,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
               token={token}
               max={balance}
               onChangeAmount={handleChange}
+              amount={amount}
             />
           )}
         </div>
@@ -451,6 +458,8 @@ export const SlippageSelector = ({
 }) => {
   const [autoHover, setAutoHover] = useState<boolean>(false);
 
+  const [invalid, setInValid] = useState<boolean>(false);
+
   const theme = useContext(ThemeContext);
   const {
     container,
@@ -469,6 +478,13 @@ export const SlippageSelector = ({
 
   const handleChange = (amount: string) => {
     onChangeSlippageTolerance(Number(amount));
+
+    if (Number(amount) > 0 && Number(amount) < 100) {
+      setInValid(false);
+    } else {
+      setInValid(true);
+    }
+
     if (ref.current) {
       ref.current.value = amount;
     }
@@ -512,7 +528,7 @@ export const SlippageSelector = ({
           className={`__ref-swap-widget-row-flex-center
         __ref-swap-widget_slippage_selector_input_container`}
           style={{
-            border: `1px solid ${borderColor}`,
+            border: `1px solid ${invalid ? '#DE5050' : borderColor}`,
             borderRadius,
           }}
         >
@@ -535,7 +551,7 @@ export const SlippageSelector = ({
             onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
               width: '100%',
-              color: primary,
+              color: invalid ? '#DE5050' : primary,
             }}
             className="__ref-swap-widget-input-class"
           />
@@ -561,6 +577,25 @@ export const SlippageSelector = ({
           Auto
         </button>
       </div>
+      {invalid && (
+        <div
+          className=" text-xs py-3"
+          style={{
+            color: '#DE5050',
+            fontSize: '12px',
+            padding: '10px 0px',
+          }}
+        >
+          <IoWarning
+            className=""
+            style={{
+              marginRight: '4px',
+            }}
+          />
+
+          {'The slippage tolerance is invalid.'}
+        </div>
+      )}
     </div>
   );
 };
@@ -611,22 +646,31 @@ const StarToken = ({
         border: `1px solid ${borderColor}`,
       }}
     >
-      <span
-        style={{
-          position: 'absolute',
-          top: '-4px',
-          right: '-4px',
-        }}
-        onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-          onDelete(token);
-        }}
-        onMouseEnter={() => setHoverClose(true)}
-        onMouseLeave={() => setHoverClose(false)}
-      >
-        <IoCloseCircle fill={hoverClose ? iconHover : iconDefault} />
-      </span>
+      {hoverIcon && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '-4px',
+            right: '-4px',
+            boxShadow: '0px 0px 2px rgba(0, 0, 0, 0.25)',
+            border: `1px solid ${borderColor}`,
+            borderRadius: '100%',
+            width: '16px',
+            height: '16px',
+            background: '#E3E3E3',
+          }}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete(token);
+          }}
+          onMouseEnter={() => setHoverClose(true)}
+          onMouseLeave={() => setHoverClose(false)}
+        >
+          <IoCloseOutline stroke={hoverClose ? 'black' : '#7e8a93'} />
+        </div>
+      )}
+
       <img
         src={token.icon}
         alt=""
@@ -634,6 +678,7 @@ const StarToken = ({
         style={{
           height: '26px',
           width: '26px',
+          marginRight: '2px',
         }}
       />
 
@@ -874,24 +919,12 @@ export const TokenListTable = ({
   const [hoverIndex, setHoverIndex] = useState(-1);
 
   const tokenSorting = (a: TokenMetadata, b: TokenMetadata) => {
-    const v1 = starList.includes(a.id);
-    const v2 = starList.includes(b.id);
-
     const b1 = balances[a.id];
     const b2 = balances[b.id];
 
-    if (v1 && v2) {
-      if (currentSort === 'up') {
-        return Number(b1) - Number(b2);
-      } else return Number(b2) - Number(b1);
-    } else {
-      if (v1) return -1;
-      else if (v2) return 1;
-      else
-        return currentSort === 'up'
-          ? Number(b1) - Number(b2)
-          : Number(b2) - Number(b1);
-    }
+    if (currentSort === 'up') {
+      return Number(b1) - Number(b2);
+    } else return Number(b2) - Number(b1);
   };
 
   return !tokens || tokens.length == 0 ? null : (
@@ -1346,22 +1379,23 @@ export const Notification = ({
 
         {detail}
       </div>
-
-      <button
-        className="__ref-swap-widget-notification__button __ref-swap-widget-button"
-        style={{
-          background: buttonBg,
-          fontWeight: 700,
-          color: container,
-        }}
-        onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen(false);
-        }}
-      >
-        Close
-      </button>
+      {state !== 'pending' && (
+        <button
+          className="__ref-swap-widget-notification__button __ref-swap-widget-button"
+          style={{
+            background: buttonBg,
+            fontWeight: 700,
+            color: container,
+          }}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(false);
+          }}
+        >
+          Close
+        </button>
+      )}
     </div>
   );
 };
