@@ -262,3 +262,20 @@ button.__ref-swap-widget-button {
   background: #00c6a2;
   border-radius: 8px;
 }
+
+.__ref-swap-widget-swap_routes {
+  border-radius: 12px;
+  padding: 8px 4px 8px 12px;
+  width: calc(100% - 20px);
+}
+
+.__ref-swap-widget-valueStyle {
+  background-image: -webkit-linear-gradient(left, #00ffd1, #00ffd1, #8c78ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.__ref-swap-widget-swap_route_row {
+  justify-content: space-between;
+  margin-bottom: 4px;
+}

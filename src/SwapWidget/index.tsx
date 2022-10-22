@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { SwapWidgetProps } from './types';
 import { TokenMetadata } from '../types';
@@ -11,7 +11,12 @@ import {
   useAllTokens,
 } from './state';
 import { ftGetBalance, ftGetTokenMetadata } from '../ref';
-import { getAccountName, toReadableNumber, toPrecision } from '../utils';
+import {
+  getAccountName,
+  toReadableNumber,
+  toPrecision,
+  getPriceImpact,
+} from '../utils';
 import {
   Slider,
   SlippageSelector,
@@ -33,8 +38,8 @@ import Big from 'big.js';
 import {
   defaultTheme,
   defaultDarkModeTheme,
-  REF_FI_SWAP_IN_KEY,
-  REF_FI_SWAP_OUT_KEY,
+  REF_WIDGET_SWAP_IN_KEY,
+  REF_WIDGET_SWAP_OUT_KEY,
 } from './constant';
 import {
   WRAP_NEAR_CONTRACT_ID,
@@ -62,9 +67,9 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const curTheme = theme || (darkMode ? defaultDarkModeTheme : defaultTheme);
 
-  const STORAGED_TOKEN_IN = localStorage.getItem(REF_FI_SWAP_IN_KEY);
+  const STORAGED_TOKEN_IN = localStorage.getItem(REF_WIDGET_SWAP_IN_KEY);
 
-  const STORAGED_TOKEN_OUT = localStorage.getItem(REF_FI_SWAP_OUT_KEY);
+  const STORAGED_TOKEN_OUT = localStorage.getItem(REF_WIDGET_SWAP_OUT_KEY);
 
   const {
     container,
@@ -90,12 +95,12 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const handleSetTokenIn = (token: TokenMetadata) => {
     setTokenIn(token);
-    localStorage.setItem(REF_FI_SWAP_IN_KEY, token.id);
+    localStorage.setItem(REF_WIDGET_SWAP_IN_KEY, token.id);
   };
 
   const handleSetTokenOut = (token: TokenMetadata) => {
     setTokenOut(token);
-    localStorage.setItem(REF_FI_SWAP_OUT_KEY, token.id);
+    localStorage.setItem(REF_WIDGET_SWAP_OUT_KEY, token.id);
   };
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
@@ -216,6 +221,19 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     refreshTrigger,
     poolFetchingState,
   });
+
+  const priceImpact = useMemo(() => {
+    if (!tokenIn || !tokenOut) return '0';
+
+    return getPriceImpact({
+      estimates,
+      tokenIn,
+      tokenOut,
+      amountIn,
+      amountOut,
+      stablePools: allStablePools,
+    });
+  }, [estimates, tokenIn, tokenOut, amountIn, amountOut, allStablePools]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -350,6 +368,8 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 tokenIn={tokenIn}
                 tokenOut={tokenOut}
                 amountOut={amountOut}
+                priceImpact={priceImpact}
+                estimates={estimates}
               />
             )}
 

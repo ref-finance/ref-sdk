@@ -24,6 +24,13 @@ import {
   //@ts-ignore
 } from './smartRoutingLogic.js';
 
+export enum PoolMode {
+  PARALLEL = 'parallel swap',
+  SMART = 'smart routing',
+  SMART_V2 = 'stableSmart',
+  STABLE = 'stable swap',
+}
+
 export interface SwapParams {
   tokenIn: TokenMetadata;
   tokenOut: TokenMetadata;
@@ -488,6 +495,7 @@ export async function getHybridStableSmart(
                     amountIn,
                     pool: tmpPool1,
                   })),
+              status: PoolMode.SMART,
             };
 
             const estimate2 = {
@@ -504,6 +512,7 @@ export async function getHybridStableSmart(
                     pool: tmpPool2,
                     amountIn: estimate1.estimate,
                   })),
+              status: PoolMode.SMART,
             };
 
             return Number(estimate2.estimate);
@@ -527,6 +536,8 @@ export async function getHybridStableSmart(
         actions: [
           {
             ...estimate,
+            status: PoolMode.STABLE,
+
             pool: { ...bestPool, partialAmountIn: parsedAmountIn },
             tokens: [tokenIn, tokenOut],
             inputToken: tokenIn.id,
@@ -566,6 +577,7 @@ export async function getHybridStableSmart(
       tokens: [tokenIn, tokenMidMeta, tokenOut],
       inputToken: tokenIn.id,
       outputToken: tokenMidMeta.id,
+      status: PoolMode.SMART,
     };
 
     estimate1.pool = {
@@ -591,6 +603,7 @@ export async function getHybridStableSmart(
       tokens: [tokenIn, tokenMidMeta, tokenOut],
       inputToken: tokenMidMeta.id,
       outputToken: tokenOut.id,
+      status: PoolMode.SMART,
     };
 
     return { actions: [estimate1, estimate2], estimate: estimate2.estimate };
@@ -627,7 +640,9 @@ export const estimateSwap = async ({
     return [
       {
         ...estimate,
+        status: PoolMode.PARALLEL,
         pool: { ...estimate?.pool, partialAmountIn: parsedAmountIn },
+        tokens: [tokenIn, tokenOut],
       },
     ] as EstimateSwapView[];
   } else {

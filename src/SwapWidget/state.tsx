@@ -104,7 +104,7 @@ export const useAllTokens = ({ reload }: { reload?: boolean }) => {
       setTokensLoading(false);
     };
     fetchTokens();
-  }, []);
+  }, [reload]);
 
   return { tokens, tokensLoading };
 };

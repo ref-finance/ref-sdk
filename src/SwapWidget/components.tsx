@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { TokenMetadata } from '../types';
+import React, { useState, useEffect, useContext, useRef, useMemo } from 'react';
+import { TokenMetadata, EstimateSwapView, Pool } from '../types';
 import {
   ThemeContext,
   useTokenPriceList,
@@ -16,8 +16,6 @@ import { FiChevronUp } from '@react-icons/all-files/fi/FiChevronUp';
 import { FaSearch } from '@react-icons/all-files/fa/FaSearch';
 
 import { RiRefreshLine } from '@react-icons/all-files/ri/RiRefreshLine';
-
-import { IoCloseCircle } from '@react-icons/all-files/io5/IoCloseCircle';
 
 import { TiArrowSortedUp } from '@react-icons/all-files/ti/TiArrowSortedUp';
 
@@ -56,6 +54,14 @@ import {
 } from './constant';
 import Big from 'big.js';
 import { config, FEE_DIVISOR, TokenLinks } from '../constant';
+import {
+  scientificNotationToString,
+  percent,
+  getPoolAllocationPercents,
+} from '../utils';
+import { REF_WIDGET_SWAP_DETAIL_KEY } from './constant';
+import { PoolMode } from '../swap';
+import { isMobile, separateRoutes } from '../utils';
 
 interface TokenAmountProps {
   balance?: string;
@@ -69,6 +75,200 @@ interface TokenAmountProps {
   poolFetchingState?: 'loading' | 'end';
 }
 
+export const getPriceImpact = (
+  value: string,
+  tokenIn: TokenMetadata,
+  tokenInAmount: string
+) => {
+  const textColor =
+    Number(value) <= 1
+      ? 'text-greenLight'
+      : 1 < Number(value) && Number(value) <= 2
+      ? 'text-warn'
+      : 'text-error';
+
+  const displayValue = scientificNotationToString(
+    multiply(tokenInAmount || '0', percent(value, '100'))
+  );
+
+  const tokenInInfo =
+    Number(displayValue) > 0 && Number(displayValue) < 0.001
+      ? '< 0.001'
+      : Number(displayValue) <= 0
+      ? ` / 0 ${toRealSymbol(tokenIn.symbol)}`
+      : ` / -${toInternationalCurrencySystemLongString(displayValue, 3)} ${
+          tokenIn.symbol
+        }`;
+
+  if (Number(value) < 0.01)
+    return (
+      <span className="text-greenLight">
+        {`< -0.01%`}
+        {tokenInInfo}
+      </span>
+    );
+
+  if (Number(value) > 1000)
+    return (
+      <span className="text-error">
+        {`< -1000%`}
+        {tokenInInfo}
+      </span>
+    );
+
+  return (
+    <span className={`${textColor} font-sans`}>
+      {`≈ -${toPrecision(value, 2)}%`}
+      {tokenInInfo}
+    </span>
+  );
+};
+
+export const SmartRouteV2 = ({
+  tokens,
+  p,
+  pools,
+}: {
+  tokens: TokenMetadata[];
+  p: string;
+  pools: Pool[];
+}) => {
+  const theme = useContext(ThemeContext);
+  const {
+    container,
+    buttonBg,
+    primary,
+    secondary,
+    borderRadius,
+    fontFamily,
+    hover,
+    active,
+    secondaryBg,
+    borderColor,
+    iconDefault,
+    iconHover,
+  } = theme;
+
+  const ParaTokenFrom = ({
+    tokenIn,
+    p,
+  }: {
+    tokenIn: TokenMetadata;
+    p: string;
+  }) => {
+    return (
+      <div
+        className="__ref-swap-widget-row-flex-center "
+        style={{
+          width: '60px',
+        }}
+      >
+        <span
+          className=" "
+          style={{
+            marginRight: '4px',
+          }}
+        >
+          {p}%
+        </span>
+        <span className="">
+          <Icon token={tokenIn} />
+        </span>
+      </div>
+    );
+  };
+  const Icon = ({ token }: { token: TokenMetadata }) => {
+    if (token.icon) {
+      return (
+        <img
+          src={token.icon}
+          alt=""
+          style={{
+            borderRadius: '100%',
+            height: '16px',
+            width: '16px',
+          }}
+        />
+      );
+    } else {
+      return (
+        <div
+          style={{
+            borderRadius: '100%',
+            height: '16px',
+            width: '16px',
+          }}
+        />
+      );
+    }
+  };
+  const Hub = ({ token, poolId }: { token: TokenMetadata; poolId: number }) => {
+    return (
+      <div
+        className={`__ref-swap-widget-row-flex-center`}
+        style={{
+          width: '62px',
+          height: '22px',
+        }}
+      >
+        <div
+          className={`w-full flex items-center justify-start pl-2 `}
+          style={{
+            marginRight: '4px',
+          }}
+        >
+          <span className="text-gray-400">{`#${poolId}`}</span>
+        </div>
+        <Icon token={token} />
+      </div>
+    );
+  };
+
+  if (tokens.length === 3) {
+    return (
+      <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap_route_row">
+        {/* <Hub token={tokens[0]} /> */}
+
+        <ParaTokenFrom tokenIn={tokens[0]} p={p} />
+        <div
+          className=""
+          style={{
+            position: 'relative',
+            bottom: '1px',
+          }}
+        >
+          <ArrowRight />
+        </div>
+
+        <Hub token={tokens[1]} poolId={pools?.[0]?.id} />
+        <div
+          className="px-3"
+          style={{
+            position: 'relative',
+            bottom: '1px',
+          }}
+        >
+          <ArrowRight />
+        </div>
+
+        <Hub token={tokens[2]} poolId={pools?.[1]?.id} />
+      </div>
+    );
+  } else if (tokens.length === 2) {
+    return (
+      <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap_route_row">
+        <ParaTokenFrom tokenIn={tokens[0]} p={p} />
+        <div className="px-3">
+          <ArrowRight />
+        </div>
+        <Hub token={tokens[1]} poolId={pools?.[0]?.id} />
+      </div>
+    );
+  } else {
+    return null;
+  }
+};
+
 export const DetailView = ({
   tokenIn,
   tokenOut,
@@ -77,6 +277,8 @@ export const DetailView = ({
   minReceived,
   amountIn,
   amountOut,
+  priceImpact,
+  estimates,
 }: {
   tokenIn: TokenMetadata | undefined;
   tokenOut: TokenMetadata | undefined;
@@ -85,12 +287,35 @@ export const DetailView = ({
   minReceived: string;
   amountIn: string;
   amountOut: string;
+  priceImpact: string;
+  estimates: EstimateSwapView[];
 }) => {
   const theme = useContext(ThemeContext);
 
-  const [showDetail, setShowDetail] = useState(false);
+  const storagedOpen = !!localStorage.getItem(REF_WIDGET_SWAP_DETAIL_KEY);
+
+  const [showDetail, setShowDetail] = useState(storagedOpen || false);
   const [isRateReverse, setIsRateReverse] = useState(false);
 
+  const tokensPerRoute = estimates
+    .filter(swap => swap.inputToken === tokenIn?.id)
+    .map(swap => swap.tokens);
+
+  const identicalRoutes = separateRoutes(
+    estimates,
+    estimates[estimates.length - 1]?.outputToken || ''
+  );
+
+  const pools = identicalRoutes.map(r => r[0]).map(hub => hub.pool);
+  const percents = useMemo(() => {
+    if (!pools || pools.length === 0) return [];
+    return getPoolAllocationPercents(pools);
+  }, [pools]);
+
+  const priceImpactDisplay = useMemo(() => {
+    if (!priceImpact || !tokenIn || !amountIn) return null;
+    return getPriceImpact(priceImpact, tokenIn, amountIn);
+  }, [priceImpact, tokenIn, amountIn]);
   if (!tokenIn || !tokenOut) return null;
 
   const displayRate = `1 ${toRealSymbol(tokenIn.symbol)} ≈ ${
@@ -118,8 +343,6 @@ export const DetailView = ({
     iconHover,
   } = theme;
 
-  console.log(tokenIn, tokenOut, rate, fee, minReceived, amountIn, amountOut);
-
   return (
     <div
       className="__ref-widget-swap-detail-view __ref-swap-widget-col-flex-start"
@@ -134,6 +357,10 @@ export const DetailView = ({
             cursor: 'pointer',
           }}
           onClick={() => {
+            if (showDetail) localStorage.removeItem(REF_WIDGET_SWAP_DETAIL_KEY);
+            else {
+              localStorage.setItem(REF_WIDGET_SWAP_DETAIL_KEY, '1');
+            }
             setShowDetail(!showDetail);
           }}
         >
@@ -187,6 +414,67 @@ export const DetailView = ({
             </div>
           </div>
         </>
+      )}
+
+      {!showDetail ? null : (
+        <>
+          <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap-detail-view-item">
+            <div>Mimimum received</div>
+            <div>{toPrecision(minReceived || '0', 8)}</div>
+          </div>
+
+          <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap-detail-view-item">
+            <div>Price impact</div>
+
+            <div>{priceImpactDisplay}</div>
+          </div>
+        </>
+      )}
+
+      {estimates && estimates.length > 1 && showDetail && (
+        <div
+          className="__ref-swap-widget-swap_routes __ref-swap-widget-row-flex-center"
+          style={{
+            border: `1px solid ${borderColor}`,
+            flexDirection: isMobile() ? 'column' : 'row',
+            position: 'relative',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div className="__ref-swap-widget-row-flex-center">
+            <RouterIcon />
+            <span
+              className="__ref-swap-widget-valueStyle"
+              style={{
+                marginLeft: '4px',
+              }}
+            >
+              {'Auto Router'}
+            </span>
+          </div>
+
+          <div
+            className=""
+            style={{
+              width: isMobile() ? '100%' : 'auto',
+              minWidth: !isMobile() ? '70%' : '',
+            }}
+          >
+            {tokensPerRoute.every(r => !!r) &&
+              tokensPerRoute.map((tokens, index) => {
+                if (!tokens) return null;
+                return (
+                  <SmartRouteV2
+                    key={index + '-swap-route'}
+                    tokens={tokens}
+                    p={percents[index]}
+                    pools={identicalRoutes[index].map(hub => hub.pool)}
+                  />
+                );
+              })}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -508,7 +796,7 @@ export const SlippageSelector = ({
     return () => {
       document.onclick = null;
     };
-  }, [showSlip]);
+  }, [showSlip, setShowSlip]);
 
   if (!showSlip) return null;
 
@@ -849,7 +1137,7 @@ const Token = ({
           <AiFillPushpin
             onMouseEnter={() => setHoverPin(true)}
             onMouseLeave={() => setHoverPin(false)}
-            fill={hoverPin && hoverIndex == index ? iconHover : iconDefault}
+            fill={hoverPin && hoverIndex === index ? iconHover : iconDefault}
             style={{
               marginLeft: '10px',
               cursor: 'pointer',
@@ -868,7 +1156,7 @@ const Token = ({
             }}
             onMouseEnter={() => setHoverPin(true)}
             onMouseLeave={() => setHoverPin(false)}
-            fill={hoverPin && hoverIndex == index ? iconHover : iconDefault}
+            fill={hoverPin && hoverIndex === index ? iconHover : iconDefault}
             onClick={e => {
               e.preventDefault();
               e.stopPropagation();
@@ -937,7 +1225,7 @@ export const TokenListTable = ({
     } else return Number(b2) - Number(b1);
   };
 
-  return !tokens || tokens.length == 0 ? null : (
+  return !tokens || tokens.length === 0 ? null : (
     <div className="__ref-swap-widget_token_list_table">
       <div
         className="__ref-swap-widget_token_list_table_header"
@@ -1315,6 +1603,37 @@ export const Success = () => {
   );
 };
 
+export const RouterIcon = () => {
+  return (
+    <svg
+      width="16"
+      height="12"
+      viewBox="0 0 16 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="mr-2"
+    >
+      <path
+        d="M13.4862 6.25488C12.2813 6.25488 11.2485 7.10159 11.019 8.28698H6.02703L4.7647 7.21448C4.93684 6.8758 5.05159 6.48067 5.10897 6.0291C5.10897 5.52107 4.93684 4.9566 4.59257 4.56147L6.02703 3.1503H11.0763C11.478 4.44858 12.8551 5.23884 14.1748 4.84371C15.4945 4.44858 16.2978 3.09385 15.8961 1.79557C15.4945 0.497295 14.1174 -0.292963 12.7977 0.102166C11.937 0.327954 11.3059 1.00532 11.0763 1.79557H5.51062L3.50237 3.77122C3.21548 3.65832 2.92859 3.60188 2.58432 3.60188C1.20723 3.54543 0.0596573 4.61792 0.00227872 5.97265C-0.0550999 7.32738 0.977715 8.45632 2.3548 8.51276H2.58432C3.04334 8.51276 3.44499 8.39987 3.84664 8.17408L5.568 9.6417H11.1911C11.7075 10.8835 13.142 11.5045 14.4043 11.0529C15.6666 10.5449 16.2978 9.13368 15.8388 7.89185C15.4371 6.8758 14.5191 6.25488 13.4862 6.25488V6.25488ZM13.4862 1.344C14.1174 1.344 14.6338 1.85202 14.6338 2.47294C14.6338 3.09385 14.1174 3.60188 13.4862 3.60188C12.8551 3.60188 12.3387 3.09385 12.3387 2.47294C12.3387 1.85202 12.8551 1.344 13.4862 1.344ZM2.58432 7.15804C1.95315 7.15804 1.43674 6.65001 1.43674 6.0291C1.43674 5.40818 1.95315 4.90016 2.58432 4.90016C3.21548 4.90016 3.73189 5.40818 3.73189 6.0291C3.73189 6.65001 3.21548 7.15804 2.58432 7.15804ZM13.4862 9.86749C12.8551 9.86749 12.3387 9.35947 12.3387 8.73855C12.3387 8.11763 12.8551 7.60961 13.4862 7.60961C14.1174 7.60961 14.6338 8.11763 14.6338 8.73855C14.6338 9.35947 14.1174 9.86749 13.4862 9.86749Z"
+        fill="url(#paint0_linear_12461_2312)"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_12461_2312"
+          x1="8"
+          y1="0"
+          x2="8"
+          y2="11.2"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#00C6A2" />
+          <stop offset="1" stopColor="#8C78FF" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
 export const Notification = ({
   state,
   tx,
@@ -1387,6 +1706,7 @@ export const Notification = ({
               fontSize: '14px',
               color: primary,
             }}
+            rel="noreferrer"
           >
             Click to view.
           </a>
@@ -1412,6 +1732,25 @@ export const Notification = ({
           Close
         </button>
       )}
+    </div>
+  );
+};
+
+export const ArrowRight = () => {
+  return (
+    <div className="mx-1">
+      <svg
+        width="12"
+        height="5"
+        viewBox="0 0 12 5"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8.864 4.4C9.024 4.05867 9.17867 3.76 9.328 3.504C9.488 3.248 9.64267 3.03467 9.792 2.864H0.464V2.192H9.792C9.64267 2.01067 9.488 1.792 9.328 1.536C9.17867 1.28 9.024 0.986666 8.864 0.656H9.424C10.096 1.43467 10.8 2.01067 11.536 2.384V2.672C10.8 3.03467 10.096 3.61067 9.424 4.4H8.864Z"
+          fill="#7E8A93"
+        />
+      </svg>
     </div>
   );
 };
