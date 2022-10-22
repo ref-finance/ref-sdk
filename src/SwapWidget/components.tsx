@@ -419,11 +419,6 @@ export const DetailView = ({
       {!showDetail ? null : (
         <>
           <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap-detail-view-item">
-            <div>Mimimum received</div>
-            <div>{toPrecision(minReceived || '0', 8)}</div>
-          </div>
-
-          <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap-detail-view-item">
             <div>Price impact</div>
 
             <div>{priceImpactDisplay}</div>
