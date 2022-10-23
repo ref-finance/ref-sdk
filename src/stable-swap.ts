@@ -48,7 +48,7 @@ export const calc_y = (
   let s = x_c_amount;
   let c = (d * d) / x_c_amount;
   for (let i = 0; i < token_num; i++) {
-    if (i != index_x && i != index_y) {
+    if (i !== index_x && i !== index_y) {
       s += current_c_amounts[i];
       c = (c * d) / current_c_amounts[i];
     }

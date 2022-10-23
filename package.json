@@ -6,7 +6,6 @@
   "files": [
     "dist"
   ],
-  "type": "module",
   "engines": {
     "node": ">=10"
   },
