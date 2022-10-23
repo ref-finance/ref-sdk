@@ -108,6 +108,7 @@
 
 .__ref-swap-widget_token_icon {
   border-radius: 100%;
+  flex-shrink: 0;
 }
 
 .__ref-swap-widget_token_list_table {
@@ -198,7 +199,7 @@
 }
 
 .__ref-swap-widget-token-amount_input {
-  width: 100%;
+  width: 75%;
 }
 
 .__ref-swap-widget-notification__button {
@@ -265,8 +266,8 @@ button.__ref-swap-widget-button {
 
 .__ref-swap-widget-swap_routes {
   border-radius: 12px;
-  padding: 8px 4px 8px 12px;
-  width: calc(100% - 20px);
+  padding: 8px 12px 8px 12px;
+  width: 100%;
 }
 
 .__ref-swap-widget-valueStyle {

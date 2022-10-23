@@ -456,6 +456,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             }}
             onClose={() => setWidgetRoute('swap')}
             AccountId={AccountId}
+            className={className}
           />
         )}
 
@@ -470,6 +471,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             }}
             onClose={() => setWidgetRoute('swap')}
             AccountId={AccountId}
+            className={className}
           />
         )}
       </TokenPriceContextProvider>

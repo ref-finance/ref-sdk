@@ -53,7 +53,13 @@ import {
   REF_WIDGET_STAR_TOKEN_LIST_KEY,
 } from './constant';
 import Big from 'big.js';
-import { config, FEE_DIVISOR, TokenLinks } from '../constant';
+import {
+  config,
+  FEE_DIVISOR,
+  NEAR_META_DATA,
+  TokenLinks,
+  WRAP_NEAR_CONTRACT_ID,
+} from '../constant';
 import {
   scientificNotationToString,
   percent,
@@ -125,7 +131,7 @@ export const getPriceImpact = (
 };
 
 export const SmartRouteV2 = ({
-  tokens,
+  tokens: tokensRaw,
   p,
   pools,
 }: {
@@ -134,6 +140,13 @@ export const SmartRouteV2 = ({
   pools: Pool[];
 }) => {
   const theme = useContext(ThemeContext);
+
+  const tokens = tokensRaw.map(t =>
+    t.id === WRAP_NEAR_CONTRACT_ID
+      ? { ...NEAR_META_DATA, id: WRAP_NEAR_CONTRACT_ID }
+      : t
+  );
+
   const {
     container,
     buttonBg,
@@ -164,7 +177,6 @@ export const SmartRouteV2 = ({
         }}
       >
         <span
-          className=" "
           style={{
             marginRight: '4px',
           }}
@@ -178,6 +190,8 @@ export const SmartRouteV2 = ({
     );
   };
   const Icon = ({ token }: { token: TokenMetadata }) => {
+    console.log(token);
+
     if (token.icon) {
       return (
         <img
@@ -187,6 +201,7 @@ export const SmartRouteV2 = ({
             borderRadius: '100%',
             height: '16px',
             width: '16px',
+            flexShrink: 0,
           }}
         />
       );
@@ -356,6 +371,7 @@ export const DetailView = ({
             color: primary,
             cursor: 'pointer',
           }}
+          className="__ref-swap-widget-row-flex-center"
           onClick={() => {
             if (showDetail) localStorage.removeItem(REF_WIDGET_SWAP_DETAIL_KEY);
             else {
@@ -364,20 +380,19 @@ export const DetailView = ({
             setShowDetail(!showDetail);
           }}
         >
-          Detail{' '}
-          <span
+          <div>Detail</div>
+          <div
             style={{
               position: 'relative',
-              top: '2px',
             }}
           >
             {!showDetail ? <FiChevronDown /> : <FiChevronUp />}
-          </span>
+          </div>
         </div>
 
         {amountIn && amountOut && (
-          <div>
-            {isRateReverse ? revertDisplayRate : displayRate}
+          <div className="__ref-swap-widget-row-flex-center">
+            <div>{isRateReverse ? revertDisplayRate : displayRate}</div>
 
             <RiExchangeFill
               onClick={() => {
@@ -387,8 +402,6 @@ export const DetailView = ({
               style={{
                 marginLeft: '4px',
                 cursor: 'pointer',
-                position: 'relative',
-                top: '2px',
               }}
               fill={iconDefault}
             />
@@ -443,6 +456,7 @@ export const DetailView = ({
               className="__ref-swap-widget-valueStyle"
               style={{
                 marginLeft: '4px',
+                whiteSpace: 'nowrap',
               }}
             >
               {'Auto Router'}
@@ -617,15 +631,17 @@ export const TokenAmount = (props: TokenAmountProps) => {
           onMouseLeave={() => setHoverSelect(false)}
         >
           {!token ? (
-            <span
-              style={{
-                whiteSpace: 'nowrap',
-                height: '26px',
-              }}
-              className="__ref-swap-widget-row-flex-center"
-            >
-              Select Token
-            </span>
+            <>
+              <span
+                style={{
+                  whiteSpace: 'nowrap',
+                  height: '26px',
+                }}
+                className="__ref-swap-widget-row-flex-center"
+              >
+                Select Token
+              </span>
+            </>
           ) : (
             <>
               <img
@@ -638,12 +654,13 @@ export const TokenAmount = (props: TokenAmountProps) => {
                   marginRight: '8px',
                 }}
               />
-              {toRealSymbol(token?.symbol)}
+              <span>{toRealSymbol(token?.symbol)}</span>
             </>
           )}
           <FiChevronDown
             style={{
               marginLeft: '4px',
+              flexShrink: 0,
             }}
           />
         </div>
@@ -659,9 +676,9 @@ export const TokenAmount = (props: TokenAmountProps) => {
               cursor: 'pointer',
               color: secondary,
               position: 'relative',
-              top: '8px',
+              top: '9px',
             }}
-            size={22}
+            size={18}
             onClick={() => {
               onForceUpdate();
             }}
@@ -1272,6 +1289,7 @@ export const TokenSelector = ({
   onClose,
   AccountId,
   balances,
+  className,
 }: {
   onSelect: (token: TokenMetadata) => void;
   width: string;
@@ -1279,6 +1297,7 @@ export const TokenSelector = ({
   onClose: () => void;
   AccountId: string;
   balances: { [tokenId: string]: string };
+  className?: string;
 }) => {
   const theme = useContext(ThemeContext);
   const {
@@ -1332,7 +1351,7 @@ export const TokenSelector = ({
 
   return (
     <div
-      className="__ref-swap_widget-token_selector __ref-swap-widget-container"
+      className={`__ref-swap_widget-token_selector __ref-swap-widget-container ${className}`}
       style={{
         position: 'relative',
         width,
