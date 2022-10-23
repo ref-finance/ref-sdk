@@ -416,26 +416,33 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 {'Connect Wallet'}
               </button>
             )}
-
-            <a
+            <div
               className="__ref-swap-widget-row-flex-center"
               style={{
-                color: secondary,
                 justifyContent: 'center',
-                paddingTop: '12px',
-                fontSize: '14px',
               }}
-              href="https://ref.finance"
-              target="_blank"
-              rel="noreferrer"
             >
-              <RefIcon
+              <a
+                className="__ref-swap-widget-row-flex-center"
                 style={{
-                  color: refIcon || 'black',
+                  color: secondary,
+                  justifyContent: 'center',
+                  paddingTop: '12px',
+                  fontSize: '14px',
+                  display: 'inline-flex',
                 }}
-              />
-              &nbsp; Powered by Ref.finance
-            </a>
+                href="https://ref.finance"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <RefIcon
+                  style={{
+                    color: refIcon || 'black',
+                  }}
+                />
+                &nbsp; Powered by Ref.finance
+              </a>
+            </div>
 
             <Notification
               state={transactionState?.state}
