@@ -198,16 +198,6 @@
   padding: 32px 20px;
 }
 
-.__ref-swap-widget-token-amount_input {
-  width: 70%;
-}
-
-@media screen and (max-width: 1024px) {
-  .__ref-swap-widget-token-amount_input {
-    width: 50%;
-  }
-}
-
 .__ref-swap-widget-notification__button {
   border-radius: 8px;
   padding: 8px 20px;

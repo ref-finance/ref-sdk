@@ -805,5 +805,5 @@ export function getPoolAllocationPercents(pools: Pool[]) {
 }
 
 export const isMobile = (): boolean => {
-  return window.screen.width <= 1023;
+  return window.screen.width <= 600;
 };

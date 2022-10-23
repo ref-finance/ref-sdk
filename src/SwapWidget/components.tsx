@@ -617,74 +617,86 @@ export const TokenAmount = (props: TokenAmountProps) => {
         className="__ref-swap-widger-token-amount "
         style={{
           background: secondaryBg,
+          flexDirection: isMobile() ? 'column' : 'row',
         }}
       >
         <div
-          className="__ref-swap-widget-row-flex-center __ref-swap-widget-token-amount_token-select-button"
+          className="__ref-swap-widget-row-flex-center"
           style={{
-            color: primary,
-            background: hoverSelect ? hover : 'transparent',
-            border: `1px solide ${hoverSelect ? borderColor : 'transparent'}`,
+            width: isMobile() ? 'auto' : '40%',
           }}
-          onClick={onSelectToken}
-          onMouseEnter={() => setHoverSelect(true)}
-          onMouseLeave={() => setHoverSelect(false)}
         >
-          {!token ? (
-            <>
-              <span
-                style={{
-                  whiteSpace: 'nowrap',
-                  height: '26px',
-                }}
-                className="__ref-swap-widget-row-flex-center"
-              >
-                Select Token
-              </span>
-            </>
-          ) : (
-            <>
-              <img
-                src={token?.icon}
-                alt=""
-                className="__ref-swap-widget_token_icon"
-                style={{
-                  height: '26px',
-                  width: '26px',
-                  marginRight: '8px',
-                }}
-              />
-              <span>{toRealSymbol(token?.symbol)}</span>
-            </>
-          )}
-          <FiChevronDown
+          <div
+            className="__ref-swap-widget-row-flex-center __ref-swap-widget-token-amount_token-select-button"
             style={{
-              marginLeft: '4px',
-              flexShrink: 0,
+              color: primary,
+              background: hoverSelect ? hover : 'transparent',
+              border: `1px solide ${hoverSelect ? borderColor : 'transparent'}`,
             }}
-          />
+            onClick={onSelectToken}
+            onMouseEnter={() => setHoverSelect(true)}
+            onMouseLeave={() => setHoverSelect(false)}
+          >
+            {!token ? (
+              <>
+                <span
+                  style={{
+                    whiteSpace: 'nowrap',
+                    height: '26px',
+                  }}
+                  className="__ref-swap-widget-row-flex-center"
+                >
+                  Select Token
+                </span>
+              </>
+            ) : (
+              <>
+                <img
+                  src={token?.icon}
+                  alt=""
+                  className="__ref-swap-widget_token_icon"
+                  style={{
+                    height: '26px',
+                    width: '26px',
+                    marginRight: '8px',
+                  }}
+                />
+                <span>{toRealSymbol(token?.symbol)}</span>
+              </>
+            )}
+            <FiChevronDown
+              style={{
+                marginLeft: '4px',
+                flexShrink: 0,
+              }}
+            />
+          </div>
+
+          {onForceUpdate && (
+            <RiRefreshLine
+              className={`${
+                poolFetchingState === 'loading'
+                  ? '__ref-swap-widget-loading '
+                  : ''
+              }`}
+              style={{
+                cursor: 'pointer',
+                color: secondary,
+              }}
+              size={18}
+              onClick={() => {
+                onForceUpdate();
+              }}
+            />
+          )}
         </div>
 
-        {onForceUpdate && (
-          <RiRefreshLine
-            className={`${
-              poolFetchingState === 'loading'
-                ? '__ref-swap-widget-loading '
-                : ''
-            }`}
-            style={{
-              cursor: 'pointer',
-              color: secondary,
-              position: 'relative',
-              top: '9px',
-            }}
-            size={18}
-            onClick={() => {
-              onForceUpdate();
-            }}
-          />
-        )}
-        <div className=" __ref-swap-widget-token-amount_input">
+        <div
+          className=" __ref-swap-widget-token-amount_input"
+          style={{
+            width: isMobile() ? '100%' : '60%',
+          }}
+        >
           <input
             ref={ref}
             max={balance || '0'}
