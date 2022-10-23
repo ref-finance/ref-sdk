@@ -417,7 +417,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               </button>
             )}
 
-            <div
+            <a
               className="__ref-swap-widget-row-flex-center"
               style={{
                 color: secondary,
@@ -425,6 +425,9 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 paddingTop: '12px',
                 fontSize: '14px',
               }}
+              href="https://ref.finance"
+              target="_blank"
+              rel="noreferrer"
             >
               <RefIcon
                 style={{
@@ -432,7 +435,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 }}
               />
               &nbsp; Powered by Ref.finance
-            </div>
+            </a>
 
             <Notification
               state={transactionState?.state}
