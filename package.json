@@ -66,6 +66,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "@near-wallet-selector/core": "^7.0.0",
     "@types/big.js": "^6.1.5",
     "@types/bn.js": "^5.1.1",
     "@types/lodash": "^4.14.182",
