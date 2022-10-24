@@ -55,7 +55,7 @@ A QuickStart of Ref Swap component.
 ```typescript
 export interface SwapWidgetProps {
     theme?: Theme;
-    extraTokenList?: string[];
+    defaultTokenList?: TokenMetadata[];
     onSwap: (transactionsRef: Transaction[]) => void;
     onDisConnect: () => void;
     width: string;
@@ -80,7 +80,7 @@ export interface SwapWidgetProps {
 ```
 
 - **theme:** widget theme for customization.
-- **extraTokenList:** introduce extra tokens with ref whitelist into default token list in the widget.
+- **defaultTokenList:** default tokens intoduced into token list.
 - **onSwap:** Swap button triggers this function.
 - **width:** width of widget component.
 - **height:** height of widget component.
@@ -164,84 +164,82 @@ export const defaultDarkModeTheme: Theme = {
 
 ```typescript
 // an example of combining SwapWidget with wallet-selector
-import * as React from 'react';
-import { SwapWidget } from '@ref_finance/ref-sdk';
+import * as React from "react";
+import { SwapWidget, Transaction, transformTransactions, getDefaultTokenList, NotLoginError } from "@ref_finance/ref-sdk/";
 
-// please check on wallet-selector example about how to set WalletSelectorContext
-import { useWalletSelector } from './WalletSelectorContext';
+// please check on wallet-selector example about how to set up wallet-selector
+import { useWalletSelector } from "./WalletSelectorContext";
+import "@near-wallet-selector/modal-ui/styles.css";
 
-import { WalletSelectorTransactions, NotLoginError } from '@ref_finance/ref-sdk';
+import { SignAndSendTransactionsParams } from "@near-wallet-selector/core/lib/wallet";
 
-export const Widget = ()=>{
-  
-  const { modal, selector, accountId } = useWalletSelector();
-  
-  const [swapState, setSwapState] = React.useState<'success' | 'fail' | null>(
-    null
-  );
-  const [tx, setTx] = React.useState<string | undefined>(undefined);
-  React.useEffect(() => {
-    const errorCode = new URLSearchParams(window.location.search).get(
-      'errorCode'
+export const Content = () => {
+    const { modal, selector, accountId } = useWalletSelector();
+
+    const onDisConnect = async () => {
+        const wallet = await selector.wallet();
+        return await wallet.signOut();
+    };
+
+    const onConnect = () => {
+        modal.show();
+    };
+
+    const [swapState, setSwapState] = React.useState<"success" | "fail" | null>(null);
+
+    const [tx, setTx] = React.useState<string | undefined>(undefined);
+
+    React.useEffect(() => {
+        const errorCode = new URLSearchParams(window.location.search).get("errorCode");
+
+        const transactions = new URLSearchParams(window.location.search).get("transactionHashes");
+
+        const lastTX = transactions?.split(",").pop();
+
+        setTx(lastTX);
+
+        setSwapState(!!errorCode ? "fail" : !!lastTX ? "success" : null);
+
+        window.history.replaceState({}, "", window.location.origin + window.location.pathname);
+    }, []);
+
+    const onSwap = async (transactionsRef: Transaction[]) => {
+        const wallet = await selector.wallet();
+
+        if (!accountId) throw NotLoginError;
+
+        const WalletSelectorTransactions = {
+            transactions: transformTransactions(transactionsRef, accountId),
+        } as SignAndSendTransactionsParams;
+
+        return wallet.signAndSendTransactions(WalletSelectorTransactions);
+    };
+
+    const defaultList = getDefaultTokenList();
+
+    return (
+        <SwapWidget
+            onSwap={onSwap}
+            onDisConnect={onDisConnect}
+            width={"500px"}
+            connection={{
+                AccountId: accountId || "",
+                isSignedIn: !!accountId,
+            }}
+            className="mx-auto"
+            transactionState={{
+                state: swapState,
+                setState: setSwapState,
+                tx,
+                detail: "(success details show here)",
+            }}
+            defaultTokenList={defaultList as TokenMetadata[]}
+            enableSmartRouting={true}
+            onConnect={onConnect}
+        />
     );
+};
 
-    const transactions = new URLSearchParams(window.location.search).get(
-      'transactionHashes'
-    );
-
-    const lastTX = transactions?.split(',').pop();
-
-    setTx(lastTX);
-
-    setSwapState(!!errorCode ? 'fail' : !!lastTX ? 'success' : null);
-
-    window.history.replaceState(
-      {},
-      '',
-      window.location.origin + window.location.pathname
-    );
-  }, []);
-  
-  const onSwap = async (transactionsRef: Transaction[]) => {
-    const wallet = await selector.wallet();
-    if (!accountId) throw NotLoginError;
-
-    wallet.signAndSendTransactions(
-      WalletSelectorTransactions(transactionsRef, accountId)
-    );
-  };
-  
-  const onConnect = () => {
-    modal.show();
-  };
-
-  const onDisConnect = async () => {
-    const wallet = await selector.wallet();
-    return await wallet.signOut();
-  };
-
-  return (
-    <SwapWidget
-      onSwap={onSwap}
-      onDisConnect={onDisConnect}
-      width={'400px'}
-      connection={{
-        AccountId: accountId || '',
-        isSignedIn: !!accountId,
-      }}
-      transactionState={{
-        state: swapState,
-        setState: setSwapState,
-        tx,
-        detail: '(success details show here)',
-      }}
-      enableSmartRouting={true}
-      onConnect={onConnect}
-      defaultTokenIn={'wrap.testnet'}
-      defaultTokenOut={'ref.fakes.testnet'}
-    />
-  );
-}
 
 ```
 
