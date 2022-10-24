@@ -54,28 +54,28 @@ A QuickStart of Ref Swap component.
 
 ```typescript
 export interface SwapWidgetProps {
-    theme?: Theme;
-    defaultTokenList?: TokenMetadata[];
-    onSwap: (transactionsRef: Transaction[]) => void;
-    onDisConnect: () => void;
-    width: string;
-    height?: string;
-    enableSmartRouting?: boolean;
-    className?: string;
-    darkMode?: boolean;
-    connection: {
-        AccountId: string;
-        isSignedIn: boolean;
-    };
-    defaultTokenIn?: string;
-    defaultTokenOut?: string;
-    transactionState?: {
-        state: 'success' | 'fail' | null;
-        setState: (state: 'success' | 'fail' | null) => void;
-        tx?: string;
-        detail?: string;
-    };
-    onConnect: () => void;
+  theme?: Theme;
+  defaultTokenList?: TokenMetadata[];
+  onSwap: (transactionsRef: Transaction[]) => void;
+  onDisConnect: () => void;
+  width: string;
+  height?: string;
+  enableSmartRouting?: boolean;
+  className?: string;
+  darkMode?: boolean;
+  connection: {
+    AccountId: string;
+    isSignedIn: boolean;
+  };
+  defaultTokenIn?: string;
+  defaultTokenOut?: string;
+  transactionState?: {
+    state: 'success' | 'fail' | null;
+    setState: (state: 'success' | 'fail' | null) => void;
+    tx?: string;
+    detail?: string;
+  };
+  onConnect: () => void;
 }
 ```
 
@@ -96,15 +96,10 @@ export interface SwapWidgetProps {
   - **tx:** will add link to near explorer according to this tx.
   - **detail:** you could input some tips to show on sucess pop-up.
 
-
 ![IMG754](https://user-images.githubusercontent.com/50706666/197215817-ee3a70aa-58d9-426c-8edb-907e998b2f3b.jpeg)
-
-
 
 - **onDisConnect:** Disconnect button triggers this function.
 - **onConnect:** Connect to Near Wallet button triggers this function.
-
-
 
 ### Usage
 
@@ -157,93 +152,104 @@ export const defaultDarkModeTheme: Theme = {
   iconHover: '#B7C9D6',
   refIcon: 'white',
 };
-
 ```
 
 #### Component
 
 ```typescript
 // an example of combining SwapWidget with wallet-selector
-import * as React from "react";
-import { SwapWidget, Transaction, transformTransactions, getDefaultTokenList, NotLoginError } from "@ref_finance/ref-sdk/";
+import * as React from 'react';
+import {
+  SwapWidget,
+  Transaction,
+  transformTransactions,
+  getDefaultTokenList,
+  NotLoginError,
+} from '@ref_finance/ref-sdk/';
 
 // please check on wallet-selector example about how to set up wallet-selector
-import { useWalletSelector } from "./WalletSelectorContext";
-import "@near-wallet-selector/modal-ui/styles.css";
+import { useWalletSelector } from './WalletSelectorContext';
+import '@near-wallet-selector/modal-ui/styles.css';
 
-import { SignAndSendTransactionsParams } from "@near-wallet-selector/core/lib/wallet";
+import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 
 export const Content = () => {
-    const { modal, selector, accountId } = useWalletSelector();
+  const { modal, selector, accountId } = useWalletSelector();
 
-    const onDisConnect = async () => {
-        const wallet = await selector.wallet();
-        return await wallet.signOut();
-    };
+  const onDisConnect = async () => {
+    const wallet = await selector.wallet();
+    return await wallet.signOut();
+  };
 
-    const onConnect = () => {
-        modal.show();
-    };
+  const onConnect = () => {
+    modal.show();
+  };
 
-    const [swapState, setSwapState] = React.useState<"success" | "fail" | null>(null);
+  const [swapState, setSwapState] = React.useState<'success' | 'fail' | null>(
+    null
+  );
 
-    const [tx, setTx] = React.useState<string | undefined>(undefined);
+  const [tx, setTx] = React.useState<string | undefined>(undefined);
 
-    React.useEffect(() => {
-        const errorCode = new URLSearchParams(window.location.search).get("errorCode");
-
-        const transactions = new URLSearchParams(window.location.search).get("transactionHashes");
-
-        const lastTX = transactions?.split(",").pop();
-
-        setTx(lastTX);
-
-        setSwapState(!!errorCode ? "fail" : !!lastTX ? "success" : null);
-
-        window.history.replaceState({}, "", window.location.origin + window.location.pathname);
-    }, []);
-
-    const onSwap = async (transactionsRef: Transaction[]) => {
-        const wallet = await selector.wallet();
-
-        if (!accountId) throw NotLoginError;
-
-        const WalletSelectorTransactions = {
-            transactions: transformTransactions(transactionsRef, accountId),
-        } as SignAndSendTransactionsParams;
-
-        return wallet.signAndSendTransactions(WalletSelectorTransactions);
-    };
-
-    const defaultList = getDefaultTokenList();
-
-    return (
-        <SwapWidget
-            onSwap={onSwap}
-            onDisConnect={onDisConnect}
-            width={"500px"}
-            connection={{
-                AccountId: accountId || "",
-                isSignedIn: !!accountId,
-            }}
-            className="mx-auto"
-            transactionState={{
-                state: swapState,
-                setState: setSwapState,
-                tx,
-                detail: "(success details show here)",
-            }}
-            defaultTokenList={defaultList as TokenMetadata[]}
-            enableSmartRouting={true}
-            onConnect={onConnect}
-        />
+  React.useEffect(() => {
+    const errorCode = new URLSearchParams(window.location.search).get(
+      'errorCode'
     );
+
+    const transactions = new URLSearchParams(window.location.search).get(
+      'transactionHashes'
+    );
+
+    const lastTX = transactions?.split(',').pop();
+
+    setTx(lastTX);
+
+    setSwapState(!!errorCode ? 'fail' : !!lastTX ? 'success' : null);
+
+    window.history.replaceState(
+      {},
+      '',
+      window.location.origin + window.location.pathname
+    );
+  }, []);
+
+  const onSwap = async (transactionsRef: Transaction[]) => {
+    const wallet = await selector.wallet();
+
+    if (!accountId) throw NotLoginError;
+
+    const WalletSelectorTransactions = {
+      transactions: transformTransactions(transactionsRef, accountId),
+    } as SignAndSendTransactionsParams;
+
+    return wallet.signAndSendTransactions(WalletSelectorTransactions);
+  };
+
+  const defaultList = getDefaultTokenList();
+
+  return (
+    <SwapWidget
+      onSwap={onSwap}
+      onDisConnect={onDisConnect}
+      width={'500px'}
+      connection={{
+        AccountId: accountId || '',
+        isSignedIn: !!accountId,
+      }}
+      className="mx-auto"
+      transactionState={{
+        state: swapState,
+        setState: setSwapState,
+        tx,
+        detail: '(success details show here)',
+      }}
+      defaultTokenList={defaultList as TokenMetadata[]}
+      enableSmartRouting={true}
+      onConnect={onConnect}
+    />
+  );
 };
-
-
 ```
-
-
 
 ## Functions
 
@@ -365,6 +371,42 @@ const { ratedPools, unRatedPools, simplePools } = await fetchAllPools();
   },...]
   unRatedPools:[...],
   simplePools:[...],
+}
+```
+
+---
+
+#### getPool
+
+Get pool by pool id.
+
+**Parameters**
+
+```typescript
+id: number;
+```
+
+**example**
+
+```typescript
+const pool: Pool = await getPool(568);
+```
+
+**response**
+
+```typescript
+{
+  fee: 5,
+  id: 568,
+  pool_kind: "RATED_SWAP",
+  shareSupply: "26451465237475258802922778636",
+  supplies:{
+    "meta-v2.pool.testnet": "1398827255606210320943588411",
+    "wrap.testnet": "24214469361973589652255226961",
+  },
+  token0_ref_price: undefined,
+  tokenIds: ["meta-v2.pool.testnet", "wrap.testnet"],
+  tvl: undefined
 }
 ```
 
@@ -552,8 +594,6 @@ const swapTodos: EstimateSwapView[] = await estimateSwap({
 ]
 ```
 
-
-
 ---
 
 #### getExpectedOutputFromSwapTodos
@@ -577,17 +617,17 @@ const swapTodos: EstimateSwapView[] = await estimateSwap({
   options,
 });
 
-const amountOut:string = getExpectedOutputFromSwapTodos(swapTodos, tokenOut.id);
-
+const amountOut: string = getExpectedOutputFromSwapTodos(
+  swapTodos,
+  tokenOut.id
+);
 ```
 
 **Response**
 
 ```typescript
-"0.723972845937443"
+'0.723972845937443';
 ```
-
-
 
 ---
 
@@ -712,7 +752,7 @@ const transactionsRef: Transaction[] = await instantSwap({
   amountIn: '1',
   swapTodos,
   slippageTolerance = 0.01,
-  AccountId: 'your-account-id.testnet'
+  AccountId: 'your-account-id.testnet',
 });
 ```
 
