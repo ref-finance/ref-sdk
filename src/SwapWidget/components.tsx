@@ -1112,6 +1112,7 @@ const Token = ({
               fontSize: '14px',
               color: primary,
             }}
+            className="__ref-swap-widget-row-flex-center"
           >
             {toRealSymbol(token.symbol)}
 
@@ -1137,7 +1138,7 @@ const Token = ({
             style={{
               fontSize: '10px',
               color: secondary,
-              marginTop: '4px',
+              marginTop: '2px',
             }}
           >
             {!price
