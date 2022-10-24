@@ -1034,7 +1034,7 @@ export const DefaultMainnetTokenList = [
   },
 ];
 
-export function getTokenList(
+export function getDefaultTokenList(
   env: string | undefined = process.env.NEAR_ENV ||
     process.env.REACT_APP_REF_SDK_ENV
 ) {

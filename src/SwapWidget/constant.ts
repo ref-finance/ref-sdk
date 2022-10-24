@@ -1,3 +1,4 @@
+import { getConfig } from '../constant';
 export const REF_WIDGET_STAR_TOKEN_LIST_KEY =
   'REF_WIDGET_STAR_TOKEN_LIST_VALUE';
 
@@ -10,12 +11,29 @@ export const REF_WIDGET_SWAP_OUT_KEY = 'REF_FI_SWAP_OUT_VALUE';
 
 export const REF_WIDGET_SWAP_DETAIL_KEY = 'REF_FI_SWAP_DETAIL_VALUE';
 
-export const DEFAULT_START_TOKEN_LIST = [
+export const DEFAULT_START_TOKEN_LIST_TESTNET = [
   'wrap.testnet',
+  'usdtt.fakes.testnet',
+  'usdt.fakes.testnet',
   'ref.fakes.testnet',
-  'usdc.fakes.testnet',
   'usdn.testnet',
+  'eth.fakes.testnet',
 ];
+
+export const DEFAULT_START_TOKEN_LIST_MAINNET = [
+  'wrap.near',
+  'usdt.tether-token.near',
+  'dac17f958d2ee523a2206206994597c13d831ec7.factory.bridge.near',
+  'token.v2.ref-finance.near',
+  'usn',
+  'aurora',
+  'token.sweat',
+];
+
+export const DEFAULT_START_TOKEN_LIST =
+  getConfig().networkId === 'testnet'
+    ? DEFAULT_START_TOKEN_LIST_TESTNET
+    : DEFAULT_START_TOKEN_LIST_MAINNET;
 
 export interface Theme {
   container: string; // container background
