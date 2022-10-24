@@ -24,7 +24,7 @@ export function getConfig(
     case 'testnet':
       return {
         networkId: 'testnet',
-        nodeUrl: 'https://rpc.testnet.near.org',
+        nodeUrl: 'https://public-rpc.blockpi.io/http/near-testnet',
         walletUrl: 'https://wallet.testnet.near.org',
         indexerUrl: 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',

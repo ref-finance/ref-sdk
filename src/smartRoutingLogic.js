@@ -1818,8 +1818,6 @@ async function calculateSmartRouteV2PriceImpact(actions, allTokens) {
     let nodeRoute = nodeRoutes[i];
     let tokens = await Promise.all(
       nodeRoute.map(async t => {
-        console.log(allTokens[t]);
-
         return allTokens[t]
           ? allTokens[t]
           : await ftGetTokenMetadata(t, 'sm routes');

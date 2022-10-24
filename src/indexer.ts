@@ -43,10 +43,12 @@ export const getTokens = async (reload?: boolean) => {
           return newTokens;
         })
         .then(res => {
-          localStorage.setItem(
-            REF_WIDGET_ALL_TOKENS_LIST_KEY,
-            JSON.stringify(res)
-          );
+          typeof window !== 'undefined' &&
+            !reload &&
+            localStorage.setItem(
+              REF_WIDGET_ALL_TOKENS_LIST_KEY,
+              JSON.stringify(res)
+            );
           return res;
         });
 };

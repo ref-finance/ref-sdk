@@ -190,8 +190,6 @@ export const SmartRouteV2 = ({
     );
   };
   const Icon = ({ token }: { token: TokenMetadata }) => {
-    console.log(token);
-
     if (token.icon) {
       return (
         <img

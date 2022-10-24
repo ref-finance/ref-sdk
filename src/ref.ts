@@ -24,8 +24,6 @@ import { AccountView } from 'near-api-js/lib/providers/provider';
 import { Transaction } from './types';
 import { ONE_YOCTO_NEAR, REF_TOKEN_ID, REF_META_DATA } from './constant';
 
-// export const keyStore = new keyStores.BrowserLocalStorageKeyStore();
-
 export const near = new Near({
   keyStore: getKeyStore(),
   headers: {},
