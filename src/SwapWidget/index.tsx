@@ -50,7 +50,7 @@ import {
 export const SwapWidget = (props: SwapWidgetProps) => {
   const {
     theme,
-    extraTokenList,
+    defaultTokenList,
     onSwap,
     connection,
     width,
@@ -129,7 +129,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
 
-  const tokens = useTokensIndexer({ extraTokenList, AccountId });
+  const tokens = useTokensIndexer({ defaultTokenList, AccountId });
 
   // cache list tokens
   useAllTokens({ reload: true });

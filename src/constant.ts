@@ -41,7 +41,7 @@ export function getConfig(
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
-        explorerUrl: 'https://testnet.nearblocks.io',
+        explorerUrl: 'https://nearblocks.io',
       };
   }
 }

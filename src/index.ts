@@ -19,3 +19,5 @@ export * from './swap';
 export * from './near';
 
 export * from './SwapWidget';
+
+export * from './defaultTokenList';

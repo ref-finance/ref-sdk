@@ -138,63 +138,51 @@ export const useTokens = (
 };
 
 export const useTokensIndexer = ({
-  extraTokenList,
+  defaultTokenList,
   AccountId,
 }: {
-  extraTokenList?: string[];
+  defaultTokenList?: TokenMetadata[];
   AccountId?: string;
 }) => {
   const [tokens, setTokens] = useState<TokenMetadata[]>([]);
 
   useEffect(() => {
-    const userRegister = getUserRegisteredTokens(AccountId);
+    const getTokensList = async () => {
+      const whiteList = await getGlobalWhitelist();
+      const globalWhiteListTokens = (
+        await getWhiteListTokensIndexer(whiteList)
+      ).filter(token => !!token) as TokenMetadata[];
 
-    userRegister
-      .then((list: string[]) => {
-        const tokenList = list.concat(extraTokenList || []);
-        const tokenListUnique =
-          tokenList.length === 0 ? [] : Array.from(new Set<string>(tokenList));
+      const parsedTokens = globalWhiteListTokens.map(t => {
+        return t.id === WRAP_NEAR_CONTRACT_ID
+          ? {
+              ...NEAR_META_DATA,
+              id: t.id,
+            }
+          : t;
+      });
 
-        if (tokenList.length > 0)
-          return Promise.all(tokenListUnique.map(id => ftGetTokenMetadata(id)));
-        else return [];
-      })
-      .then(async tokenList => {
-        const whiteList = await getGlobalWhitelist();
+      if (!defaultTokenList || defaultTokenList.length === 0) {
+        setTokens(parsedTokens);
+      } else {
+        const newList = defaultTokenList
+          .map(t => {
+            return t.id === WRAP_NEAR_CONTRACT_ID
+              ? {
+                  ...NEAR_META_DATA,
+                  id: t.id,
+                }
+              : t;
+          })
+          .filter(t => {
+            return parsedTokens.findIndex(p => p.id === t.id) !== -1;
+          });
+        setTokens(newList);
+      }
+    };
 
-        const globalWhiteListTokens = (
-          await getWhiteListTokensIndexer(whiteList)
-        ).filter(token => !!token) as TokenMetadata[];
-
-        if (tokenList && tokenList.length > 0) {
-          const tokenListMap = tokenList
-            .filter(t => !!t)
-            .concat(globalWhiteListTokens)
-            .reduce(
-              (acc, cur, i) => ({
-                ...acc,
-                [cur.id]: cur,
-              }),
-              {}
-            );
-
-          return Object.values(tokenListMap) as TokenMetadata[];
-        }
-
-        return globalWhiteListTokens;
-      })
-      .then(tokens => {
-        return tokens.map(t => {
-          return t.id === WRAP_NEAR_CONTRACT_ID
-            ? {
-                ...NEAR_META_DATA,
-                id: t.id,
-              }
-            : t;
-        });
-      })
-      .then(setTokens);
-  }, [AccountId, extraTokenList]);
+    getTokensList();
+  }, [AccountId, defaultTokenList]);
 
   return tokens;
 };

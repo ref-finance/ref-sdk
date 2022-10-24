@@ -59,6 +59,13 @@ export const getWhiteListTokensIndexer = async (whiteListIds: string[]) => {
     .then(res => res.json())
     .then(res => {
       return whiteListIds.reduce((acc, cur, i) => {
+        if (
+          !res[cur] ||
+          !Object.values(res[cur]) ||
+          Object.values(res[cur]).length === 0
+        )
+          return acc;
+
         return {
           ...acc,
           [cur]: { ...res[cur], id: cur },

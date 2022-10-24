@@ -14,7 +14,7 @@
     "build": "tsdx build --format esm,cjs,umd",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
-    "prepare": "NEAR_ENV=testnet tsdx build --format esm,cjs,umd",
+    "prepare": "tsdx build --format esm,cjs,umd",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },

@@ -5,7 +5,7 @@ import { Theme } from './constant';
 
 export interface SwapWidgetProps {
   theme?: Theme;
-  extraTokenList?: string[];
+  defaultTokenList?: TokenMetadata[];
   onSwap: (transactionsRef: Transaction[]) => void;
   onDisConnect: () => void;
   width: string;
