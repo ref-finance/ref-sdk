@@ -152,7 +152,11 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
     const defaultOut = STORAGED_TOKEN_OUT || defaultTokenOut || REF_TOKEN_ID;
 
-    if (tokens && defaultIn && tokens.findIndex(t => t.id === defaultIn)) {
+    if (
+      tokens.length > 0 &&
+      defaultIn &&
+      tokens.findIndex(t => t.id === defaultIn)
+    ) {
       if (defaultIn === WRAP_NEAR_CONTRACT_ID || defaultIn === 'NEAR') {
         handleSetTokenIn({
           ...NEAR_META_DATA,
@@ -162,7 +166,11 @@ export const SwapWidget = (props: SwapWidgetProps) => {
         ftGetTokenMetadata(defaultIn).then(handleSetTokenIn);
       }
     }
-    if (tokens && defaultOut && tokens.findIndex(t => t.id === defaultOut)) {
+    if (
+      tokens.length > 0 &&
+      defaultOut &&
+      tokens.findIndex(t => t.id === defaultOut)
+    ) {
       if (defaultOut === WRAP_NEAR_CONTRACT_ID || defaultOut === 'NEAR') {
         handleSetTokenOut({
           ...NEAR_META_DATA,
