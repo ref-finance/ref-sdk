@@ -12,6 +12,7 @@ import { FEE_DIVISOR } from './constant';
 import { getSwappedAmount } from './stable-swap';
 import { ftGetTokenMetadata, ftGetTokensMetadata } from './ref';
 import { isStablePool } from './utils';
+import { getTokens } from './indexer';
 import {
   getStablePoolDecimal,
   isStablePoolToken,
@@ -22,6 +23,13 @@ import {
   getExpectedOutputFromActionsORIG,
   //@ts-ignore
 } from './smartRoutingLogic.js';
+
+export enum PoolMode {
+  PARALLEL = 'parallel swap',
+  SMART = 'smart routing',
+  SMART_V2 = 'stableSmart',
+  STABLE = 'stable swap',
+}
 
 export interface SwapParams {
   tokenIn: TokenMetadata;
@@ -133,6 +141,8 @@ export const singlePoolSwap = ({
     throw NoPoolError;
   }
 
+  const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
+
   // const pools = simplePools.concat(stablePools);
 
   const simplePoolsThisPair = simplePools.filter(
@@ -180,10 +190,20 @@ export const singlePoolSwap = ({
 
   if (!maxStablePoolEstimate && !maxSimplePoolEstimate) throw NoPoolError;
 
+  maxSimplePoolEstimate &&
+    (maxSimplePoolEstimate.pool.partialAmountIn = parsedAmountIn);
+
+  maxStablePoolEstimate &&
+    (maxStablePoolEstimate.pool.partialAmountIn = parsedAmountIn);
+
   if (!maxStablePoolEstimate) {
+    maxSimplePoolEstimate &&
+      (maxSimplePoolEstimate.pool.partialAmountIn = parsedAmountIn);
+
     return maxSimplePoolEstimate;
-  } else if (!maxSimplePoolEstimate) return maxStablePoolEstimate;
-  else {
+  } else if (!maxSimplePoolEstimate) {
+    return maxStablePoolEstimate;
+  } else {
     return Number(maxSimplePoolEstimate?.estimate) >
       Number(maxStablePoolEstimate?.estimate)
       ? maxSimplePoolEstimate
@@ -260,7 +280,8 @@ export async function getHybridStableSmart(
   amountIn: string,
   stablePools: Pool[],
   stablePoolsDetail: StablePool[],
-  simplePools: Pool[]
+  simplePools: Pool[],
+  allTokens: Record<string, TokenMetadata>
 ) {
   if (
     !isStablePoolToken(stablePoolsDetail, tokenIn.id) &&
@@ -412,7 +433,8 @@ export async function getHybridStableSmart(
 
   if (candidatePools.length > 0) {
     const tokensMedata = await ftGetTokensMetadata(
-      candidatePools.map(cp => cp.map(p => p.tokenIds).flat()).flat()
+      candidatePools.map(cp => cp.map(p => p.tokenIds).flat()).flat(),
+      allTokens
     );
 
     const BestPoolPair =
@@ -473,6 +495,7 @@ export async function getHybridStableSmart(
                     amountIn,
                     pool: tmpPool1,
                   })),
+              status: PoolMode.SMART,
             };
 
             const estimate2 = {
@@ -489,6 +512,7 @@ export async function getHybridStableSmart(
                     pool: tmpPool2,
                     amountIn: estimate1.estimate,
                   })),
+              status: PoolMode.SMART,
             };
 
             return Number(estimate2.estimate);
@@ -512,7 +536,9 @@ export async function getHybridStableSmart(
         actions: [
           {
             ...estimate,
-            pool: { ...bestPool, parsedAmountIn: parsedAmountIn },
+            status: PoolMode.STABLE,
+
+            pool: { ...bestPool, partialAmountIn: parsedAmountIn },
             tokens: [tokenIn, tokenOut],
             inputToken: tokenIn.id,
             outputToken: tokenOut.id,
@@ -530,7 +556,9 @@ export async function getHybridStableSmart(
       BestPoolPair[1].tokenIds.includes(t)
     ) as string;
 
-    const tokenMidMeta = await ftGetTokenMetadata(tokenMidId);
+    const tokenMidMeta =
+      allTokens[tokenMidId] ||
+      (await ftGetTokenMetadata(tokenMidId, 'hybridSmartRoutingEstimate'));
 
     const estimate1 = {
       ...(isStablePool(stablePoolsDetail, pool1.id)
@@ -549,9 +577,13 @@ export async function getHybridStableSmart(
       tokens: [tokenIn, tokenMidMeta, tokenOut],
       inputToken: tokenIn.id,
       outputToken: tokenMidMeta.id,
+      status: PoolMode.SMART,
     };
 
-    estimate1.pool.partialAmountIn = parsedAmountIn;
+    estimate1.pool = {
+      ...estimate1.pool,
+      partialAmountIn: parsedAmountIn,
+    };
 
     const estimate2 = {
       ...(isStablePool(stablePoolsDetail, pool2.id)
@@ -571,6 +603,7 @@ export async function getHybridStableSmart(
       tokens: [tokenIn, tokenMidMeta, tokenOut],
       inputToken: tokenMidMeta.id,
       outputToken: tokenOut.id,
+      status: PoolMode.SMART,
     };
 
     return { actions: [estimate1, estimate2], estimate: estimate2.estimate };
@@ -604,22 +637,25 @@ export const estimateSwap = async ({
       stablePools: stablePoolsDetail,
     });
 
-    console.log(estimate, 'estimate');
-
     return [
       {
         ...estimate,
+        status: PoolMode.PARALLEL,
         pool: { ...estimate?.pool, partialAmountIn: parsedAmountIn },
+        tokens: [tokenIn, tokenOut],
       },
     ] as EstimateSwapView[];
   } else {
     const inputPools = simplePools.map(p => poolFormatter(p));
 
+    const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
+
     const simplePoolSmartRoutingActions = await stableSmart(
       inputPools,
       tokenIn.id,
       tokenOut.id,
-      parsedAmountIn
+      parsedAmountIn,
+      allTokens
     );
 
     const simplePoolSmartRoutingEstimate = getExpectedOutputFromActionsORIG(
@@ -633,7 +669,8 @@ export const estimateSwap = async ({
       amountIn,
       stablePools || [],
       stablePoolsDetail || [],
-      simplePools
+      simplePools,
+      allTokens
     );
 
     const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();

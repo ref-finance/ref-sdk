@@ -37,3 +37,5 @@ export const AccountIdMisMatch = formatError(
 );
 
 export const NoCredential = formatError('No Credential to such path');
+
+export const NoAccountIdFound = formatError('No account id found');

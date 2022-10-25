@@ -1,4 +1,5 @@
 import Big from 'big.js';
+import { PoolMode } from './swap';
 
 export interface TokenMetadata {
   id: string;
@@ -91,6 +92,7 @@ export interface EstimateSwapView {
   pool: Pool;
   intl?: any;
   dy?: string;
+  status?: PoolMode;
   noFeeAmountOut?: string;
   inputToken?: string;
   outputToken?: string;

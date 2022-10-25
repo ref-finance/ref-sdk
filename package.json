@@ -14,7 +14,7 @@
     "build": "tsdx build --format esm,cjs,umd",
     "test": "tsdx test --passWithNoTests",
     "lint": "tsdx lint",
-    "prepare": "NEAR_ENV=testnet tsdx build --format esm,cjs,umd",
+    "prepare": "tsdx build --format esm,cjs,umd",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
@@ -49,15 +49,23 @@
     "@size-limit/preset-small-lib": "^8.0.1",
     "@types/react": "^17.0.17",
     "@types/react-dom": "^17.0.6",
+    "autoprefixer": "^10.4.12",
+    "buffer": "^6.0.3",
     "husky": "^8.0.1",
+    "os-browserify": "^0.3.0",
+    "postcss": "^8.4.18",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "rollup-plugin-postcss": "^4.0.2",
     "size-limit": "^8.0.1",
+    "tailwindcss": "^3.1.8",
     "tsdx": "^0.14.1",
     "tslib": "^2.4.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "@near-wallet-selector/core": "^7.0.0",
     "@types/big.js": "^6.1.5",
     "@types/bn.js": "^5.1.1",
     "@types/lodash": "^4.14.182",
@@ -66,6 +74,9 @@
     "lodash-es": "^4.17.21",
     "mathjs": "^9.3.0",
     "near-api-js": "0.44.2",
-    "node-notifier": "^8.0.1"
+    "node-notifier": "^8.0.1",
+    "lodash": "^4.17.21",
+    "bn.js": "^5.2.0",
+    "@react-icons/all-files": "^4.1.0"
   }
 }
