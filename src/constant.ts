@@ -24,8 +24,7 @@ export function getConfig(
     case 'testnet':
       return {
         networkId: 'testnet',
-        nodeUrl:
-          'https://near-testnet.infura.io/v3/388c72223585424086eea3872bb0ba2c',
+        nodeUrl: 'https://rpc.testnet.near.org',
         walletUrl: 'https://wallet.testnet.near.org',
         indexerUrl: 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
