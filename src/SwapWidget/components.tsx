@@ -1707,6 +1707,8 @@ export const Notification = ({
       <div
         style={{
           fontSize: '16px',
+          marginTop: '10px',
+          marginBottom: '6px',
         }}
       >
         {state === 'success' && <p>Sucess!</p>}

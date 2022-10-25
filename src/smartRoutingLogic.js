@@ -10,7 +10,6 @@ import { TokenMetadata } from './types';
 import { ftGetTokenMetadata } from './ref';
 
 import { percentLess, toNonDivisibleNumber } from './utils';
-import { getTokens } from './indexer';
 Big.RM = 0;
 Big.DP = 40;
 Big.NE = -40;

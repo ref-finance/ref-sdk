@@ -27,7 +27,8 @@ export const instantSwap = async ({
 }) => {
   const transactions: Transaction[] = [];
 
-  if (swapTodos?.at(-1)?.outputToken !== tokenOut.id) throw SwapRouteError;
+  if (swapTodos?.[swapTodos?.length - 1]?.outputToken !== tokenOut.id)
+    throw SwapRouteError;
 
   const registerToken = async (token: TokenMetadata) => {
     const tokenRegistered = await ftGetStorageBalance(

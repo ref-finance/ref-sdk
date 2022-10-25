@@ -18,6 +18,10 @@ export const getTokens = async (reload?: boolean) => {
       ? localStorage.getItem(REF_WIDGET_ALL_TOKENS_LIST_KEY)
       : null;
 
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
   return storagedTokens
     ? JSON.parse(storagedTokens)
     : await fetch(config.indexerUrl + '/list-token', {
