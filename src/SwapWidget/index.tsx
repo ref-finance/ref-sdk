@@ -155,7 +155,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     if (
       tokens.length > 0 &&
       defaultIn &&
-      tokens.findIndex(t => t.id === defaultIn)
+      tokens.findIndex(t => t.id === defaultIn) !== -1
     ) {
       if (defaultIn === WRAP_NEAR_CONTRACT_ID || defaultIn === 'NEAR') {
         handleSetTokenIn({
@@ -169,7 +169,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     if (
       tokens.length > 0 &&
       defaultOut &&
-      tokens.findIndex(t => t.id === defaultOut)
+      tokens.findIndex(t => t.id === defaultOut) !== -1
     ) {
       if (defaultOut === WRAP_NEAR_CONTRACT_ID || defaultOut === 'NEAR') {
         handleSetTokenOut({
