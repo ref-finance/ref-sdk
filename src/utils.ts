@@ -406,9 +406,11 @@ export function getExpectedOutputFromSwapTodos(
   estimates: EstimateSwapView[],
   outputToken: string
 ) {
+  if (!estimates || estimates.length === 0) return new Big(0);
+
   return estimates
     .filter(item => item.outputToken === outputToken)
-    .map(item => new Big(item.estimate))
+    .map(item => new Big(item.estimate || 0))
     .reduce((a, b) => a.plus(b), new Big(0));
 }
 

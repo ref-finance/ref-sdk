@@ -86,7 +86,7 @@ export const estimateValidator = (
   if (
     tokenInId !== tokenIn.id ||
     tokenOutId !== tokenOut.id ||
-    !totalPartialAmountIn.eq(parsedAmountIn)
+    !totalPartialAmountIn.eq(parsedAmountIn || '0')
   ) {
     return false;
   }
