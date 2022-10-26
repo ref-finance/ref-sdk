@@ -67,7 +67,7 @@ import {
 } from '../utils';
 import { REF_WIDGET_SWAP_DETAIL_KEY } from './constant';
 import { PoolMode } from '../swap';
-import { isMobile, separateRoutes } from '../utils';
+import { isMobile, separateRoutes, divide } from '../utils';
 
 interface TokenAmountProps {
   balance?: string;
@@ -94,17 +94,18 @@ export const getPriceImpact = (
       : 'text-error';
 
   const displayValue = scientificNotationToString(
-    multiply(tokenInAmount || '0', percent(value, '100'))
+    multiply(tokenInAmount || '0', divide(value, '100'))
   );
 
   const tokenInInfo =
     Number(displayValue) > 0 && Number(displayValue) < 0.001
-      ? '< 0.001'
+      ? ` / < 0.001 ${toRealSymbol(tokenIn.symbol)}`
       : Number(displayValue) <= 0
       ? ` / 0 ${toRealSymbol(tokenIn.symbol)}`
-      : ` / -${toInternationalCurrencySystemLongString(displayValue, 3)} ${
-          tokenIn.symbol
-        }`;
+      : ` / -${toInternationalCurrencySystemLongString(
+          displayValue,
+          3
+        )} ${toRealSymbol(tokenIn.symbol)}`;
 
   if (Number(value) < 0.01)
     return (
@@ -409,7 +410,7 @@ export const DetailView = ({
       {!showDetail ? null : (
         <>
           <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap-detail-view-item">
-            <div>Mimimum received</div>
+            <div>Minimum received</div>
             <div>{toPrecision(minReceived || '0', 8)}</div>
           </div>
 
@@ -609,6 +610,30 @@ export const TokenAmount = (props: TokenAmountProps) => {
       ref.current.value = amount;
     }
   };
+
+  const getMax = function(id: string, amount: string) {
+    return id !== WRAP_NEAR_CONTRACT_ID
+      ? amount
+      : Number(amount) <= 0.5
+      ? '0'
+      : String(Number(amount) - 0.5);
+  };
+
+  useEffect(() => {
+    if (
+      ref.current &&
+      token &&
+      token.id === WRAP_NEAR_CONTRACT_ID &&
+      Number(getMax(token.id, balance || '0')) - Number(amount) < 0.5
+    ) {
+      ref.current.setCustomValidity(
+        'Must have 0.5N or more left in wallet for gas fee.'
+      );
+    } else if (ref.current) {
+      ref.current.setCustomValidity('');
+    }
+  }, [ref, balance, amount, token, token?.id]);
+
   return (
     <>
       <div
@@ -697,7 +722,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
         >
           <input
             ref={ref}
-            max={balance || '0'}
+            max={(token && getMax(token?.id, balance || '0')) || '0'}
             min="0"
             onWheel={() => {
               if (ref.current) {
@@ -899,7 +924,7 @@ export const SlippageSelector = ({
       </div>
       {invalid && (
         <div
-          className=" text-xs py-3"
+          className=" text-xs py-3 __ref-swap-widget-row-flex-center"
           style={{
             color: '#DE5050',
             fontSize: '12px',
@@ -912,8 +937,13 @@ export const SlippageSelector = ({
               marginRight: '4px',
             }}
           />
-
-          {'The slippage tolerance is invalid.'}
+          <span
+            style={{
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {'The slippage tolerance is invalid.'}
+          </span>
         </div>
       )}
     </div>

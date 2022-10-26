@@ -331,11 +331,16 @@ export const getAvgFee = (
 
     fee = fee.plus(
       r
-        .reduce((acc, cur) => acc.plus(cur.pool.fee || 0), new Big(0))
+        .reduce(
+          (acc, cur) => acc.plus(cur.pool.fee || cur.pool.total_fee || 0),
+          new Big(0)
+        )
         .times(partialAmountIn)
         .div(ONLY_ZEROS.test(parsedAmountIn) ? '1' : parsedAmountIn)
     );
   });
+
+  console.log(parsedAmountIn, fee.toString(), estimates);
 
   return fee.toNumber();
 };
@@ -481,6 +486,10 @@ export const calculateSmartRoutingPriceImpact = (
       ).toString()
     : calculateMarketPrice(swapTodos[0].pool, tokenIn, tokenMid);
 
+  console.log({
+    marketPrice1,
+  });
+
   const marketPrice2 = isPool2StablePool
     ? (
         Number(swapTodos[1].pool.rates?.[tokenOut.id]) /
@@ -498,6 +507,10 @@ export const calculateSmartRoutingPriceImpact = (
         tokenIn,
         tokenMid
       );
+
+  console.log({
+    tokenminreceived: tokenMidReceived,
+  });
 
   const formattedTokenMidReceived = scientificNotationToString(
     tokenMidReceived?.toString() || '0'
@@ -538,10 +551,14 @@ export const calculateSmartRoutingPriceImpact = (
     `${tokenInAmount} / ${tokenOutReceived}`
   );
 
+  console.log({ newMarketPrice, generalMarketPrice });
+
   const PriceImpact = new Big(newMarketPrice)
     .minus(new Big(generalMarketPrice))
     .div(newMarketPrice)
+    .times(100)
     .toString();
+  console.log({ PriceImpact });
 
   return scientificNotationToString(PriceImpact);
 };
@@ -610,6 +627,7 @@ export const calculatePriceImpact = (
   const PriceImpact = new Big(newMarketPrice)
     .minus(new Big(finalMarketPrice))
     .div(newMarketPrice)
+    .times(100)
     .toString();
 
   return scientificNotationToString(PriceImpact);
@@ -707,7 +725,7 @@ export const getPriceImpact = ({
         amountIn,
         estimates,
         tokenIn,
-        estimates[1].tokens?.[1] || tokenIn,
+        estimates[0].tokens?.[1] || tokenIn,
         tokenOut,
         stablePools
       );
@@ -724,14 +742,22 @@ export const getPriceImpact = ({
         ).toString()
       );
     } else priceImpactValueSmartRouting = '0';
+  } catch (error) {
+    priceImpactValueSmartRouting = '0';
+  }
 
+  try {
     priceImpactValueSmartRoutingV2 = calculateSmartRoutesV2PriceImpact(
       estimates,
       tokenOut.id,
       tokenIn,
       stablePools
     );
+  } catch (error) {
+    priceImpactValueSmartRoutingV2 = '0';
+  }
 
+  try {
     if (
       estimates[0].status === PoolMode.SMART ||
       estimates[0].status === PoolMode.STABLE
@@ -809,3 +835,8 @@ export function getPoolAllocationPercents(pools: Pool[]) {
 export const isMobile = (): boolean => {
   return window.screen.width <= 600;
 };
+export function divide(numerator: string, denominator: string) {
+  return math.format(math.evaluate(`${numerator} / ${denominator}`), {
+    notation: 'fixed',
+  });
+}

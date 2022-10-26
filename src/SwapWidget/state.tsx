@@ -298,7 +298,7 @@ export const useSwap = (
       AccountId: AccountId || '',
     });
     if (tokenIn && tokenIn.id === WRAP_NEAR_CONTRACT_ID) {
-      transactionsRef.unshift(nearDepositTransaction(amountIn));
+      transactionsRef.splice(-1, 0, nearDepositTransaction(amountIn));
     }
     if (tokenOut && tokenOut.id === WRAP_NEAR_CONTRACT_ID) {
       let outEstimate = new Big(0);

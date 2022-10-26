@@ -258,6 +258,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     !swapError &&
     isSignedIn &&
     new Big(tokenInBalance || '0').gte(amountIn || '0') &&
+    slippageTolerance > 0 &&
     !ONLY_ZEROS.test(tokenInBalance);
 
   return (
@@ -309,7 +310,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                     onMouseEnter={() => setHoverAccount(true)}
                     onMouseLeave={() => setHoverAccount(false)}
                   >
-                    {hoverAccount ? 'Diconnect' : getAccountName(AccountId)}
+                    {hoverAccount ? 'Disconnect' : getAccountName(AccountId)}
                   </div>
                 )}
 

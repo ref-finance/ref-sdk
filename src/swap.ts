@@ -85,11 +85,13 @@ export const getStablePoolEstimate = ({
   tokenOut,
   amountIn,
   stablePool,
+  pool,
 }: {
   tokenIn: TokenMetadata;
   tokenOut: TokenMetadata;
   amountIn: string;
   stablePool: StablePool;
+  pool: Pool;
 }) => {
   const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
 
@@ -111,10 +113,20 @@ export const getStablePoolEstimate = ({
       ? '0'
       : toPrecision(scientificNotationToString(dy.toString()), 0);
 
+  const rates = stablePool.rates.reduce((acc, cur, i) => {
+    return {
+      ...acc,
+      [stablePool.token_account_ids[i]]: cur,
+    };
+  }, {});
+
   return {
     estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
     noFeeAmountOut: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, dyOut),
-    pool: stablePool,
+    pool: {
+      ...pool,
+      rates,
+    },
     outputToken: tokenOut.id,
     inputToken: tokenIn.id,
   };
@@ -171,6 +183,7 @@ export const singlePoolSwap = ({
       tokenOut,
       amountIn,
       stablePool,
+      pool: simplePools.find(p => p.id === stablePool.id) as Pool,
     })
   );
 
@@ -263,6 +276,7 @@ export const getPoolEstimate = async ({
       tokenOut,
       stablePool: stablePoolDetail,
       amountIn,
+      pool,
     });
   } else {
     return getSimplePoolEstimate({
@@ -460,6 +474,7 @@ export async function getHybridStableSmart(
                     tokenOut,
                     stablePool: stablePoolDetailThisPair as StablePool,
                     amountIn,
+                    pool: poolPair[0],
                   }).estimate
                 );
               } else {
@@ -488,6 +503,7 @@ export async function getHybridStableSmart(
                     tokenOut: tokenMidMeta,
                     amountIn,
                     stablePool: stablePoolsDetailById[tmpPool1.id],
+                    pool: tmpPool1,
                   })
                 : getSimplePoolEstimate({
                     tokenIn,
@@ -505,6 +521,7 @@ export async function getHybridStableSmart(
                     tokenOut,
                     amountIn: estimate1.estimate,
                     stablePool: stablePoolsDetailById[tmpPool2.id],
+                    pool: tmpPool2,
                   })
                 : getSimplePoolEstimate({
                     tokenIn: tokenMidMeta,
@@ -567,6 +584,7 @@ export async function getHybridStableSmart(
             tokenOut: tokenMidMeta,
             amountIn,
             stablePool: stablePoolsDetailById[pool1.id],
+            pool: pool1,
           })
         : getSimplePoolEstimate({
             tokenIn,
@@ -592,6 +610,7 @@ export async function getHybridStableSmart(
             tokenOut,
             amountIn: estimate1.estimate,
             stablePool: stablePoolsDetailById[pool2.id],
+            pool: pool2,
           })
         : getSimplePoolEstimate({
             tokenIn: tokenMidMeta,
