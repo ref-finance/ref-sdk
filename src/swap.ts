@@ -177,15 +177,15 @@ export const singlePoolSwap = ({
   );
 
   // different stable lp token decimal for different type of pools
-  const estimatesStablePool = stablePoolThisPair?.map(stablePool =>
-    getStablePoolEstimate({
+  const estimatesStablePool = stablePoolThisPair?.map(stablePool => {
+    return getStablePoolEstimate({
       tokenIn,
       tokenOut,
       amountIn,
       stablePool,
       pool: simplePools.find(p => p.id === stablePool.id) as Pool,
-    })
-  );
+    });
+  });
 
   const maxSimplePoolEstimate =
     estimatesSimplePool === undefined || estimatesSimplePool.length === 0
@@ -555,7 +555,7 @@ export async function getHybridStableSmart(
             ...estimate,
             status: PoolMode.STABLE,
 
-            pool: { ...bestPool, partialAmountIn: parsedAmountIn },
+            pool: { ...estimate.pool, partialAmountIn: parsedAmountIn },
             tokens: [tokenIn, tokenOut],
             inputToken: tokenIn.id,
             outputToken: tokenOut.id,
@@ -647,7 +647,9 @@ export const estimateSwap = async ({
 
   const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
 
-  if (!enableSmartRouting) {
+  let singleRouteEstimate: EstimateSwapView[] = [];
+
+  try {
     const estimate = singlePoolSwap({
       tokenIn,
       tokenOut,
@@ -656,53 +658,85 @@ export const estimateSwap = async ({
       stablePools: stablePoolsDetail,
     });
 
-    return [
+    singleRouteEstimate = [
       {
         ...estimate,
         status: PoolMode.PARALLEL,
         pool: { ...estimate?.pool, partialAmountIn: parsedAmountIn },
+        totalInputAmount: toNonDivisibleNumber(tokenIn.decimals, amountIn),
         tokens: [tokenIn, tokenOut],
       },
     ] as EstimateSwapView[];
-  } else {
-    const inputPools = simplePools.map(p => poolFormatter(p));
+    if (!enableSmartRouting) {
+      return singleRouteEstimate;
+    }
+  } catch (error) {
+    if (!enableSmartRouting) throw error;
+  }
 
-    const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
+  console.log({ singleRouteEstimate });
 
-    const simplePoolSmartRoutingActions = await stableSmart(
-      inputPools,
-      tokenIn.id,
-      tokenOut.id,
-      parsedAmountIn,
-      allTokens
-    );
+  const inputPools = simplePools.map(p => poolFormatter(p));
 
-    const simplePoolSmartRoutingEstimate = getExpectedOutputFromActionsORIG(
-      simplePoolSmartRoutingActions,
-      tokenOut.id
-    ).toString();
+  const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
 
-    const hybridSmartRoutingRes = await getHybridStableSmart(
-      tokenIn,
-      tokenOut,
-      amountIn,
-      stablePools || [],
-      stablePoolsDetail || [],
-      simplePools,
-      allTokens
-    );
+  const simplePoolSmartRoutingActions = await stableSmart(
+    inputPools,
+    tokenIn.id,
+    tokenOut.id,
+    parsedAmountIn,
+    allTokens
+  );
 
-    const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
+  const simplePoolSmartRoutingEstimate = getExpectedOutputFromActionsORIG(
+    simplePoolSmartRoutingActions,
+    tokenOut.id
+  ).toString();
+
+  const hybridSmartRoutingRes = await getHybridStableSmart(
+    tokenIn,
+    tokenOut,
+    amountIn,
+    stablePools || [],
+    stablePoolsDetail || [],
+    simplePools,
+    allTokens
+  );
+
+  console.log({ hybridSmartRoutingRes, simplePoolSmartRoutingEstimate });
+
+  const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
+
+  if (
+    new Big(simplePoolSmartRoutingEstimate || '0').gte(
+      hybridSmartRoutingEstimate || '0'
+    )
+  ) {
+    if (!simplePoolSmartRoutingActions?.length) throw NoPoolError;
 
     if (
-      new Big(simplePoolSmartRoutingEstimate || '0').gte(
+      typeof singleRouteEstimate !== 'undefined' &&
+      singleRouteEstimate &&
+      singleRouteEstimate?.[0]?.estimate &&
+      new Big(singleRouteEstimate[0].estimate || '0').gt(
+        simplePoolSmartRoutingEstimate || '0'
+      )
+    ) {
+      return singleRouteEstimate;
+    }
+    return simplePoolSmartRoutingActions as EstimateSwapView[];
+  } else {
+    if (
+      typeof singleRouteEstimate !== 'undefined' &&
+      singleRouteEstimate &&
+      singleRouteEstimate?.[0]?.estimate &&
+      new Big(singleRouteEstimate[0].estimate || '0').gt(
         hybridSmartRoutingEstimate || '0'
       )
     ) {
-      if (!simplePoolSmartRoutingActions?.length) throw NoPoolError;
-      return simplePoolSmartRoutingActions as EstimateSwapView[];
-    } else {
-      return hybridSmartRoutingRes.actions as EstimateSwapView[];
+      return singleRouteEstimate;
     }
+
+    return hybridSmartRoutingRes.actions as EstimateSwapView[];
   }
 };

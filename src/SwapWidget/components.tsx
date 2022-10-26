@@ -622,17 +622,21 @@ export const TokenAmount = (props: TokenAmountProps) => {
   useEffect(() => {
     if (
       ref.current &&
+      onChangeAmount &&
       token &&
+      balance &&
       token.id === WRAP_NEAR_CONTRACT_ID &&
-      Number(getMax(token.id, balance || '0')) - Number(amount) < 0.5
+      Number(balance) - Number(ref.current.value) < 0.5
     ) {
       ref.current.setCustomValidity(
         'Must have 0.5N or more left in wallet for gas fee.'
       );
-    } else if (ref.current) {
-      ref.current.setCustomValidity('');
+    } else {
+      ref.current?.setCustomValidity('');
     }
-  }, [ref, balance, amount, token, token?.id]);
+  }, [ref, balance, ref.current, ref.current?.value, token, amount]);
+
+  const curMax = token ? getMax(token.id, balance || '0') : '0';
 
   return (
     <>
@@ -722,7 +726,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
         >
           <input
             ref={ref}
-            max={(token && getMax(token?.id, balance || '0')) || '0'}
+            max={!!onChangeAmount ? curMax : undefined}
             min="0"
             onWheel={() => {
               if (ref.current) {
@@ -734,7 +738,10 @@ export const TokenAmount = (props: TokenAmountProps) => {
             value={amount}
             type="number"
             placeholder={!onChangeAmount ? '-' : '0.0'}
-            onChange={({ target }) => handleChange(target.value)}
+            onChange={({ target }) => {
+              target.setCustomValidity('');
+              handleChange(target.value);
+            }}
             disabled={!onChangeAmount}
             onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{

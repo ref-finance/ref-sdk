@@ -257,6 +257,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     isSignedIn &&
     new Big(tokenInBalance || '0').gte(amountIn || '0') &&
     slippageTolerance > 0 &&
+    slippageTolerance < 100 &&
     !ONLY_ZEROS.test(tokenInBalance);
 
   return (

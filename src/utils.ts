@@ -609,6 +609,10 @@ export const calculatePriceImpact = (
 
   const finalMarketPrice = math.evaluate(`(${in_balance} / ${out_balance})`);
 
+  console.log({
+    finalMarketPrice,
+  });
+
   const separatedReceivedAmount = pools.map(pool => {
     return calculateAmountReceived(
       pool,
@@ -620,15 +624,21 @@ export const calculatePriceImpact = (
 
   const finalTokenOutReceived = math.sum(...separatedReceivedAmount);
 
+  console.log({ finalTokenOutReceived });
+
   const newMarketPrice = math.evaluate(
     `${tokenInAmount} / ${finalTokenOutReceived}`
   );
+
+  console.log({ newMarketPrice });
 
   const PriceImpact = new Big(newMarketPrice)
     .minus(new Big(finalMarketPrice))
     .div(newMarketPrice)
     .times(100)
     .toString();
+
+  console.log({ PriceImpact });
 
   return scientificNotationToString(PriceImpact);
 };
@@ -683,17 +693,21 @@ export function calculateSmartRoutesV2PriceImpact(
     }
   });
 
+  console.log({ priceImpactForRoutes, routes, totalInputAmount });
+
   const rawRes = priceImpactForRoutes.reduce(
     (pre, cur, i) => {
       return pre.plus(
         new Big(routes[i][0].pool.partialAmountIn || '0')
-          .div(new Big(totalInputAmount || '0'))
+          .div(new Big(totalInputAmount || '1'))
           .mul(cur)
       );
     },
 
     new Big(0)
   );
+
+  console.log({ rawRes });
 
   return scientificNotationToString(rawRes.toString());
 }
@@ -753,6 +767,8 @@ export const getPriceImpact = ({
       tokenIn,
       stablePools
     );
+
+    console.log({ priceImpactValueSmartRoutingV2 });
   } catch (error) {
     priceImpactValueSmartRoutingV2 = '0';
   }
