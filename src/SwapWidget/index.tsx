@@ -35,6 +35,7 @@ import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon } from './components';
 import Big from 'big.js';
+import { ONLY_ZEROS } from '../utils';
 import {
   defaultTheme,
   defaultDarkModeTheme,
@@ -256,7 +257,8 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     canSwap &&
     !swapError &&
     isSignedIn &&
-    new Big(tokenInBalance || '0').gte(amountIn || '0');
+    new Big(tokenInBalance || '0').gte(amountIn || '0') &&
+    !ONLY_ZEROS.test(tokenInBalance);
 
   return (
     <ThemeContextProvider customTheme={curTheme}>
