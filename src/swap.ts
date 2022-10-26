@@ -91,7 +91,7 @@ export const getStablePoolEstimate = ({
   tokenOut: TokenMetadata;
   amountIn: string;
   stablePool: StablePool;
-  pool: Pool;
+  pool?: Pool;
 }) => {
   const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
 
@@ -124,7 +124,7 @@ export const getStablePoolEstimate = ({
     estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
     noFeeAmountOut: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, dyOut),
     pool: {
-      ...pool,
+      ...stablePool,
       rates,
     },
     outputToken: tokenOut.id,
