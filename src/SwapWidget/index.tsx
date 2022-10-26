@@ -33,7 +33,7 @@ import './style.css';
 import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
 
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
-import { RefIcon } from './components';
+import { RefIcon, AccountButton } from './components';
 import Big from 'big.js';
 import { ONLY_ZEROS } from '../utils';
 import {
@@ -144,8 +144,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   const { allPools, allStablePools, poolFetchingState } = useRefPools(
     refreshTrigger
   );
-
-  const [hoverAccount, setHoverAccount] = useState<boolean>(false);
 
   useEffect(() => {
     const defaultIn =
@@ -291,28 +289,10 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                   position: 'relative',
                 }}
               >
-                {!AccountId ? null : (
-                  <div
-                    className="__ref-swap-widget-header-button-account __ref-swap-widget-row-flex-center"
-                    style={{
-                      color: primary,
-                      background: hoverAccount
-                        ? 'rgba(255,104,158,0.2)'
-                        : secondaryBg,
-                      border: `1px solid ${borderColor}`,
-                      cursor: 'pointer',
-                    }}
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      hoverAccount && onDisConnect();
-                    }}
-                    onMouseEnter={() => setHoverAccount(true)}
-                    onMouseLeave={() => setHoverAccount(false)}
-                  >
-                    {hoverAccount ? 'Disconnect' : getAccountName(AccountId)}
-                  </div>
-                )}
+                <AccountButton
+                  onDisConnect={onDisConnect}
+                  AccountId={AccountId}
+                />
 
                 <Slider showSlip={showSlip} setShowSlip={setShowSlip} />
 

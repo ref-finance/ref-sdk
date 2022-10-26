@@ -873,7 +873,7 @@ export const SlippageSelector = ({
           className={`__ref-swap-widget-row-flex-center
         __ref-swap-widget_slippage_selector_input_container`}
           style={{
-            border: `1px solid ${invalid ? '#DE5050' : borderColor}`,
+            border: `1px solid ${invalid ? '#FF7575' : borderColor}`,
             borderRadius,
           }}
         >
@@ -896,7 +896,7 @@ export const SlippageSelector = ({
             onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
               width: '100%',
-              color: invalid ? '#DE5050' : primary,
+              color: invalid ? '#FF7575' : primary,
             }}
             className="__ref-swap-widget-input-class"
           />
@@ -926,9 +926,10 @@ export const SlippageSelector = ({
         <div
           className=" text-xs py-3 __ref-swap-widget-row-flex-center"
           style={{
-            color: '#DE5050',
+            color: '#FF7575',
             fontSize: '12px',
             padding: '10px 0px',
+            alignItems: 'start',
           }}
         >
           <IoWarning
@@ -936,14 +937,9 @@ export const SlippageSelector = ({
             style={{
               marginRight: '4px',
             }}
+            size={20}
           />
-          <span
-            style={{
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {'The slippage tolerance is invalid.'}
-          </span>
+          <div>{'The slippage tolerance is invalid.'}</div>
         </div>
       )}
     </div>
@@ -1808,6 +1804,53 @@ export const ArrowRight = () => {
           fill="#7E8A93"
         />
       </svg>
+    </div>
+  );
+};
+
+export const AccountButton = ({
+  AccountId,
+  onDisConnect,
+}: {
+  AccountId: string;
+  onDisConnect: () => void;
+}) => {
+  const [hoverAccount, setHoverAccount] = useState<boolean>(false);
+
+  const theme = useContext(ThemeContext);
+  const {
+    container,
+    buttonBg,
+    primary,
+    secondary,
+    borderRadius,
+    fontFamily,
+    hover,
+    active,
+    secondaryBg,
+    iconDefault,
+    iconHover,
+    borderColor,
+  } = theme;
+
+  return !AccountId ? null : (
+    <div
+      className="__ref-swap-widget-header-button-account __ref-swap-widget-row-flex-center"
+      style={{
+        color: primary,
+        background: secondaryBg,
+        border: `1px solid ${borderColor}`,
+        cursor: 'pointer',
+      }}
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        hoverAccount && onDisConnect();
+      }}
+      onMouseEnter={() => setHoverAccount(true)}
+      onMouseLeave={() => setHoverAccount(false)}
+    >
+      {hoverAccount ? 'Disconnect' : getAccountName(AccountId)}
     </div>
   );
 };
