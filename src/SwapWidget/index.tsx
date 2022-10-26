@@ -256,7 +256,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     canSwap &&
     !swapError &&
     isSignedIn &&
-    new Big(tokenInBalance).gte(amountIn || '0');
+    new Big(tokenInBalance || '0').gte(amountIn || '0');
 
   return (
     <ThemeContextProvider customTheme={curTheme}>
