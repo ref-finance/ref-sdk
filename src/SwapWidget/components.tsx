@@ -98,9 +98,7 @@ export const getPriceImpact = (
   );
 
   const tokenInInfo =
-    Number(displayValue) > 0 && Number(displayValue) < 0.001
-      ? ` / < 0.001 ${toRealSymbol(tokenIn.symbol)}`
-      : Number(displayValue) <= 0
+    Number(displayValue) <= 0
       ? ` / 0 ${toRealSymbol(tokenIn.symbol)}`
       : ` / -${toInternationalCurrencySystemLongString(
           displayValue,
