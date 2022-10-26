@@ -924,6 +924,7 @@ export const SlippageSelector = ({
             e.stopPropagation();
             e.preventDefault();
             onChangeSlippageTolerance(0.5);
+            setInValid(false);
           }}
         >
           Auto
