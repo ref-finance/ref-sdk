@@ -1,14 +1,14 @@
-import { TokenMetadata, EstimateSwapView, Transaction } from './types';
-import { ftGetStorageBalance } from './ref';
+import { TokenMetadata, EstimateSwapView, Transaction } from '../types';
+import { ftGetStorageBalance } from '../ref';
 import {
   STORAGE_TO_REGISTER_WITH_MFT,
   REF_FI_CONTRACT_ID,
   ONE_YOCTO_NEAR,
-} from './constant';
-import { round, percentLess } from './utils';
-import { toNonDivisibleNumber } from './utils';
-import { config } from './constant';
-import { SwapRouteError } from './error';
+} from '../constant';
+import { round, percentLess } from '../utils';
+import { toNonDivisibleNumber } from '../utils';
+import { config } from '../constant';
+import { SwapRouteError } from '../error';
 
 export const instantSwap = async ({
   tokenIn,

@@ -27,7 +27,7 @@ import { REF_FI_CONTRACT_ID, WRAP_NEAR_CONTRACT_ID } from './constant';
 import Big from 'big.js';
 import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 import { TokenMetadata } from './types';
-import { PoolMode } from './swap';
+import { PoolMode } from './v1-swap/swap';
 import { getSwappedAmount } from './stable-swap';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({

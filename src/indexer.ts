@@ -1,5 +1,5 @@
 import { config, WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from './constant';
-import { REF_WIDGET_ALL_TOKENS_LIST_KEY } from './SwapWidget/constant';
+import { REF_WIDGET_ALL_TOKENS_LIST_KEY } from './swap-widget/constant';
 
 export const getTokenPriceList = async (): Promise<any> => {
   return await fetch(config.indexerUrl + '/list-token-price', {

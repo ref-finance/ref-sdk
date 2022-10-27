@@ -19,8 +19,8 @@ import {
   TokenMetadata,
   Transaction,
 } from '../types';
-import { fetchAllPools, getStablePools } from '../pool';
-import { estimateSwap, SwapOptions, SwapParams } from '../swap';
+import { fetchAllPools, getStablePools } from '../v1-swap/pool';
+import { estimateSwap, SwapOptions, SwapParams } from '../v1-swap/swap';
 import { SwapOutParams } from './types';
 import {
   percentLess,
@@ -30,9 +30,9 @@ import {
   getAvgFee,
 } from '../utils';
 import Big from 'big.js';
-import { instantSwap } from '../instantSwap';
+import { instantSwap } from '../v1-swap/instantSwap';
 
-import { getExpectedOutputFromActionsORIG } from '../smartRoutingLogic.js';
+import { getExpectedOutputFromActionsORIG } from '../v1-swap/smartRoutingLogic.js';
 import { Theme } from './constant';
 import { defaultTheme } from './constant';
 import {

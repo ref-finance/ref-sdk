@@ -4,9 +4,9 @@ export * from './error';
 
 export * from './utils';
 
-export * from './instantSwap';
+export * from './v1-swap/instantSwap';
 
-export * from './pool';
+export * from './v1-swap/pool';
 
 export * from './types';
 
@@ -14,10 +14,10 @@ export * from './ref';
 
 export * from './stable-swap';
 
-export * from './swap';
+export * from './v1-swap/swap';
 
 export * from './near';
 
-export * from './SwapWidget';
+export * from './swap-widget';
 
-export * from './defaultTokenList';
+export * from './swap-widget/defaultTokenList';
