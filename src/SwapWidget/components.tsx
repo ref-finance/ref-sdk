@@ -67,7 +67,7 @@ import {
 } from '../utils';
 import { REF_WIDGET_SWAP_DETAIL_KEY } from './constant';
 import { PoolMode } from '../swap';
-import { isMobile, separateRoutes } from '../utils';
+import { isMobile, separateRoutes, divide, getMax } from '../utils';
 
 interface TokenAmountProps {
   balance?: string;
@@ -94,17 +94,16 @@ export const getPriceImpact = (
       : 'text-error';
 
   const displayValue = scientificNotationToString(
-    multiply(tokenInAmount || '0', percent(value, '100'))
+    multiply(tokenInAmount || '0', divide(value, '100'))
   );
 
   const tokenInInfo =
-    Number(displayValue) > 0 && Number(displayValue) < 0.001
-      ? '< 0.001'
-      : Number(displayValue) <= 0
+    Number(displayValue) <= 0
       ? ` / 0 ${toRealSymbol(tokenIn.symbol)}`
-      : ` / -${toInternationalCurrencySystemLongString(displayValue, 3)} ${
-          tokenIn.symbol
-        }`;
+      : ` / -${toInternationalCurrencySystemLongString(
+          displayValue,
+          3
+        )} ${toRealSymbol(tokenIn.symbol)}`;
 
   if (Number(value) < 0.01)
     return (
@@ -409,7 +408,7 @@ export const DetailView = ({
       {!showDetail ? null : (
         <>
           <div className="__ref-swap-widget-row-flex-center __ref-swap-widget-swap-detail-view-item">
-            <div>Mimimum received</div>
+            <div>Minimum received</div>
             <div>{toPrecision(minReceived || '0', 8)}</div>
           </div>
 
@@ -609,6 +608,26 @@ export const TokenAmount = (props: TokenAmountProps) => {
       ref.current.value = amount;
     }
   };
+
+  useEffect(() => {
+    if (
+      ref.current &&
+      onChangeAmount &&
+      token &&
+      balance &&
+      token.id === WRAP_NEAR_CONTRACT_ID &&
+      Number(balance) - Number(ref.current.value) < 0.5
+    ) {
+      ref.current.setCustomValidity(
+        'Must have 0.5N or more left in wallet for gas fee.'
+      );
+    } else {
+      ref.current?.setCustomValidity('');
+    }
+  }, [ref, balance, ref.current, ref.current?.value, token, amount]);
+
+  const curMax = token ? getMax(token.id, balance || '0') : '0';
+
   return (
     <>
       <div
@@ -697,7 +716,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
         >
           <input
             ref={ref}
-            max={balance || '0'}
+            max={!!onChangeAmount ? curMax : undefined}
             min="0"
             onWheel={() => {
               if (ref.current) {
@@ -709,7 +728,10 @@ export const TokenAmount = (props: TokenAmountProps) => {
             value={amount}
             type="number"
             placeholder={!onChangeAmount ? '-' : '0.0'}
-            onChange={({ target }) => handleChange(target.value)}
+            onChange={({ target }) => {
+              target.setCustomValidity('');
+              handleChange(target.value);
+            }}
             disabled={!onChangeAmount}
             onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
@@ -754,7 +776,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
           {token && (
             <HalfAndMaxAmount
               token={token}
-              max={balance}
+              max={getMax(token.id, balance)}
               onChangeAmount={handleChange}
               amount={amount}
             />
@@ -776,8 +798,6 @@ export const SlippageSelector = ({
   showSlip: boolean;
   setShowSlip: (showSlip: boolean) => void;
 }) => {
-  const [autoHover, setAutoHover] = useState<boolean>(false);
-
   const [invalid, setInValid] = useState<boolean>(false);
 
   const theme = useContext(ThemeContext);
@@ -848,7 +868,7 @@ export const SlippageSelector = ({
           className={`__ref-swap-widget-row-flex-center
         __ref-swap-widget_slippage_selector_input_container`}
           style={{
-            border: `1px solid ${invalid ? '#DE5050' : borderColor}`,
+            border: `1px solid ${invalid ? '#FF7575' : borderColor}`,
             borderRadius,
           }}
         >
@@ -871,7 +891,7 @@ export const SlippageSelector = ({
             onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
               width: '100%',
-              color: invalid ? '#DE5050' : primary,
+              color: invalid ? '#FF7575' : primary,
             }}
             className="__ref-swap-widget-input-class"
           />
@@ -879,19 +899,21 @@ export const SlippageSelector = ({
         </div>
 
         <button
-          className="__ref-swap-widget_slippage_selector_button __ref-swap-widget-button"
-          onMouseEnter={() => setAutoHover(true)}
-          onMouseLeave={() => setAutoHover(false)}
+          className={`__ref-swap-widget_slippage_selector_button __ref-swap-widget-button ${
+            isMobile()
+              ? '__ref-swap-widget-opacity-active'
+              : '__ref-swap-widget-opacity-hover'
+          }`}
           style={{
             color: primary,
             background: buttonBg,
             borderRadius,
-            opacity: autoHover ? 0.5 : 1,
           }}
           onClick={e => {
             e.stopPropagation();
             e.preventDefault();
             onChangeSlippageTolerance(0.5);
+            setInValid(false);
           }}
         >
           Auto
@@ -899,11 +921,12 @@ export const SlippageSelector = ({
       </div>
       {invalid && (
         <div
-          className=" text-xs py-3"
+          className=" text-xs py-3 __ref-swap-widget-row-flex-center"
           style={{
-            color: '#DE5050',
+            color: '#FF7575',
             fontSize: '12px',
             padding: '10px 0px',
+            alignItems: 'start',
           }}
         >
           <IoWarning
@@ -911,9 +934,9 @@ export const SlippageSelector = ({
             style={{
               marginRight: '4px',
             }}
+            size={20}
           />
-
-          {'The slippage tolerance is invalid.'}
+          <div>{'The slippage tolerance is invalid.'}</div>
         </div>
       )}
     </div>
@@ -1711,7 +1734,7 @@ export const Notification = ({
           marginBottom: '6px',
         }}
       >
-        {state === 'success' && <p>Sucess!</p>}
+        {state === 'success' && <p>Success!</p>}
         {state === 'fail' && <p>Swap Failed!</p>}
       </div>
       <div
@@ -1778,6 +1801,53 @@ export const ArrowRight = () => {
           fill="#7E8A93"
         />
       </svg>
+    </div>
+  );
+};
+
+export const AccountButton = ({
+  AccountId,
+  onDisConnect,
+}: {
+  AccountId: string;
+  onDisConnect: () => void;
+}) => {
+  const [hoverAccount, setHoverAccount] = useState<boolean>(false);
+
+  const theme = useContext(ThemeContext);
+  const {
+    container,
+    buttonBg,
+    primary,
+    secondary,
+    borderRadius,
+    fontFamily,
+    hover,
+    active,
+    secondaryBg,
+    iconDefault,
+    iconHover,
+    borderColor,
+  } = theme;
+
+  return !AccountId ? null : (
+    <div
+      className="__ref-swap-widget-header-button-account __ref-swap-widget-row-flex-center"
+      style={{
+        color: primary,
+        background: secondaryBg,
+        border: `1px solid ${borderColor}`,
+        cursor: 'pointer',
+      }}
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        hoverAccount && onDisConnect();
+      }}
+      onMouseEnter={() => setHoverAccount(true)}
+      onMouseLeave={() => setHoverAccount(false)}
+    >
+      {hoverAccount ? 'Disconnect' : getAccountName(AccountId)}
     </div>
   );
 };

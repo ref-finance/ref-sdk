@@ -33,6 +33,7 @@ export interface Pool {
   tokenIds: string[];
   supplies: { [key: string]: string };
   fee: number;
+  total_fee?: number;
   shareSupply: string;
   tvl: number;
   token0_ref_price: string;

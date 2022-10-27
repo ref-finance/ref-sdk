@@ -16,6 +16,7 @@ import {
   toReadableNumber,
   toPrecision,
   getPriceImpact,
+  isMobile,
 } from '../utils';
 import {
   Slider,
@@ -33,8 +34,9 @@ import './style.css';
 import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
 
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
-import { RefIcon } from './components';
+import { RefIcon, AccountButton } from './components';
 import Big from 'big.js';
+import { ONLY_ZEROS } from '../utils';
 import {
   defaultTheme,
   defaultDarkModeTheme,
@@ -144,15 +146,17 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     refreshTrigger
   );
 
-  const [hoverAccount, setHoverAccount] = useState<boolean>(false);
-
   useEffect(() => {
     const defaultIn =
       STORAGED_TOKEN_IN || defaultTokenIn || WRAP_NEAR_CONTRACT_ID;
 
     const defaultOut = STORAGED_TOKEN_OUT || defaultTokenOut || REF_TOKEN_ID;
 
-    if (defaultIn) {
+    if (
+      tokens.length > 0 &&
+      defaultIn &&
+      tokens.findIndex(t => t.id === defaultIn) !== -1
+    ) {
       if (defaultIn === WRAP_NEAR_CONTRACT_ID || defaultIn === 'NEAR') {
         handleSetTokenIn({
           ...NEAR_META_DATA,
@@ -162,7 +166,11 @@ export const SwapWidget = (props: SwapWidgetProps) => {
         ftGetTokenMetadata(defaultIn).then(handleSetTokenIn);
       }
     }
-    if (defaultOut) {
+    if (
+      tokens.length > 0 &&
+      defaultOut &&
+      tokens.findIndex(t => t.id === defaultOut) !== -1
+    ) {
       if (defaultOut === WRAP_NEAR_CONTRACT_ID || defaultOut === 'NEAR') {
         handleSetTokenOut({
           ...NEAR_META_DATA,
@@ -172,7 +180,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
         ftGetTokenMetadata(defaultOut).then(handleSetTokenOut);
       }
     }
-  }, [defaultTokenIn, defaultTokenOut, STORAGED_TOKEN_IN, STORAGED_TOKEN_OUT]);
+  }, [tokens]);
 
   useEffect(() => {
     if (!tokenIn) return;
@@ -248,7 +256,10 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     canSwap &&
     !swapError &&
     isSignedIn &&
-    new Big(tokenInBalance).gte(amountIn || '0');
+    new Big(tokenInBalance || '0').gte(amountIn || '0') &&
+    slippageTolerance > 0 &&
+    slippageTolerance < 100 &&
+    !ONLY_ZEROS.test(tokenInBalance);
 
   return (
     <ThemeContextProvider customTheme={curTheme}>
@@ -280,28 +291,10 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                   position: 'relative',
                 }}
               >
-                {!AccountId ? null : (
-                  <div
-                    className="__ref-swap-widget-header-button-account __ref-swap-widget-row-flex-center"
-                    style={{
-                      color: primary,
-                      background: hoverAccount
-                        ? 'rgba(255,104,158,0.2)'
-                        : secondaryBg,
-                      border: `1px solid ${borderColor}`,
-                      cursor: 'pointer',
-                    }}
-                    onClick={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      hoverAccount && onDisConnect();
-                    }}
-                    onMouseEnter={() => setHoverAccount(true)}
-                    onMouseLeave={() => setHoverAccount(false)}
-                  >
-                    {hoverAccount ? 'Diconnect' : getAccountName(AccountId)}
-                  </div>
-                )}
+                <AccountButton
+                  onDisConnect={onDisConnect}
+                  AccountId={AccountId}
+                />
 
                 <Slider showSlip={showSlip} setShowSlip={setShowSlip} />
 
@@ -326,7 +319,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             />
 
             <div
-              className="__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center"
+              className={`__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center `}
               style={{
                 color: iconDefault,
               }}
@@ -335,7 +328,11 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 style={{
                   cursor: 'pointer',
                 }}
-                className="__ref-swap-widget-exchange-button-icon"
+                className={`__ref-swap-widget-exchange-button-icon ${
+                  isMobile()
+                    ? '__ref-swap-widget-active'
+                    : '__ref-swap-widget-hover'
+                }`}
                 size={30}
                 onClick={() => {
                   tokenOut && handleSetTokenIn(tokenOut);

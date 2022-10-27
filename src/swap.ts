@@ -85,11 +85,13 @@ export const getStablePoolEstimate = ({
   tokenOut,
   amountIn,
   stablePool,
+  pool,
 }: {
   tokenIn: TokenMetadata;
   tokenOut: TokenMetadata;
   amountIn: string;
   stablePool: StablePool;
+  pool?: Pool;
 }) => {
   const STABLE_LP_TOKEN_DECIMALS = getStablePoolDecimal(stablePool);
 
@@ -111,10 +113,20 @@ export const getStablePoolEstimate = ({
       ? '0'
       : toPrecision(scientificNotationToString(dy.toString()), 0);
 
+  const rates = stablePool.rates.reduce((acc, cur, i) => {
+    return {
+      ...acc,
+      [stablePool.token_account_ids[i]]: cur,
+    };
+  }, {});
+
   return {
     estimate: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, amountOut),
     noFeeAmountOut: toReadableNumber(STABLE_LP_TOKEN_DECIMALS, dyOut),
-    pool: stablePool,
+    pool: {
+      ...stablePool,
+      rates,
+    },
     outputToken: tokenOut.id,
     inputToken: tokenIn.id,
   };
@@ -165,14 +177,15 @@ export const singlePoolSwap = ({
   );
 
   // different stable lp token decimal for different type of pools
-  const estimatesStablePool = stablePoolThisPair?.map(stablePool =>
-    getStablePoolEstimate({
+  const estimatesStablePool = stablePoolThisPair?.map(stablePool => {
+    return getStablePoolEstimate({
       tokenIn,
       tokenOut,
       amountIn,
       stablePool,
-    })
-  );
+      pool: simplePools.find(p => p.id === stablePool.id) as Pool,
+    });
+  });
 
   const maxSimplePoolEstimate =
     estimatesSimplePool === undefined || estimatesSimplePool.length === 0
@@ -263,6 +276,7 @@ export const getPoolEstimate = async ({
       tokenOut,
       stablePool: stablePoolDetail,
       amountIn,
+      pool,
     });
   } else {
     return getSimplePoolEstimate({
@@ -460,6 +474,7 @@ export async function getHybridStableSmart(
                     tokenOut,
                     stablePool: stablePoolDetailThisPair as StablePool,
                     amountIn,
+                    pool: poolPair[0],
                   }).estimate
                 );
               } else {
@@ -488,6 +503,7 @@ export async function getHybridStableSmart(
                     tokenOut: tokenMidMeta,
                     amountIn,
                     stablePool: stablePoolsDetailById[tmpPool1.id],
+                    pool: tmpPool1,
                   })
                 : getSimplePoolEstimate({
                     tokenIn,
@@ -505,6 +521,7 @@ export async function getHybridStableSmart(
                     tokenOut,
                     amountIn: estimate1.estimate,
                     stablePool: stablePoolsDetailById[tmpPool2.id],
+                    pool: tmpPool2,
                   })
                 : getSimplePoolEstimate({
                     tokenIn: tokenMidMeta,
@@ -538,7 +555,7 @@ export async function getHybridStableSmart(
             ...estimate,
             status: PoolMode.STABLE,
 
-            pool: { ...bestPool, partialAmountIn: parsedAmountIn },
+            pool: { ...estimate.pool, partialAmountIn: parsedAmountIn },
             tokens: [tokenIn, tokenOut],
             inputToken: tokenIn.id,
             outputToken: tokenOut.id,
@@ -567,6 +584,7 @@ export async function getHybridStableSmart(
             tokenOut: tokenMidMeta,
             amountIn,
             stablePool: stablePoolsDetailById[pool1.id],
+            pool: pool1,
           })
         : getSimplePoolEstimate({
             tokenIn,
@@ -592,6 +610,7 @@ export async function getHybridStableSmart(
             tokenOut,
             amountIn: estimate1.estimate,
             stablePool: stablePoolsDetailById[pool2.id],
+            pool: pool2,
           })
         : getSimplePoolEstimate({
             tokenIn: tokenMidMeta,
@@ -628,7 +647,9 @@ export const estimateSwap = async ({
 
   const parsedAmountIn = toNonDivisibleNumber(tokenIn.decimals, amountIn);
 
-  if (!enableSmartRouting) {
+  let singleRouteEstimate: EstimateSwapView[] = [];
+
+  try {
     const estimate = singlePoolSwap({
       tokenIn,
       tokenOut,
@@ -637,53 +658,85 @@ export const estimateSwap = async ({
       stablePools: stablePoolsDetail,
     });
 
-    return [
+    singleRouteEstimate = [
       {
         ...estimate,
         status: PoolMode.PARALLEL,
         pool: { ...estimate?.pool, partialAmountIn: parsedAmountIn },
+        totalInputAmount: toNonDivisibleNumber(tokenIn.decimals, amountIn),
         tokens: [tokenIn, tokenOut],
       },
     ] as EstimateSwapView[];
-  } else {
-    const inputPools = simplePools.map(p => poolFormatter(p));
+    if (!enableSmartRouting) {
+      return singleRouteEstimate;
+    }
+  } catch (error) {
+    if (!enableSmartRouting) throw error;
+  }
 
-    const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
+  console.log({ singleRouteEstimate });
 
-    const simplePoolSmartRoutingActions = await stableSmart(
-      inputPools,
-      tokenIn.id,
-      tokenOut.id,
-      parsedAmountIn,
-      allTokens
-    );
+  const inputPools = simplePools.map(p => poolFormatter(p));
 
-    const simplePoolSmartRoutingEstimate = getExpectedOutputFromActionsORIG(
-      simplePoolSmartRoutingActions,
-      tokenOut.id
-    ).toString();
+  const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
 
-    const hybridSmartRoutingRes = await getHybridStableSmart(
-      tokenIn,
-      tokenOut,
-      amountIn,
-      stablePools || [],
-      stablePoolsDetail || [],
-      simplePools,
-      allTokens
-    );
+  const simplePoolSmartRoutingActions = await stableSmart(
+    inputPools,
+    tokenIn.id,
+    tokenOut.id,
+    parsedAmountIn,
+    allTokens
+  );
 
-    const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
+  const simplePoolSmartRoutingEstimate = getExpectedOutputFromActionsORIG(
+    simplePoolSmartRoutingActions,
+    tokenOut.id
+  ).toString();
+
+  const hybridSmartRoutingRes = await getHybridStableSmart(
+    tokenIn,
+    tokenOut,
+    amountIn,
+    stablePools || [],
+    stablePoolsDetail || [],
+    simplePools,
+    allTokens
+  );
+
+  console.log({ hybridSmartRoutingRes, simplePoolSmartRoutingEstimate });
+
+  const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
+
+  if (
+    new Big(simplePoolSmartRoutingEstimate || '0').gte(
+      hybridSmartRoutingEstimate || '0'
+    )
+  ) {
+    if (!simplePoolSmartRoutingActions?.length) throw NoPoolError;
 
     if (
-      new Big(simplePoolSmartRoutingEstimate || '0').gte(
+      typeof singleRouteEstimate !== 'undefined' &&
+      singleRouteEstimate &&
+      singleRouteEstimate?.[0]?.estimate &&
+      new Big(singleRouteEstimate[0].estimate || '0').gt(
+        simplePoolSmartRoutingEstimate || '0'
+      )
+    ) {
+      return singleRouteEstimate;
+    }
+    return simplePoolSmartRoutingActions as EstimateSwapView[];
+  } else {
+    if (
+      typeof singleRouteEstimate !== 'undefined' &&
+      singleRouteEstimate &&
+      singleRouteEstimate?.[0]?.estimate &&
+      new Big(singleRouteEstimate[0].estimate || '0').gt(
         hybridSmartRoutingEstimate || '0'
       )
     ) {
-      if (!simplePoolSmartRoutingActions?.length) throw NoPoolError;
-      return simplePoolSmartRoutingActions as EstimateSwapView[];
-    } else {
-      return hybridSmartRoutingRes.actions as EstimateSwapView[];
+      return singleRouteEstimate;
     }
+
+    return hybridSmartRoutingRes.actions as EstimateSwapView[];
   }
 };

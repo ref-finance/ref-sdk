@@ -10,7 +10,7 @@ For npm Developers: `npm install @ref_finance/ref-sdk`
 
 ## Initialization
 
-Ref SDK identifies env variable NEAR_ENV or REACT_APP_REF_SDK_ENV to set up NEAR network configuration.
+Ref SDK identifies env variable NEAR_ENV or REACT_APP_REF_SDK_ENV to set up NEAR network.
 
 ```typescript
 export function getConfig(
@@ -340,7 +340,7 @@ const tokensMetadata = await ftGetTokensMetadata([
 
 #### fetchAllPools
 
-Fetch all pools in Ref, including simple pools, rated pools and unrated pools.
+Fetch all existing pools, including vanilla/simple pools, stable pools and rated pools (designed for yield-bearing tokens).
 
 **Parameters**
 
@@ -456,9 +456,11 @@ const stablePoolsDetail: StablePool[] = await getStablePools(stablePools);
 
 #### estimateSwap
 
-Get swap routes by pools, tokens and input amount. Please notice since there is message constraint on **Ledger**, we set `enableSmartRouting` option for developers.
+Get token output amount and corresponding route.
 
-This function integrates smart routing, parallel swap and hybrid stable smart routing algorihtms to get best estimate based on input pools.
+As there is a memory limitation on Ledger, note that we set `enableSmartRouting` option for developers.
+
+This function integrates a smart routing algorithm, designed to deliver the best output token amount.
 
 **Parameters**
 
@@ -633,7 +635,7 @@ const amountOut: string = getExpectedOutputFromSwapTodos(
 
 #### getPoolEstimate
 
-Get estimate output from single pool, which integrates estimate method of simple pool and stable pool.
+Get token output amount from one single pool. Method can be used for simple and stable pools.
 
 **Parameters**
 
@@ -725,7 +727,7 @@ const estimate = await getPoolEstimate({
 
 #### instantSwap
 
-Set up transactions through swap routes. Please notice that you have to make sure the AccountId have a balance storaged in the token-in contract, **otherwise the transaction would fail and user would lose the input token** **amount**.
+Set up transactions through swap routes. Please ensure that the AccountId has an active balance storage in the token-in contract, **otherwise the transaction will fail and the user will lose the token input amount**.
 
 Dapp developers only need to create transactions then send to wallets.
 
