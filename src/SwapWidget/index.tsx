@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SwapWidgetProps } from './types';
 import { TokenMetadata } from '../types';
 import {
-  useTokens,
   useRefPools,
   useSwap,
   ThemeContextProvider,
