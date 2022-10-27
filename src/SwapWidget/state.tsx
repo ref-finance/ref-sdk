@@ -102,7 +102,16 @@ export const useAllTokens = ({ reload }: { reload?: boolean }) => {
   useEffect(() => {
     const fetchTokens = async () => {
       const tokens = await getTokens(reload);
-      setTokens(tokens);
+      setTokens(
+        tokens.map((t: TokenMetadata) =>
+          !t.icon || REPLACE_TOKENS.includes(t.id)
+            ? {
+                ...t,
+                icon: metadataDefaults[t.id],
+              }
+            : t
+        )
+      );
       setTokensLoading(false);
     };
     fetchTokens();
