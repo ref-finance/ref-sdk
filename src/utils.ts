@@ -23,7 +23,7 @@ import _, { sortBy } from 'lodash';
 import BN from 'bn.js';
 
 import * as math from 'mathjs';
-import { REF_FI_CONTRACT_ID } from './constant';
+import { REF_FI_CONTRACT_ID, WRAP_NEAR_CONTRACT_ID } from './constant';
 import Big from 'big.js';
 import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 import { TokenMetadata } from './types';
@@ -856,3 +856,11 @@ export function divide(numerator: string, denominator: string) {
     notation: 'fixed',
   });
 }
+
+export const getMax = function(id: string, amount: string) {
+  return id !== WRAP_NEAR_CONTRACT_ID
+    ? amount
+    : Number(amount) <= 0.5
+    ? '0'
+    : String(Number(amount) - 0.5);
+};

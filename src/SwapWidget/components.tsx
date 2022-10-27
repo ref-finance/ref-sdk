@@ -67,7 +67,7 @@ import {
 } from '../utils';
 import { REF_WIDGET_SWAP_DETAIL_KEY } from './constant';
 import { PoolMode } from '../swap';
-import { isMobile, separateRoutes, divide } from '../utils';
+import { isMobile, separateRoutes, divide, getMax } from '../utils';
 
 interface TokenAmountProps {
   balance?: string;
@@ -609,14 +609,6 @@ export const TokenAmount = (props: TokenAmountProps) => {
     }
   };
 
-  const getMax = function(id: string, amount: string) {
-    return id !== WRAP_NEAR_CONTRACT_ID
-      ? amount
-      : Number(amount) <= 0.5
-      ? '0'
-      : String(Number(amount) - 0.5);
-  };
-
   useEffect(() => {
     if (
       ref.current &&
@@ -784,7 +776,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
           {token && (
             <HalfAndMaxAmount
               token={token}
-              max={balance}
+              max={getMax(token.id, balance)}
               onChangeAmount={handleChange}
               amount={amount}
             />

@@ -247,9 +247,15 @@ button.__ref-swap-widget-button {
 .__ref-swap-widget-submit-button:hover {
   opacity: 0.5;
 }
-.__ref-swap-widget-exchange-button-icon:hover {
+
+.__ref-swap-widget-active:active {
   color: #00c6a2;
 }
+
+.__ref-swap-widget-hover:hover {
+  color: #00c6a2;
+}
+
 .__ref-swap-widget_token_list_table_content::-webkit-scrollbar {
   width: 4px;
   height: 4px;

@@ -16,6 +16,7 @@ import {
   toReadableNumber,
   toPrecision,
   getPriceImpact,
+  isMobile,
 } from '../utils';
 import {
   Slider,
@@ -318,7 +319,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
             />
 
             <div
-              className="__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center"
+              className={`__ref-swap-widget-exchange-button __ref-swap-widget-row-flex-center `}
               style={{
                 color: iconDefault,
               }}
@@ -327,7 +328,11 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 style={{
                   cursor: 'pointer',
                 }}
-                className="__ref-swap-widget-exchange-button-icon"
+                className={`__ref-swap-widget-exchange-button-icon ${
+                  isMobile()
+                    ? '__ref-swap-widget-active'
+                    : '__ref-swap-widget-hover'
+                }`}
                 size={30}
                 onClick={() => {
                   tokenOut && handleSetTokenIn(tokenOut);
