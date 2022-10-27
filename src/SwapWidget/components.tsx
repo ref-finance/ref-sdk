@@ -798,8 +798,6 @@ export const SlippageSelector = ({
   showSlip: boolean;
   setShowSlip: (showSlip: boolean) => void;
 }) => {
-  const [autoHover, setAutoHover] = useState<boolean>(false);
-
   const [invalid, setInValid] = useState<boolean>(false);
 
   const theme = useContext(ThemeContext);
@@ -901,14 +899,15 @@ export const SlippageSelector = ({
         </div>
 
         <button
-          className="__ref-swap-widget_slippage_selector_button __ref-swap-widget-button"
-          onMouseEnter={() => setAutoHover(true)}
-          onMouseLeave={() => setAutoHover(false)}
+          className={`__ref-swap-widget_slippage_selector_button __ref-swap-widget-button ${
+            isMobile()
+              ? '__ref-swap-widget-opacity-active'
+              : '__ref-swap-widget-opacity-hover'
+          }`}
           style={{
             color: primary,
             background: buttonBg,
             borderRadius,
-            opacity: autoHover ? 0.5 : 1,
           }}
           onClick={e => {
             e.stopPropagation();
@@ -1735,7 +1734,7 @@ export const Notification = ({
           marginBottom: '6px',
         }}
       >
-        {state === 'success' && <p>Sucess!</p>}
+        {state === 'success' && <p>Success!</p>}
         {state === 'fail' && <p>Swap Failed!</p>}
       </div>
       <div

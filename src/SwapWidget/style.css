@@ -67,6 +67,14 @@
   padding: 6px 16px;
 }
 
+.__ref-swap-widget-opacity-hover:hover {
+  opacity: 0.5;
+}
+
+.__ref-swap-widget-opacity-active:active {
+  opacity: 0.5;
+}
+
 .__ref-swap-widger-token-amount {
   padding: 14px;
   padding-bottom: 8px;
