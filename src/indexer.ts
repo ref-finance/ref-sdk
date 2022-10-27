@@ -1,5 +1,7 @@
 import { config, WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from './constant';
 import { REF_WIDGET_ALL_TOKENS_LIST_KEY } from './SwapWidget/constant';
+import { REPLACE_TOKENS } from './ref';
+import metaIconDefaults from './metaIcons';
 
 export const getTokenPriceList = async (): Promise<any> => {
   return await fetch(config.indexerUrl + '/list-token-price', {
@@ -34,6 +36,10 @@ export const getTokens = async (reload?: boolean) => {
                 [id]: {
                   ...cur,
                   id,
+                  icon:
+                    !cur.icon || REPLACE_TOKENS.includes(id)
+                      ? metaIconDefaults[id]
+                      : cur.icon,
                 },
               };
             },

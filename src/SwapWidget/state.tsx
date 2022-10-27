@@ -49,7 +49,7 @@ import {
 import { getUserRegisteredTokens } from '../ref';
 import { WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from '../constant';
 import { scientificNotationToString } from '../utils';
-import metadataDefaults from '../metaIcons';
+import metaIconDefaults from '../metaIcons';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -96,22 +96,13 @@ export const estimateValidator = (
 };
 
 export const useAllTokens = ({ reload }: { reload?: boolean }) => {
-  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
+  const [tokens, setTokens] = useState<Record<string, TokenMetadata>>();
   const [tokensLoading, setTokensLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchTokens = async () => {
       const tokens = await getTokens(reload);
-      setTokens(
-        tokens.map((t: TokenMetadata) =>
-          !t.icon || REPLACE_TOKENS.includes(t.id)
-            ? {
-                ...t,
-                icon: metadataDefaults[t.id],
-              }
-            : t
-        )
-      );
+      setTokens(tokens);
       setTokensLoading(false);
     };
     fetchTokens();
@@ -165,7 +156,7 @@ export const useTokensIndexer = ({
             !t.icon || REPLACE_TOKENS.includes(t.id)
               ? {
                   ...t,
-                  icon: metadataDefaults[t.id],
+                  icon: metaIconDefaults[t.id],
                 }
               : t
           )

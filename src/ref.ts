@@ -24,7 +24,7 @@ import { AccountView } from 'near-api-js/lib/providers/provider';
 import { Transaction } from './types';
 import { ONE_YOCTO_NEAR, REF_TOKEN_ID, REF_META_DATA } from './constant';
 
-import metadataDefaults from './metaIcons';
+import metaIconDefaults from './metaIcons';
 
 const BANANA_ID = 'berryclub.ek.near';
 const CHEDDAR_ID = 'token.cheddar.near';
@@ -124,7 +124,7 @@ export const ftGetTokenMetadata = async (
   ) {
     return {
       ...metadata,
-      icon: metadataDefaults[id],
+      icon: metaIconDefaults[id],
       id,
     };
   }
