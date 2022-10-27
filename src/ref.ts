@@ -12,7 +12,7 @@ import {
   WalletConnection,
   utils,
 } from 'near-api-js';
-import { NoAccountIdFound, TokenNotExistError } from './error';
+import { NoAccountIdFound, TokenNotExistError, DCLInValid } from './error';
 import { getKeyStore } from './near';
 
 import {
@@ -198,4 +198,29 @@ export const nearWithdrawTransaction = (amount: string) => {
     ],
   };
   return transaction;
+};
+
+export const refDCLSwapViewFunction = async ({
+  methodName,
+  args,
+}: RefFiViewFunctionOptions) => {
+  const nearConnection = await near.account(REF_FI_CONTRACT_ID);
+
+  if (!config.REF_DCL_SWAP_CONTRACT_ID) throw DCLInValid;
+
+  return nearConnection.viewFunction(
+    config.REF_DCL_SWAP_CONTRACT_ID,
+    methodName,
+    args
+  );
+};
+
+export const DCLSwapGetStorageBalance = (
+  tokenId: string,
+  AccountId: string
+) => {
+  return refDCLSwapViewFunction({
+    methodName: 'storage_balance_of',
+    args: { account_id: AccountId },
+  });
 };

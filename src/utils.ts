@@ -23,12 +23,18 @@ import _, { sortBy } from 'lodash';
 import BN from 'bn.js';
 
 import * as math from 'mathjs';
-import { REF_FI_CONTRACT_ID, WRAP_NEAR_CONTRACT_ID } from './constant';
+import {
+  REF_FI_CONTRACT_ID,
+  WRAP_NEAR_CONTRACT_ID,
+  STORAGE_TO_REGISTER_WITH_MFT,
+} from './constant';
 import Big from 'big.js';
 import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 import { TokenMetadata } from './types';
 import { PoolMode } from './v1-swap/swap';
 import { getSwappedAmount } from './stable-swap';
+import { NoFeeToPool } from './error';
+import { CONSTANT_D, POINTLEFTRANGE, POINTRIGHTRANGE } from './constant';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(typeof id === 'number' ? id : pool.id),
@@ -863,4 +869,101 @@ export const getMax = function(id: string, amount: string) {
     : Number(amount) <= 0.5
     ? '0'
     : String(Number(amount) - 0.5);
+};
+
+export function getPointByPrice(
+  pointDelta: number,
+  price: string,
+  decimalRate: number,
+  noNeedSlot?: boolean
+) {
+  const point = Math.log(+price * decimalRate) / Math.log(CONSTANT_D);
+  const point_int = Math.round(point);
+  let point_int_slot = point_int;
+  if (!noNeedSlot) {
+    point_int_slot = Math.floor(point_int / pointDelta) * pointDelta;
+  }
+  if (point_int_slot < POINTLEFTRANGE) {
+    return POINTLEFTRANGE;
+  } else if (point_int_slot > POINTRIGHTRANGE) {
+    return 800000;
+  }
+  return point_int_slot;
+}
+export const feeToPointDelta = (fee: number) => {
+  switch (fee) {
+    case 100:
+      return 1;
+    case 400:
+      return 8;
+    case 2000:
+      return 40;
+    case 10000:
+      return 200;
+    default:
+      throw NoFeeToPool(fee);
+  }
+};
+
+export const priceToPoint = ({
+  tokenA,
+  tokenB,
+  amountA,
+  amountB,
+  fee,
+}: {
+  tokenA: TokenMetadata;
+  tokenB: TokenMetadata;
+  amountA: string;
+  amountB: string;
+  fee: number;
+}) => {
+  const decimal_price_A_by_B = new Big(amountB).div(amountA);
+  const undecimal_price_A_by_B = decimal_price_A_by_B
+    .times(new Big(10).pow(tokenB.decimals))
+    .div(new Big(10).pow(tokenA.decimals));
+
+  const pointDelta = feeToPointDelta(fee);
+
+  const price = decimal_price_A_by_B;
+
+  const decimalRate = new Big(10)
+    .pow(tokenB.decimals)
+    .div(new Big(10).pow(tokenA.decimals))
+    .toNumber();
+
+  return getPointByPrice(
+    pointDelta,
+    scientificNotationToString(price.toString()),
+    decimalRate
+  );
+};
+
+export const pointToPrice = ({
+  tokenA,
+  tokenB,
+  point,
+}: {
+  tokenA: TokenMetadata;
+  tokenB: TokenMetadata;
+  point: number;
+}) => {
+  const undecimal_price = Math.pow(CONSTANT_D, point);
+  const decimal_price_A_by_B = new Big(undecimal_price)
+    .times(new Big(10).pow(tokenA.decimals))
+    .div(new Big(10).pow(tokenB.decimals));
+
+  return scientificNotationToString(decimal_price_A_by_B.toString());
+};
+
+export const registerAccountOnToken = (AccountId: string) => {
+  return {
+    methodName: 'storage_deposit',
+    args: {
+      registration_only: true,
+      account_id: AccountId,
+    },
+    gas: '30000000000000',
+    amount: STORAGE_TO_REGISTER_WITH_MFT,
+  };
 };

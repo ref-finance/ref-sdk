@@ -1,4 +1,4 @@
-import { getConfig } from './constant';
+import { config, getConfig } from './constant';
 
 export const formatError = (msg: string) => {
   return new Error(msg);
@@ -39,3 +39,10 @@ export const AccountIdMisMatch = formatError(
 export const NoCredential = formatError('No Credential to such path');
 
 export const NoAccountIdFound = formatError('No account id found');
+
+export const NoFeeToPool = (fee: number) =>
+  formatError(`InValid fee ${fee} to DCL pool`);
+
+export const DCLInValid = formatError(
+  `DCL contract currently in Valid on ${config.networkId}`
+);
