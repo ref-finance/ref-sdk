@@ -5,7 +5,13 @@ import {
   toPrecision,
   registerAccountOnToken,
 } from '../utils';
-import { ONE_YOCTO_NEAR, WRAP_NEAR_CONTRACT_ID, config } from '../constant';
+import {
+  ONE_YOCTO_NEAR,
+  WRAP_NEAR_CONTRACT_ID,
+  config,
+  POINTLEFTRANGE,
+  POINTRIGHTRANGE,
+} from '../constant';
 import {
   nearDepositTransaction,
   ftGetStorageBalance,
@@ -77,4 +83,48 @@ export const find_order = async ({
       point,
     },
   }) as Promise<UserOrderInfo>;
+};
+export const cancel_order = ({
+  order_id,
+  undecimal_amount,
+}: {
+  order_id: string;
+  undecimal_amount: string;
+}) => {
+  const transactions: Transaction[] = [
+    {
+      receiverId: config.REF_DCL_SWAP_CONTRACT_ID,
+      functionCalls: [
+        {
+          methodName: 'cancel_order',
+          args: {
+            order_id,
+            amount: undecimal_amount,
+          },
+          gas: '180000000000000',
+        },
+      ],
+    },
+  ];
+
+  return transactions;
+};
+
+export const get_pointorder_range = ({
+  pool_id,
+  left_point,
+  right_point,
+}: {
+  pool_id: string;
+  left_point?: number;
+  right_point?: number;
+}) => {
+  return refDCLSwapViewFunction({
+    methodName: 'get_pointorder_range',
+    args: {
+      pool_id,
+      left_point: left_point || POINTLEFTRANGE,
+      right_point: right_point || POINTRIGHTRANGE,
+    },
+  });
 };

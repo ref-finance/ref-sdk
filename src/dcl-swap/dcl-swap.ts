@@ -8,11 +8,15 @@ import {
 } from '../utils';
 import { ONE_YOCTO_NEAR, WRAP_NEAR_CONTRACT_ID, config } from '../constant';
 import { DCLSwapGetStorageBalance } from '../ref';
+import { DCL_POOL_FEE_LIST, getDCLPoolId } from './dcl-pool';
 import {
   nearDepositTransaction,
   ftGetStorageBalance,
   refDCLSwapViewFunction,
 } from '../ref';
+import _ from 'lodash';
+import { toReadableNumber, percentLess } from '../utils';
+import { NoPoolOnThisPair, SlippageError } from '../error';
 
 interface SwapInfo {
   tokenA: TokenMetadata;
@@ -258,11 +262,6 @@ export const quote = async ({
       input_amount: toNonDivisibleNumber(input_token.decimals, input_amount),
       tag,
     },
-  }).catch(e => {
-    return {
-      amount: '0',
-      tag: null,
-    };
   });
 };
 
@@ -273,6 +272,90 @@ export const list_user_assets = async (AccountId: string) => {
     methodName: 'list_user_assets',
     args: {
       account_id: AccountId,
+    },
+  });
+};
+
+export const DCLSwapOnBestPool = async ({
+  tokenA,
+  tokenB,
+  amountA,
+  slippageTolerance,
+  AccountId,
+}: {
+  tokenA: TokenMetadata;
+  tokenB: TokenMetadata;
+  amountA: string;
+  slippageTolerance: number;
+  AccountId: string;
+}) => {
+  if (slippageTolerance < 0 || slippageTolerance >= 100) {
+    throw SlippageError;
+  }
+
+  const estimates = await Promise.all(
+    DCL_POOL_FEE_LIST.map(async fee => {
+      const pool_id = getDCLPoolId(tokenA.id, tokenB.id, fee);
+      return quote({
+        pool_ids: [pool_id],
+        input_token: tokenA,
+        output_token: tokenB,
+        input_amount: amountA,
+        tag: `${tokenA.id}-${fee}-${amountA}`,
+      }).catch(e => null);
+    })
+  );
+
+  if (!estimates || estimates.every(e => e === null)) {
+    throw NoPoolOnThisPair(tokenA.id, tokenB.id);
+  }
+
+  const bestEstimate =
+    estimates && estimates?.some(e => !!e)
+      ? _.maxBy(estimates, e => Number(!e || !e.tag ? -1 : e.amount))
+      : null;
+
+  const bestFee =
+    bestEstimate &&
+    bestEstimate.tag &&
+    bestEstimate?.tag?.split('-')?.[1] &&
+    Number(bestEstimate?.tag?.split('-')?.[1]);
+
+  const amountB = toReadableNumber(tokenB.decimals, bestEstimate.amount);
+
+  return DCLSwap({
+    swapInfo: {
+      tokenA,
+      tokenB,
+      amountA,
+      amountB,
+    },
+    Swap: {
+      pool_ids: [getDCLPoolId(tokenA.id, tokenB.id, bestFee)],
+      min_output_amount: percentLess(slippageTolerance, bestEstimate.amount),
+    },
+    AccountId,
+  });
+};
+
+export const quote_by_output = ({
+  pool_ids,
+  output_amount,
+  input_token,
+  output_token,
+}: {
+  pool_ids: string[];
+  input_token: TokenMetadata;
+  output_token: TokenMetadata;
+  output_amount: string;
+}) => {
+  return refDCLSwapViewFunction({
+    methodName: 'quote_by_output',
+    args: {
+      pool_ids,
+      input_token: input_token.id,
+      output_token: output_token.id,
+      output_amount: toNonDivisibleNumber(output_token.decimals, output_amount),
     },
   });
 };
