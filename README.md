@@ -20,7 +20,10 @@ npm: `npm install @ref_finance/ref-sdk`
 Ref SDK identifies env variable NEAR_ENV to get global configuration. We suggest to use `export NEAR_ENV=mainnet` or `export NEAR_ENV=testnet` to set up the corresponding NEAR network.
 
 ```plain
-export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
+export function getConfig(
+  env: string | undefined = process.env.NEAR_ENV ||
+    process.env.REACT_APP_REF_SDK_ENV
+) {
   switch (env) {
     case 'mainnet':
       return {
@@ -29,14 +32,22 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
         walletUrl: 'https://wallet.near.org',
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
+        REF_TOKEN_ID: 'token.v2.ref-finance.near',
+        indexerUrl: 'https://indexer.ref.finance',
+        explorerUrl: 'https://testnet.nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: '',
       };
     case 'testnet':
       return {
         networkId: 'testnet',
         nodeUrl: 'https://rpc.testnet.near.org',
         walletUrl: 'https://wallet.testnet.near.org',
+        indexerUrl: 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
+        REF_TOKEN_ID: 'ref.fakes.testnet',
+        explorerUrl: 'https://testnet.nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: 'dcl.ref-dev.testnet',
       };
     default:
       return {
@@ -45,11 +56,16 @@ export function getConfig(env: string | undefined = process.env.NEAR_ENV) {
         walletUrl: 'https://wallet.near.org',
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
+        REF_TOKEN_ID: 'token.v2.ref-finance.near',
+        indexerUrl: 'https://indexer.ref.finance',
+        explorerUrl: 'https://nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: '',
       };
   }
 }
+
 ```
-## Ref Swap V1
+## Ref V1 Swap
 
 ### Tokens
 
@@ -819,6 +835,8 @@ SDK integration tips:
 * You can let the user set the slippage, or you can pre set a default number. 
 * For a better user experience, before the execution of the swap, you can show more details about the swap (ex: fee, rate, route, etc.), allowing users to take better data-driven decisions.
 * You can redirect the user to the NEAR Explorer, once the transaction is confirmed.
+
+
 
 
 
