@@ -1,4 +1,5 @@
 import { TokenMetadata, Transaction } from '../types';
+import { NoOrderFound } from '../error';
 import {
   priceToPoint,
   toNonDivisibleNumber,
@@ -57,12 +58,14 @@ export const list_active_orders = (AccountId: string) => {
   });
 };
 
-export const get_order = (order_id: string) => {
+export const get_order = async (order_id: string) => {
   return refDCLSwapViewFunction({
     methodName: 'get_order',
     args: {
       order_id,
     },
+  }).catch(() => {
+    throw NoOrderFound(order_id);
   });
 };
 
@@ -82,15 +85,13 @@ export const find_order = async ({
       pool_id,
       point,
     },
+  }).catch(() => {
+    throw NoOrderFound();
   }) as Promise<UserOrderInfo>;
 };
-export const cancel_order = ({
-  order_id,
-  undecimal_amount,
-}: {
-  order_id: string;
-  undecimal_amount: string;
-}) => {
+export const cancel_order = async (order_id: string) => {
+  const order = await get_order(order_id);
+
   const transactions: Transaction[] = [
     {
       receiverId: config.REF_DCL_SWAP_CONTRACT_ID,
@@ -99,7 +100,27 @@ export const cancel_order = ({
           methodName: 'cancel_order',
           args: {
             order_id,
-            amount: undecimal_amount,
+            amount: order.remain_amount,
+          },
+          gas: '180000000000000',
+        },
+      ],
+    },
+  ];
+
+  return transactions;
+};
+
+export const claim_order = (order_id: string) => {
+  const transactions: Transaction[] = [
+    {
+      receiverId: config.REF_DCL_SWAP_CONTRACT_ID,
+      functionCalls: [
+        {
+          methodName: 'cancel_order',
+          args: {
+            order_id,
+            amount: '0',
           },
           gas: '180000000000000',
         },

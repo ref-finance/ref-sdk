@@ -51,5 +51,8 @@ export const NoPoolOnThisPair = (tokenA: string, tokenB: string) =>
   formatError(`No pools on pair ${tokenA} <> ${tokenB}`);
 
 export const SlippageError = formatError(
-  'slippage tolerance should be in range [0, 100)'
+  'slippage tolerance should be in range (0, 100)'
 );
+
+export const NoOrderFound = (order_id?: string) =>
+  formatError(`No order ${order_id || ''} found`);

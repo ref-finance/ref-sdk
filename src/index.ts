@@ -21,3 +21,9 @@ export * from './near';
 export * from './swap-widget';
 
 export * from './swap-widget/defaultTokenList';
+
+export * from './dcl-swap/dcl-pool';
+
+export * from './dcl-swap/swap';
+
+export * from './dcl-swap/limit-order';

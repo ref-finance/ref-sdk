@@ -22,7 +22,6 @@ interface SwapInfo {
   tokenA: TokenMetadata;
   tokenB: TokenMetadata;
   amountA: string;
-  amountB: string;
 }
 
 interface DCLSwapProps {
@@ -37,6 +36,7 @@ interface DCLSwapProps {
   };
   LimitOrderWithSwap?: {
     pool_id: string;
+    output_amount: string;
   };
   AccountId: string;
 }
@@ -51,7 +51,7 @@ export const DCLSwap = async ({
 }: DCLSwapProps) => {
   const transactions: Transaction[] = [];
 
-  const { tokenA, tokenB, amountA, amountB } = swapInfo;
+  const { tokenA, tokenB, amountA } = swapInfo;
 
   if (Swap) {
     const pool_ids = Swap.pool_ids;
@@ -96,12 +96,13 @@ export const DCLSwap = async ({
         },
       ],
     });
-  }
-
-  if (SwapByOutput) {
+  } else if (SwapByOutput) {
     const pool_ids = SwapByOutput.pool_ids;
     const output_token = tokenB.id;
-    const output_amount = toNonDivisibleNumber(tokenB.decimals, amountB);
+    const output_amount = toNonDivisibleNumber(
+      tokenB.decimals,
+      SwapByOutput.output_amount
+    );
     const msg = JSON.stringify({
       SwapByOutput: {
         pool_ids,
@@ -138,9 +139,7 @@ export const DCLSwap = async ({
         },
       ],
     });
-  }
-
-  if (LimitOrderWithSwap) {
+  } else if (LimitOrderWithSwap) {
     const pool_id = LimitOrderWithSwap.pool_id;
 
     const fee = Number(pool_id.split(DCL_POOL_SPLITER)[2]);
@@ -148,7 +147,7 @@ export const DCLSwap = async ({
     const buy_token = tokenB.id;
     const point = priceToPoint({
       amountA,
-      amountB,
+      amountB: LimitOrderWithSwap.output_amount,
       tokenA,
       tokenB,
       fee,
@@ -221,10 +220,6 @@ export const DCLSwap = async ({
   }
 
   if (tokenA.id === WRAP_NEAR_CONTRACT_ID) {
-    transactions.unshift(nearDepositTransaction(amountA));
-  }
-
-  if (tokenA.id === WRAP_NEAR_CONTRACT_ID) {
     const registered = await ftGetStorageBalance(
       WRAP_NEAR_CONTRACT_ID,
       AccountId
@@ -289,7 +284,7 @@ export const DCLSwapOnBestPool = async ({
   slippageTolerance: number;
   AccountId: string;
 }) => {
-  if (slippageTolerance < 0 || slippageTolerance >= 100) {
+  if (slippageTolerance <= 0 || slippageTolerance >= 100) {
     throw SlippageError;
   }
 
@@ -310,6 +305,8 @@ export const DCLSwapOnBestPool = async ({
     throw NoPoolOnThisPair(tokenA.id, tokenB.id);
   }
 
+  console.log(estimates);
+
   const bestEstimate =
     estimates && estimates?.some(e => !!e)
       ? _.maxBy(estimates, e => Number(!e || !e.tag ? -1 : e.amount))
@@ -321,14 +318,11 @@ export const DCLSwapOnBestPool = async ({
     bestEstimate?.tag?.split('-')?.[1] &&
     Number(bestEstimate?.tag?.split('-')?.[1]);
 
-  const amountB = toReadableNumber(tokenB.decimals, bestEstimate.amount);
-
   return DCLSwap({
     swapInfo: {
       tokenA,
       tokenB,
       amountA,
-      amountB,
     },
     Swap: {
       pool_ids: [getDCLPoolId(tokenA.id, tokenB.id, bestFee)],
