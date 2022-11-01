@@ -24,13 +24,21 @@ import { AccountView } from 'near-api-js/lib/providers/provider';
 import { Transaction } from './types';
 import { ONE_YOCTO_NEAR, REF_TOKEN_ID, REF_META_DATA } from './constant';
 
-import metadataDefaults from './metaIcons';
+import metaIconDefaults from './metaIcons';
 
 const BANANA_ID = 'berryclub.ek.near';
 const CHEDDAR_ID = 'token.cheddar.near';
 const CUCUMBER_ID = 'farm.berryclub.ek.near';
 const HAPI_ID = 'd9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near';
 const WOO_ID = '4691937a7508860f876c9c0a2a617e7d9e945d4b.factory.bridge.near';
+
+export const REPLACE_TOKENS = [
+  BANANA_ID,
+  CHEDDAR_ID,
+  CUCUMBER_ID,
+  HAPI_ID,
+  WOO_ID,
+];
 
 export const near = new Near({
   keyStore: getKeyStore(),
@@ -104,7 +112,9 @@ export const ftGetTokenMetadata = async (
   }).catch(() => {
     throw TokenNotExistError;
   });
+
   if (
+    !metadata.icon ||
     id === BANANA_ID ||
     id === CHEDDAR_ID ||
     id === CUCUMBER_ID ||
@@ -114,7 +124,7 @@ export const ftGetTokenMetadata = async (
   ) {
     return {
       ...metadata,
-      icon: metadataDefaults[id],
+      icon: metaIconDefaults[id],
       id,
     };
   }

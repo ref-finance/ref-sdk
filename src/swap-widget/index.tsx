@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SwapWidgetProps } from './types';
 import { TokenMetadata } from '../types';
 import {
-  useTokens,
   useRefPools,
   useSwap,
   ThemeContextProvider,
@@ -185,23 +184,32 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   useEffect(() => {
     if (!tokenIn) return;
 
-    ftGetBalance(
-      tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id,
-      AccountId
-    ).then(available => {
+    const wrapedId = tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id;
+
+    if (balances[wrapedId]) {
+      setTokenInBalance(balances[wrapedId]);
+      return;
+    }
+
+    ftGetBalance(wrapedId, AccountId).then(available => {
       setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
     });
-  }, [tokenIn, AccountId]);
+  }, [tokenIn, AccountId, balances]);
 
   useEffect(() => {
     if (!tokenOut) return;
-    ftGetBalance(
-      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id,
-      AccountId
-    ).then(available => {
+
+    const wrapedId =
+      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
+
+    if (balances[wrapedId]) {
+      setTokenOutBalance(balances[wrapedId]);
+      return;
+    }
+    ftGetBalance(wrapedId, AccountId).then(available => {
       setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
     });
-  }, [tokenOut, AccountId]);
+  }, [tokenOut, AccountId, balances]);
 
   const {
     amountOut,
