@@ -1,5 +1,5 @@
 import { TokenMetadata, Transaction } from '../types';
-import { NoOrderFound } from '../error';
+import { NoOrderFound, OrderNoRemainedAmount } from '../error';
 import {
   priceToPoint,
   toNonDivisibleNumber,
@@ -91,6 +91,8 @@ export const find_order = async ({
 };
 export const cancel_order = async (order_id: string) => {
   const order = await get_order(order_id);
+
+  if (!order.remain_amount) throw OrderNoRemainedAmount;
 
   const transactions: Transaction[] = [
     {

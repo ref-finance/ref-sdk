@@ -35,6 +35,7 @@ import { PoolMode } from './v1-swap/swap';
 import { getSwappedAmount } from './stable-swap';
 import { NoFeeToPool } from './error';
 import { CONSTANT_D, POINTLEFTRANGE, POINTRIGHTRANGE } from './constant';
+import { DCL_POOL_FEE_LIST } from './dcl-swap/dcl-pool';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(typeof id === 'number' ? id : pool.id),
@@ -918,6 +919,8 @@ export const priceToPoint = ({
   amountB: string;
   fee: number;
 }) => {
+  if (DCL_POOL_FEE_LIST.indexOf(fee) === -1) throw NoFeeToPool(fee);
+
   const decimal_price_A_by_B = new Big(amountB).div(amountA);
   const undecimal_price_A_by_B = decimal_price_A_by_B
     .times(new Big(10).pow(tokenB.decimals))

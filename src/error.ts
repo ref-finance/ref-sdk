@@ -1,4 +1,5 @@
 import { config, getConfig } from './constant';
+import { DCL_POOL_FEE_LIST } from './dcl-swap/dcl-pool';
 
 export const formatError = (msg: string) => {
   return new Error(msg);
@@ -41,7 +42,9 @@ export const NoCredential = formatError('No Credential to such path');
 export const NoAccountIdFound = formatError('No account id found');
 
 export const NoFeeToPool = (fee: number) =>
-  formatError(`InValid fee ${fee} to DCL pool`);
+  formatError(
+    `InValid fee ${fee} to DCL pool, the valid fee should be one of ${DCL_POOL_FEE_LIST}`
+  );
 
 export const DCLInValid = formatError(
   `DCL contract currently in Valid on ${config.networkId}`
@@ -56,3 +59,7 @@ export const SlippageError = formatError(
 
 export const NoOrderFound = (order_id?: string) =>
   formatError(`No order ${order_id || ''} found`);
+
+export const OrderNoRemainedAmount = formatError(
+  'No remained amount on this order'
+);

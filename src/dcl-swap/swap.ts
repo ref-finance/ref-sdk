@@ -271,7 +271,7 @@ export const list_user_assets = async (AccountId: string) => {
   });
 };
 
-export const DCLSwapOnBestPool = async ({
+export const DCLSwapByInputOnBestPool = async ({
   tokenA,
   tokenB,
   amountA,
@@ -304,8 +304,6 @@ export const DCLSwapOnBestPool = async ({
   if (!estimates || estimates.every(e => e === null)) {
     throw NoPoolOnThisPair(tokenA.id, tokenB.id);
   }
-
-  console.log(estimates);
 
   const bestEstimate =
     estimates && estimates?.some(e => !!e)

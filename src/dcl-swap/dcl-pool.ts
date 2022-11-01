@@ -11,6 +11,7 @@ import {
   ftGetStorageBalance,
   refDCLSwapViewFunction,
 } from '../ref';
+import { NoFeeToPool } from '../error';
 
 export const DCL_POOL_FEE_LIST = [100, 400, 2000, 10000];
 
@@ -34,6 +35,8 @@ interface PoolInfo {
 }
 
 export const getDCLPoolId = (tokenA: string, tokenB: string, fee: number) => {
+  if (DCL_POOL_FEE_LIST.indexOf(fee) === -1) throw NoFeeToPool(fee);
+
   const tokenSeq = [tokenA, tokenB].sort().join('|');
 
   return `${tokenSeq}|${fee}`;
