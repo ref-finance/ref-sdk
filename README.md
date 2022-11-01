@@ -1146,22 +1146,23 @@ Response (Swap)
 
 ```
 [
-	{
-		receiverId: 'usdt.fakes.testnet',
-		functionCalls:[
-      {
-        methodName: 'ft_transfer_call',
-        args: {
-          receiver_id: 'dcl.ref-dev.testnet',
-          amount: '1000000',
-            msg: '{"Swap":{"pool_ids":["usdt.fakes.testnet|wrap.testnet|2000"],"output_token":"wrap.testnet","min_output_amount":"0"}}'
-        },
-        gas: '180000000000000',
-        amount: '0.000000000000000000000001'
-      }
-    ]
-	}
-]
+    {
+        receiverId: "usdt.fakes.testnet",
+        functionCalls: [
+            {
+                methodName: "ft_transfer_call",
+                args: {
+                    receiver_id: "dcl.ref-dev.testnet",
+                    amount: "1000000",
+                    msg: '{"Swap":{"pool_ids":["usdt.fakes.testnet|wrap.testnet|2000"],"output_token":"wrap.testnet","min_output_amount":"0"}}',
+                },
+                gas: "180000000000000",
+                amount: "0.000000000000000000000001",
+            },
+        ],
+    },
+];
+
 ```
 
 Example (SwapByOutput)
@@ -1192,23 +1193,25 @@ const res = await DCLSwap({
 Response (SwapByOutput)
 
 ```
+
 [
-	{
-		receiverId: 'usdt.fakes.testnet',
-		functionCalls:[
-      {
-        methodName: 'ft_transfer_call',
-        args: {
-          receiver_id: 'dcl.ref-dev.testnet',
-          amount: '900000',
-          msg: '{"SwapByOutput":{"pool_ids":["usdt.fakes.testnet|wrap.testnet|2000"],"output_token":"wrap.testnet","output_amount":"4894547920000000000000000"}}'
-        },
-        gas: '180000000000000',
-        amount: '0.000000000000000000000001'
-      }
-  	]
-	}
-]
+    {
+        receiverId: "usdt.fakes.testnet",
+        functionCalls: [
+            {
+                methodName: "ft_transfer_call",
+                args: {
+                    receiver_id: "dcl.ref-dev.testnet",
+                    amount: "900000",
+                    msg: '{"SwapByOutput":{"pool_ids":["usdt.fakes.testnet|wrap.testnet|2000"],"output_token":"wrap.testnet","output_amount":"4894547920000000000000000"}}',
+                },
+                gas: "180000000000000",
+                amount: "0.000000000000000000000001",
+            },
+        ],
+    },
+];
+
 ```
 
 Example (LimitOrderWithSwap)
@@ -1240,23 +1243,23 @@ Response (LimitOrderWithSwap)
 
 ```
 [
-	{
-		receiverId: 'usdt.fakes.testnet',
-		functionCalls:
-		[
-      {
-        methodName: 'ft_transfer_call',
-        args: {
-        receiver_id: 'dcl.ref-dev.testnet',
-        amount: '1000000',
-        msg: '{"LimitOrderWithSwap":{"pool_id":"usdt.fakes.testnet|wrap.testnet|2000","buy_token":"wrap.testnet","point":495240}}'
-        },
-        gas: '180000000000000',
-        amount: '0.000000000000000000000001'
-      }
-    ]
-	}
-]
+    {
+        receiverId: "usdt.fakes.testnet",
+        functionCalls: [
+            {
+                methodName: "ft_transfer_call",
+                args: {
+                    receiver_id: "dcl.ref-dev.testnet",
+                    amount: "1000000",
+                    msg: '{"LimitOrderWithSwap":{"pool_id":"usdt.fakes.testnet|wrap.testnet|2000","buy_token":"wrap.testnet","point":495240}}',
+                },
+                gas: "180000000000000",
+                amount: "0.000000000000000000000001",
+            },
+        ],
+    },
+];
+
 ```
 
 ---
@@ -1297,23 +1300,23 @@ Response
 
 ```
 [
-	{
-		receiverId: 'usdt.fakes.testnet',
-		functionCalls:
-      [
-        {
-          methodName: 'ft_transfer_call',
-          args: {
-            receiver_id: 'dcl.ref-dev.testnet',
-            amount: '1000000',
-            msg: '{"Swap":{"pool_ids":["usdt.fakes.testnet|wrap.testnet|10000"],"output_token":"wrap.testnet","min_output_amount":"203606350172806050000000"}}'
-          },
-          gas: '180000000000000',
-          amount: '0.000000000000000000000001'
-        }
-      ]
-	}
-]
+    {
+        receiverId: "usdt.fakes.testnet",
+        functionCalls: [
+            {
+                methodName: "ft_transfer_call",
+                args: {
+                    receiver_id: "dcl.ref-dev.testnet",
+                    amount: "1000000",
+                    msg: '{"Swap":{"pool_ids":["usdt.fakes.testnet|wrap.testnet|10000"],"output_token":"wrap.testnet","min_output_amount":"203606350172806050000000"}}',
+                },
+                gas: "180000000000000",
+                amount: "0.000000000000000000000001",
+            },
+        ],
+    },
+];
+
 ```
 
 ---
@@ -1362,25 +1365,25 @@ const res = await list_active_orders(AccountId)
 Response
 
 ```
- [ 
- 	{
-    order_id: 'usdt.fakes.testnet|wrap.testnet|10000#93',
-    owner_id: 'your-account-id.testnet',
-    pool_id: 'usdt.fakes.testnet|wrap.testnet|10000',
-    point: 398600,
-    sell_token: 'wrap.testnet',
-    buy_token: 'usdt.fakes.testnet',
-    original_deposit_amount: '1000000000000000000000000',
-    swap_earn_amount: '0',
-    original_amount: '1000000000000000000000000',
-    cancel_amount: '0',
-    created_at: '1667292669983952215',
-    remain_amount: '1000000000000000000000000',
-    bought_amount: '0',
-    unclaimed_amount: '0'
-  },
-  ...
-]
+[
+    {
+        order_id: "usdt.fakes.testnet|wrap.testnet|10000#93",
+        owner_id: "your-account-id.testnet",
+        pool_id: "usdt.fakes.testnet|wrap.testnet|10000",
+        point: 398600,
+        sell_token: "wrap.testnet",
+        buy_token: "usdt.fakes.testnet",
+        original_deposit_amount: "1000000000000000000000000",
+        swap_earn_amount: "0",
+        original_amount: "1000000000000000000000000",
+        cancel_amount: "0",
+        created_at: "1667292669983952215",
+        remain_amount: "1000000000000000000000000",
+        bought_amount: "0",
+        unclaimed_amount: "0",
+    },
+];
+
 ```
 
 ---
@@ -1404,25 +1407,25 @@ const res = await list_history_orders(AccountId)
 Response
 
 ```
- [ 
-  {
-    order_id: 'usdc.fakes.testnet|wrap.testnet|2000#47',
-    owner_id: 'juaner.testnet',
-    pool_id: 'usdc.fakes.testnet|wrap.testnet|2000',
-    point: 399120,
-    sell_token: 'wrap.testnet',
-    buy_token: 'usdc.fakes.testnet',
-    original_deposit_amount: '1000000000000000000000000',
-    swap_earn_amount: '0',
-    original_amount: '1000000000000000000000000',
-    cancel_amount: '1000000000000000000000000',
-    created_at: '1665928620632469264',
-    remain_amount: '0',
-    bought_amount: '0',
-    unclaimed_amount: null
-  },
-  ...
-]
+[
+    {
+        order_id: "usdc.fakes.testnet|wrap.testnet|2000#47",
+        owner_id: "juaner.testnet",
+        pool_id: "usdc.fakes.testnet|wrap.testnet|2000",
+        point: 399120,
+        sell_token: "wrap.testnet",
+        buy_token: "usdc.fakes.testnet",
+        original_deposit_amount: "1000000000000000000000000",
+        swap_earn_amount: "0",
+        original_amount: "1000000000000000000000000",
+        cancel_amount: "1000000000000000000000000",
+        created_at: "1665928620632469264",
+        remain_amount: "0",
+        bought_amount: "0",
+        unclaimed_amount: null,
+    },
+];
+
 ```
 
 ---
