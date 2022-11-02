@@ -11,9 +11,9 @@ This SDK is designed to assist developers when interacting with the main functio
 
 ## Install
 
-yarn: `yarn add @ref_finance/ref-sdk`
+yarn: `yarn add @ref-finance/ref-sdk`
 
-npm: `npm install @ref_finance/ref-sdk` 
+npm: `npm install @ref-finance/ref-sdk` 
 
 ## Initialization
 
@@ -675,6 +675,7 @@ export interface SwapWidgetProps {
     * tx: will add link to near explorer according to this tx.
     * detail: you could input some tips to show on sucess pop-up.
     
+
 ![111](https://user-images.githubusercontent.com/50706666/199178453-8d09be3f-5a00-4b62-a6f1-af42ce4beae6.png)
 
 
@@ -739,12 +740,12 @@ export const defaultDarkModeTheme: Theme = {
 ```plain
 // an example of combining SwapWidget with wallet-selector
 import * as React from 'react';
-import { SwapWidget } from '@ref_finance/ref-sdk';
+import { SwapWidget } from '@ref-finance/ref-sdk';
 
 // please check on wallet-selector example about how to set WalletSelectorContext
 import { useWalletSelector } from './WalletSelectorContext';
 
-import { WalletSelectorTransactions, NotLoginError } from '@ref_finance/ref-sdk';
+import { WalletSelectorTransactions, NotLoginError } from '@ref-finance/ref-sdk';
 
 export const Widget = ()=>{
   
