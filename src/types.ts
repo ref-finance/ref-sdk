@@ -1,4 +1,5 @@
 import Big from 'big.js';
+import { PoolMode } from './v1-swap/swap';
 
 export interface TokenMetadata {
   id: string;
@@ -32,6 +33,7 @@ export interface Pool {
   tokenIds: string[];
   supplies: { [key: string]: string };
   fee: number;
+  total_fee?: number;
   shareSupply: string;
   tvl: number;
   token0_ref_price: string;
@@ -91,6 +93,7 @@ export interface EstimateSwapView {
   pool: Pool;
   intl?: any;
   dy?: string;
+  status?: PoolMode;
   noFeeAmountOut?: string;
   inputToken?: string;
   outputToken?: string;

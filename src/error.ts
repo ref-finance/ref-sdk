@@ -1,4 +1,5 @@
-import { getConfig } from './constant';
+import { config, getConfig } from './constant';
+import { DCL_POOL_FEE_LIST } from './dcl-swap/dcl-pool';
 
 export const formatError = (msg: string) => {
   return new Error(msg);
@@ -37,3 +38,28 @@ export const AccountIdMisMatch = formatError(
 );
 
 export const NoCredential = formatError('No Credential to such path');
+
+export const NoAccountIdFound = formatError('No account id found');
+
+export const NoFeeToPool = (fee: number) =>
+  formatError(
+    `InValid fee ${fee} to DCL pool, the valid fee should be one of ${DCL_POOL_FEE_LIST}`
+  );
+
+export const DCLInValid = formatError(
+  `DCL contract currently in Valid on ${config.networkId}`
+);
+
+export const NoPoolOnThisPair = (tokenA: string, tokenB: string) =>
+  formatError(`No pools on pair ${tokenA} <> ${tokenB}`);
+
+export const SlippageError = formatError(
+  'slippage tolerance should be in range (0, 100)'
+);
+
+export const NoOrderFound = (order_id?: string) =>
+  formatError(`No order ${order_id || ''} found`);
+
+export const OrderNoRemainedAmount = formatError(
+  'No remained amount on this order'
+);

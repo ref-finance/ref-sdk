@@ -1,14 +1,14 @@
-import { TokenMetadata, EstimateSwapView, Transaction } from './types';
-import { ftGetStorageBalance } from './ref';
+import { TokenMetadata, EstimateSwapView, Transaction } from '../types';
+import { ftGetStorageBalance } from '../ref';
 import {
   STORAGE_TO_REGISTER_WITH_MFT,
   REF_FI_CONTRACT_ID,
   ONE_YOCTO_NEAR,
-} from './constant';
-import { round, percentLess } from './utils';
-import { toNonDivisibleNumber } from './utils';
-import { config } from './constant';
-import { SwapRouteError } from './error';
+} from '../constant';
+import { round, percentLess } from '../utils';
+import { toNonDivisibleNumber } from '../utils';
+import { config } from '../constant';
+import { SwapRouteError } from '../error';
 
 export const instantSwap = async ({
   tokenIn,
@@ -27,7 +27,8 @@ export const instantSwap = async ({
 }) => {
   const transactions: Transaction[] = [];
 
-  if (swapTodos?.at(-1)?.outputToken !== tokenOut.id) throw SwapRouteError;
+  if (swapTodos?.[swapTodos?.length - 1]?.outputToken !== tokenOut.id)
+    throw SwapRouteError;
 
   const registerToken = async (token: TokenMetadata) => {
     const tokenRegistered = await ftGetStorageBalance(
@@ -54,6 +55,16 @@ export const instantSwap = async ({
       });
     }
   };
+
+  if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
+    const registered = await ftGetStorageBalance(
+      config.WRAP_NEAR_CONTRACT_ID,
+      AccountId
+    );
+    if (registered === null) {
+      await registerToken(tokenIn);
+    }
+  }
 
   await registerToken(tokenOut);
   let actionsList: any = [];
@@ -121,16 +132,6 @@ export const instantSwap = async ({
       },
     ],
   });
-
-  if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
-    const registered = await ftGetStorageBalance(
-      config.WRAP_NEAR_CONTRACT_ID,
-      AccountId
-    );
-    if (registered === null) {
-      await registerToken(tokenIn);
-    }
-  }
 
   return transactions;
 };

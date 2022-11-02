@@ -5,12 +5,11 @@
 import Big from 'big.js';
 import { checkIntegerSumOfAllocations } from './parallelSwapLogic';
 
-import { TokenMetadata } from './types';
+import { TokenMetadata } from '../types';
 
-import { ftGetTokenMetadata } from './ref';
+import { ftGetTokenMetadata } from '../ref';
 
-import { percentLess, toNonDivisibleNumber } from './utils';
-
+import { percentLess, toNonDivisibleNumber } from '../utils';
 Big.RM = 0;
 Big.DP = 40;
 Big.NE = -40;
@@ -1313,6 +1312,7 @@ export async function getSmartRouteSwapActions(
   inputToken,
   outputToken,
   totalInput,
+  allTokens,
   maxPathLength = 3,
   threshold = 0.001,
   numberOfRoutesLimit = 2,
@@ -1676,8 +1676,13 @@ export async function getSmartRouteSwapActions(
   // console.log(hops);
 
   for (var i in hops) {
-    let hopInputTokenMeta = await ftGetTokenMetadata(hops[i].inputToken);
-    let hopOutputTokenMeta = await ftGetTokenMetadata(hops[i].outputToken);
+    let hopInputTokenMeta = allTokens[hops[i].inputToken]
+      ? allTokens[hops[i].inputToken]
+      : await ftGetTokenMetadata(hops[i].inputToken, 'token input');
+
+    let hopOutputTokenMeta = allTokens[hops[i].outputToken]
+      ? allTokens[hops[i].outputToken]
+      : await ftGetTokenMetadata(hops[i].outputToken, 'token sm');
     let hopOutputTokenDecimals = hopOutputTokenMeta.decimals;
 
     let expectedHopOutput = getOutputSingleHop(
@@ -1700,6 +1705,7 @@ export async function getSmartRouteSwapActions(
         inputToken,
         outputToken,
         totalInput,
+        allTokens,
         (maxPathLength = maxPathLength),
         (threshold = threshold),
         (numberOfRoutesLimit = numberOfRoutesLimit),
@@ -1718,7 +1724,9 @@ export async function getSmartRouteSwapActions(
     }
 
     let tokens = await Promise.all(
-      hops[i].nodeRoute.map(async t => await ftGetTokenMetadata(t))
+      hops[i].nodeRoute.map(async t =>
+        allTokens[t] ? allTokens[t] : await ftGetTokenMetadata(t, 'smart')
+      )
     );
 
     actions[i] = {
@@ -1758,7 +1766,10 @@ export async function getSmartRouteSwapActions(
   }
   // now set partial amount in for second hops equal to zero:
   // also, set the total price impact value.
-  let overallPriceImpact = await calculateSmartRouteV2PriceImpact(actions);
+  let overallPriceImpact = await calculateSmartRouteV2PriceImpact(
+    actions,
+    allTokens
+  );
   for (var i in actions) {
     let action = actions[i];
     action.overallPriceImpact = overallPriceImpact;
@@ -1771,7 +1782,7 @@ export async function getSmartRouteSwapActions(
   return actions;
 }
 
-async function calculateSmartRouteV2PriceImpact(actions) {
+async function calculateSmartRouteV2PriceImpact(actions, allTokens) {
   // the goal is to take a weighted average of the price impact per route, treating each one at a time.
   // for single hop (parallel swaps), the price impact is calculated as before.
   // for double-hop, the market price, P, is determined using reserves of tokens in each pool in the route.
@@ -1805,7 +1816,11 @@ async function calculateSmartRouteV2PriceImpact(actions) {
     let route = routes[i];
     let nodeRoute = nodeRoutes[i];
     let tokens = await Promise.all(
-      nodeRoute.map(async t => await ftGetTokenMetadata(t))
+      nodeRoute.map(async t => {
+        return allTokens[t]
+          ? allTokens[t]
+          : await ftGetTokenMetadata(t, 'sm routes');
+      })
     );
     let weight = weights[i];
     if (route.length == 1) {
@@ -2293,14 +2308,14 @@ export async function stableSmart(
   inputToken,
   outputToken,
   totalInput,
-  slippageTolerance
+  allTokens
 ) {
   let smartRouteActions = await getSmartRouteSwapActions(
     pools,
     inputToken,
     outputToken,
     totalInput,
-    slippageTolerance
+    allTokens
   );
   return smartRouteActions;
 }
