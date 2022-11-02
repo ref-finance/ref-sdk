@@ -130,7 +130,10 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
 
-  const tokens = useTokensIndexer({ defaultTokenList, AccountId });
+  const { tokens, tokenLoading } = useTokensIndexer({
+    defaultTokenList,
+    AccountId,
+  });
 
   // cache list tokens
   useAllTokens({ reload: true });
@@ -179,7 +182,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
         ftGetTokenMetadata(defaultOut).then(handleSetTokenOut);
       }
     }
-  }, [tokens]);
+  }, [tokens, tokenLoading]);
 
   useEffect(() => {
     if (!tokenIn) return;

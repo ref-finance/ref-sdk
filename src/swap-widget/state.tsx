@@ -120,7 +120,11 @@ export const useTokensIndexer = ({
 }) => {
   const [tokens, setTokens] = useState<TokenMetadata[]>([]);
 
+  const [tokenLoading, setTokenLoading] = useState<boolean>(false);
+
   useEffect(() => {
+    setTokenLoading(true);
+
     const getTokensList = async () => {
       const whiteList = await getGlobalWhitelist();
       const globalWhiteListTokens = (
@@ -138,6 +142,7 @@ export const useTokensIndexer = ({
 
       if (!defaultTokenList || defaultTokenList.length === 0) {
         setTokens(parsedTokens);
+        setTokenLoading(false);
       } else {
         const newList = defaultTokenList
           .map(t => {
@@ -161,13 +166,14 @@ export const useTokensIndexer = ({
               : t
           )
         );
+        setTokenLoading(false);
       }
     };
 
     getTokensList();
   }, [AccountId, defaultTokenList]);
 
-  return tokens;
+  return { tokens, tokenLoading };
 };
 
 export const useRefPools = (refreshTrigger: boolean) => {
