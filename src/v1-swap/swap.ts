@@ -674,8 +674,6 @@ export const estimateSwap = async ({
     if (!enableSmartRouting) throw error;
   }
 
-  console.log({ singleRouteEstimate });
-
   const inputPools = simplePools.map(p => poolFormatter(p));
 
   const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
@@ -702,8 +700,6 @@ export const estimateSwap = async ({
     simplePools,
     allTokens
   );
-
-  console.log({ hybridSmartRoutingRes, simplePoolSmartRoutingEstimate });
 
   const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
 

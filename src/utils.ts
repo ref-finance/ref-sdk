@@ -347,8 +347,6 @@ export const getAvgFee = (
     );
   });
 
-  console.log(parsedAmountIn, fee.toString(), estimates);
-
   return fee.toNumber();
 };
 
@@ -493,10 +491,6 @@ export const calculateSmartRoutingPriceImpact = (
       ).toString()
     : calculateMarketPrice(swapTodos[0].pool, tokenIn, tokenMid);
 
-  console.log({
-    marketPrice1,
-  });
-
   const marketPrice2 = isPool2StablePool
     ? (
         Number(swapTodos[1].pool.rates?.[tokenOut.id]) /
@@ -514,10 +508,6 @@ export const calculateSmartRoutingPriceImpact = (
         tokenIn,
         tokenMid
       );
-
-  console.log({
-    tokenminreceived: tokenMidReceived,
-  });
 
   const formattedTokenMidReceived = scientificNotationToString(
     tokenMidReceived?.toString() || '0'
@@ -558,14 +548,11 @@ export const calculateSmartRoutingPriceImpact = (
     `${tokenInAmount} / ${tokenOutReceived}`
   );
 
-  console.log({ newMarketPrice, generalMarketPrice });
-
   const PriceImpact = new Big(newMarketPrice)
     .minus(new Big(generalMarketPrice))
     .div(newMarketPrice)
     .times(100)
     .toString();
-  console.log({ PriceImpact });
 
   return scientificNotationToString(PriceImpact);
 };
@@ -616,10 +603,6 @@ export const calculatePriceImpact = (
 
   const finalMarketPrice = math.evaluate(`(${in_balance} / ${out_balance})`);
 
-  console.log({
-    finalMarketPrice,
-  });
-
   const separatedReceivedAmount = pools.map(pool => {
     return calculateAmountReceived(
       pool,
@@ -631,21 +614,15 @@ export const calculatePriceImpact = (
 
   const finalTokenOutReceived = math.sum(...separatedReceivedAmount);
 
-  console.log({ finalTokenOutReceived });
-
   const newMarketPrice = math.evaluate(
     `${tokenInAmount} / ${finalTokenOutReceived}`
   );
-
-  console.log({ newMarketPrice });
 
   const PriceImpact = new Big(newMarketPrice)
     .minus(new Big(finalMarketPrice))
     .div(newMarketPrice)
     .times(100)
     .toString();
-
-  console.log({ PriceImpact });
 
   return scientificNotationToString(PriceImpact);
 };
@@ -700,8 +677,6 @@ export function calculateSmartRoutesV2PriceImpact(
     }
   });
 
-  console.log({ priceImpactForRoutes, routes, totalInputAmount });
-
   const rawRes = priceImpactForRoutes.reduce(
     (pre, cur, i) => {
       return pre.plus(
@@ -713,8 +688,6 @@ export function calculateSmartRoutesV2PriceImpact(
 
     new Big(0)
   );
-
-  console.log({ rawRes });
 
   return scientificNotationToString(rawRes.toString());
 }
@@ -774,8 +747,6 @@ export const getPriceImpact = ({
       tokenIn,
       stablePools
     );
-
-    console.log({ priceImpactValueSmartRoutingV2 });
   } catch (error) {
     priceImpactValueSmartRoutingV2 = '0';
   }
