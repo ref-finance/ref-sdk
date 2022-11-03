@@ -158,7 +158,10 @@ export const singlePoolSwap = ({
   // const pools = simplePools.concat(stablePools);
 
   const simplePoolsThisPair = simplePools.filter(
-    p => p.tokenIds.includes(tokenIn.id) && p.tokenIds.includes(tokenOut.id)
+    p =>
+      p.tokenIds.includes(tokenIn.id) &&
+      p.tokenIds.includes(tokenOut.id) &&
+      (!stablePools || !isStablePool(stablePools, p.id))
   );
 
   const estimatesSimplePool = simplePoolsThisPair.map(pool =>
