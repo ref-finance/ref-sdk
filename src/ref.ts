@@ -52,7 +52,7 @@ export const init_env = (env: string) => {
     headers: {},
     ...getConfig(env),
   });
-  switchEnv();
+  return switchEnv();
 };
 
 export const refFiViewFunction = async ({

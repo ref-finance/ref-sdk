@@ -157,4 +157,12 @@ export const switchEnv = () => {
     decimals: 24,
     icon: 'https://assets.ref.finance/images/w-NEAR-no-border.png',
   };
+  return {
+    config,
+    REF_FI_CONTRACT_ID,
+    WRAP_NEAR_CONTRACT_ID,
+    REF_TOKEN_ID,
+    REF_META_DATA,
+    WNEAR_META_DATA,
+  };
 };
