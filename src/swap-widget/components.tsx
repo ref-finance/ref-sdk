@@ -48,14 +48,12 @@ import {
   calculateFeeCharge,
   calculateFeePercent,
 } from '../utils';
-import {
-  DEFAULT_START_TOKEN_LIST,
-  REF_WIDGET_STAR_TOKEN_LIST_KEY,
-} from './constant';
+import { REF_WIDGET_STAR_TOKEN_LIST_KEY } from './constant';
 import Big from 'big.js';
 import {
   config,
   FEE_DIVISOR,
+  getConfig,
   NEAR_META_DATA,
   TokenLinks,
   WRAP_NEAR_CONTRACT_ID,
@@ -65,7 +63,11 @@ import {
   percent,
   getPoolAllocationPercents,
 } from '../utils';
-import { REF_WIDGET_SWAP_DETAIL_KEY } from './constant';
+import {
+  REF_WIDGET_SWAP_DETAIL_KEY,
+  DEFAULT_START_TOKEN_LIST_TESTNET,
+  DEFAULT_START_TOKEN_LIST_MAINNET,
+} from './constant';
 import { PoolMode } from '../v1-swap/swap';
 import { isMobile, separateRoutes, divide, getMax } from '../utils';
 
@@ -1359,6 +1361,11 @@ export const TokenSelector = ({
   const storagedStartList = localStorage.getItem(REF_WIDGET_STAR_TOKEN_LIST_KEY)
     ? JSON.parse(localStorage.getItem(REF_WIDGET_STAR_TOKEN_LIST_KEY) || '[]')
     : null;
+
+  const DEFAULT_START_TOKEN_LIST =
+    getConfig().networkId === 'testnet'
+      ? DEFAULT_START_TOKEN_LIST_TESTNET
+      : DEFAULT_START_TOKEN_LIST_MAINNET;
 
   const [starList, setStarList] = useState<string[]>(
     storagedStartList || DEFAULT_START_TOKEN_LIST

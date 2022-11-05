@@ -46,6 +46,7 @@ import {
   WRAP_NEAR_CONTRACT_ID,
   NEAR_META_DATA,
   REF_TOKEN_ID,
+  REF_META_DATA,
 } from '../constant';
 
 export const SwapWidget = (props: SwapWidgetProps) => {
@@ -167,6 +168,15 @@ export const SwapWidget = (props: SwapWidgetProps) => {
       } else {
         ftGetTokenMetadata(defaultIn).then(handleSetTokenIn);
       }
+    } else if (
+      tokens.length > 0 &&
+      defaultIn &&
+      tokens.findIndex(t => t.id === defaultIn) === -1
+    ) {
+      handleSetTokenIn({
+        ...NEAR_META_DATA,
+        id: WRAP_NEAR_CONTRACT_ID,
+      });
     }
     if (
       tokens.length > 0 &&
@@ -181,6 +191,12 @@ export const SwapWidget = (props: SwapWidgetProps) => {
       } else {
         ftGetTokenMetadata(defaultOut).then(handleSetTokenOut);
       }
+    } else if (
+      tokens.length > 0 &&
+      defaultOut &&
+      tokens.findIndex(t => t.id === defaultOut) === -1
+    ) {
+      handleSetTokenOut(REF_META_DATA);
     }
   }, [tokens, tokenLoading]);
 
