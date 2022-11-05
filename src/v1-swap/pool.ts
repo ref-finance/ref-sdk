@@ -3,7 +3,7 @@ import { Pool, PoolRPCView } from '../types';
 import { parsePool, toNonDivisibleNumber } from '../utils';
 import { STABLE_LP_TOKEN_DECIMALS } from '../constant';
 
-export const DEFAULT_PAGE_LIMIT = 100;
+let DEFAULT_PAGE_LIMIT = 100;
 
 export const getRatedPoolDetail = async ({ id }: { id: string | number }) => {
   return refFiViewFunction({
@@ -52,7 +52,6 @@ export const getRefPools = async (
   perPage: number = DEFAULT_PAGE_LIMIT
 ): Promise<Pool[]> => {
   const index = (page - 1) * perPage;
-
   const poolData: PoolRPCView[] = await refFiViewFunction({
     methodName: 'get_pools',
     args: { from_index: index, limit: perPage },
@@ -61,7 +60,10 @@ export const getRefPools = async (
   return poolData.map((rawPool, i) => parsePool(rawPool, i + index));
 };
 
-export const fetchAllPools = async () => {
+export const fetchAllPools = async (perPage?: number) => {
+  if (perPage) {
+    DEFAULT_PAGE_LIMIT = Math.min(perPage, 500);
+  }
   const totalPools = await getTotalPools();
   const pages = Math.ceil(totalPools / DEFAULT_PAGE_LIMIT);
 
