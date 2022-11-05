@@ -70,13 +70,15 @@
     "@types/bn.js": "^5.1.1",
     "@types/lodash": "^4.14.182",
     "big.js": "^6.2.1",
-    "jsdom": "^20.0.1",
     "lodash-es": "^4.17.21",
     "mathjs": "^9.3.0",
     "near-api-js": "0.44.2",
-    "node-notifier": "^8.0.1",
     "lodash": "^4.17.21",
     "bn.js": "^5.2.0",
     "@react-icons/all-files": "^4.1.0"
+  },
+  "resolutions": {
+    "jsdom": "^16.5.0",
+    "node-notifier": "^8.0.1"
   }
 }
