@@ -1,7 +1,7 @@
 //@ts-nocheck
 import Big from 'big.js';
 
-import { Pool } from './types';
+import { Pool } from '../types';
 
 Big.RM = 0;
 Big.DP = 40;
@@ -154,7 +154,7 @@ export function calculateOptimalOutput(
   outputToken: string
 ) {
   let mu = solveForMuFloat(pools, inputAmount, inputToken, outputToken);
-  let dxArray: Big[] = new Array();
+  let dxArray: Big[] = [];
   let negativeDxValsFlag = false;
   for (var i = 0; i < pools.length; i++) {
     let pool = formatPoolNew(pools[i], inputToken, outputToken);

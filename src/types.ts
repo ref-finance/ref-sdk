@@ -1,5 +1,5 @@
 import Big from 'big.js';
-import { PoolMode } from './swap';
+import { PoolMode } from './v1-swap/swap';
 
 export interface TokenMetadata {
   id: string;

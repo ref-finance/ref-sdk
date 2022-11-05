@@ -20,17 +20,20 @@ export function getConfig(
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
         explorerUrl: 'https://testnet.nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: '',
       };
     case 'testnet':
       return {
         networkId: 'testnet',
-        nodeUrl: 'https://rpc.testnet.near.org',
+        nodeUrl:
+          'https://near-testnet.infura.io/v3/388c72223585424086eea3872bb0ba2c',
         walletUrl: 'https://wallet.testnet.near.org',
         indexerUrl: 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
         REF_TOKEN_ID: 'ref.fakes.testnet',
         explorerUrl: 'https://testnet.nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: 'dcl.ref-dev.testnet',
       };
     default:
       return {
@@ -42,6 +45,7 @@ export function getConfig(
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
         explorerUrl: 'https://nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: '',
       };
   }
 }
@@ -127,3 +131,8 @@ export const TokenLinks = {
   SD: 'https://awesomenear.com/stader',
   DISC: 'https://awesomenear.com/discovol',
 } as Record<string, string>;
+
+export const CONSTANT_D = 1.0001;
+
+export const POINTLEFTRANGE = -800000;
+export const POINTRIGHTRANGE = 800000;

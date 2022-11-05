@@ -66,7 +66,7 @@ import {
   getPoolAllocationPercents,
 } from '../utils';
 import { REF_WIDGET_SWAP_DETAIL_KEY } from './constant';
-import { PoolMode } from '../swap';
+import { PoolMode } from '../v1-swap/swap';
 import { isMobile, separateRoutes, divide, getMax } from '../utils';
 
 interface TokenAmountProps {

@@ -1,23 +1,23 @@
-import { TokenMetadata, Pool, StablePool, EstimateSwapView } from './types';
+import { TokenMetadata, Pool, StablePool, EstimateSwapView } from '../types';
 import {
   toReadableNumber,
   toNonDivisibleNumber,
   scientificNotationToString,
-} from './utils';
+} from '../utils';
 import Big from 'big.js';
-import { SameInputTokenError, ZeroInputError, NoPoolError } from './error';
-import { ONLY_ZEROS, toPrecision } from './utils';
+import { SameInputTokenError, ZeroInputError, NoPoolError } from '../error';
+import { ONLY_ZEROS, toPrecision } from '../utils';
 import _ from 'lodash';
-import { FEE_DIVISOR } from './constant';
-import { getSwappedAmount } from './stable-swap';
-import { ftGetTokenMetadata, ftGetTokensMetadata } from './ref';
-import { isStablePool } from './utils';
-import { getTokens } from './indexer';
+import { FEE_DIVISOR } from '../constant';
+import { getSwappedAmount } from '../stable-swap';
+import { ftGetTokenMetadata, ftGetTokensMetadata } from '../ref';
+import { isStablePool } from '../utils';
+import { getTokens } from '../indexer';
 import {
   getStablePoolDecimal,
   isStablePoolToken,
   poolFormatter,
-} from './utils';
+} from '../utils';
 import {
   stableSmart,
   getExpectedOutputFromActionsORIG,
@@ -674,8 +674,6 @@ export const estimateSwap = async ({
     if (!enableSmartRouting) throw error;
   }
 
-  console.log({ singleRouteEstimate });
-
   const inputPools = simplePools.map(p => poolFormatter(p));
 
   const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
@@ -702,8 +700,6 @@ export const estimateSwap = async ({
     simplePools,
     allTokens
   );
-
-  console.log({ hybridSmartRoutingRes, simplePoolSmartRoutingEstimate });
 
   const hybridSmartRoutingEstimate = hybridSmartRoutingRes.estimate.toString();
 

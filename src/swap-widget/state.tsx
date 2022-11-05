@@ -11,6 +11,7 @@ import {
   getGlobalWhitelist,
   nearDepositTransaction,
   nearWithdrawTransaction,
+  REPLACE_TOKENS,
 } from '../ref';
 import {
   EstimateSwapView,
@@ -19,8 +20,8 @@ import {
   TokenMetadata,
   Transaction,
 } from '../types';
-import { fetchAllPools, getStablePools } from '../pool';
-import { estimateSwap, SwapOptions, SwapParams } from '../swap';
+import { fetchAllPools, getStablePools } from '../v1-swap/pool';
+import { estimateSwap, SwapOptions, SwapParams } from '../v1-swap/swap';
 import { SwapOutParams } from './types';
 import {
   percentLess,
@@ -30,9 +31,9 @@ import {
   getAvgFee,
 } from '../utils';
 import Big from 'big.js';
-import { instantSwap } from '../instantSwap';
+import { instantSwap } from '../v1-swap/instantSwap';
 
-import { getExpectedOutputFromActionsORIG } from '../smartRoutingLogic.js';
+import { getExpectedOutputFromActionsORIG } from '../v1-swap/smartRoutingLogic.js';
 import { Theme } from './constant';
 import { defaultTheme } from './constant';
 import {
@@ -48,6 +49,7 @@ import {
 import { getUserRegisteredTokens } from '../ref';
 import { WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from '../constant';
 import { scientificNotationToString } from '../utils';
+import metaIconDefaults from '../metaIcons';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -94,7 +96,7 @@ export const estimateValidator = (
 };
 
 export const useAllTokens = ({ reload }: { reload?: boolean }) => {
-  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
+  const [tokens, setTokens] = useState<Record<string, TokenMetadata>>();
   const [tokensLoading, setTokensLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -109,34 +111,6 @@ export const useAllTokens = ({ reload }: { reload?: boolean }) => {
   return { tokens, tokensLoading };
 };
 
-export const useTokens = (
-  extraTokenList: string[] | TokenMetadata[] = [],
-  AccountId: string = ''
-) => {
-  const [tokens, setTokens] = useState<TokenMetadata[]>([]);
-
-  const extraList = (extraTokenList.length > 0 &&
-  typeof extraTokenList[0] === 'string'
-    ? extraTokenList
-    : []) as string[];
-
-  useEffect(() => {
-    Promise.all([getGlobalWhitelist(), getUserRegisteredTokens(AccountId)])
-      .then(res => {
-        return [...new Set<string>(res.flat().concat(extraList))];
-      })
-      .then(tokenIds =>
-        Promise.all<TokenMetadata>(
-          tokenIds.map(id => ftGetTokenMetadata(id))
-        ).then(setTokens)
-      );
-  }, [extraList.join('-')]);
-
-  return tokens.concat(
-    extraList.length === 0 ? [] : (extraTokenList as TokenMetadata[])
-  );
-};
-
 export const useTokensIndexer = ({
   defaultTokenList,
   AccountId,
@@ -146,7 +120,11 @@ export const useTokensIndexer = ({
 }) => {
   const [tokens, setTokens] = useState<TokenMetadata[]>([]);
 
+  const [tokenLoading, setTokenLoading] = useState<boolean>(false);
+
   useEffect(() => {
+    setTokenLoading(true);
+
     const getTokensList = async () => {
       const whiteList = await getGlobalWhitelist();
       const globalWhiteListTokens = (
@@ -164,6 +142,7 @@ export const useTokensIndexer = ({
 
       if (!defaultTokenList || defaultTokenList.length === 0) {
         setTokens(parsedTokens);
+        setTokenLoading(false);
       } else {
         const newList = defaultTokenList
           .map(t => {
@@ -177,14 +156,24 @@ export const useTokensIndexer = ({
           .filter(t => {
             return parsedTokens.findIndex(p => p.id === t.id) !== -1;
           });
-        setTokens(newList);
+        setTokens(
+          newList.map(t =>
+            !t.icon || REPLACE_TOKENS.includes(t.id)
+              ? {
+                  ...t,
+                  icon: metaIconDefaults[t.id],
+                }
+              : t
+          )
+        );
+        setTokenLoading(false);
       }
     };
 
     getTokensList();
   }, [AccountId, defaultTokenList]);
 
-  return tokens;
+  return { tokens, tokenLoading };
 };
 
 export const useRefPools = (refreshTrigger: boolean) => {

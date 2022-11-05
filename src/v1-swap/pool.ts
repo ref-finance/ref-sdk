@@ -1,7 +1,7 @@
-import { getTotalPools, refFiViewFunction } from './ref';
-import { Pool, PoolRPCView } from './types';
-import { parsePool, toNonDivisibleNumber } from './utils';
-import { STABLE_LP_TOKEN_DECIMALS } from './constant';
+import { getTotalPools, refFiViewFunction } from '../ref';
+import { Pool, PoolRPCView } from '../types';
+import { parsePool, toNonDivisibleNumber } from '../utils';
+import { STABLE_LP_TOKEN_DECIMALS } from '../constant';
 
 export const DEFAULT_PAGE_LIMIT = 100;
 
