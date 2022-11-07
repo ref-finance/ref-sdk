@@ -244,11 +244,15 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     tokenIn: tokenIn,
     tokenOut: tokenOut,
     amountIn,
-    simplePools: allPools.simplePools,
+    simplePools: allPools.simplePools.filter(p => Number(p.shareSupply) > 0),
     options: {
       enableSmartRouting,
-      stablePools: allPools.ratedPools.concat(allPools.unRatedPools),
-      stablePoolsDetail: allStablePools,
+      stablePools: allPools.ratedPools
+        .concat(allPools.unRatedPools)
+        .filter(p => Number(p.shareSupply) > 0),
+      stablePoolsDetail: allStablePools.filter(
+        p => Number(p.shares_total_supply) > 0
+      ),
     },
     slippageTolerance,
     onSwap,
