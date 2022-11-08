@@ -157,12 +157,13 @@ Fetch all existing pools, including vanilla/simple pools, stable pools and rated
 
 Parameters
 
-None
+perPage?：number
 
 Example
 
 ```plain
 const { ratedPools, unRatedPools, simplePools } = await fetchAllPools();
+const { ratedPools, unRatedPools, simplePools } = await fetchAllPools(200);
 ```
 
 Response
@@ -648,6 +649,19 @@ Response
     }
   }
 ]
+```
+
+## Switch environment
+
+### Description
+
+The sdk provides apis for you to switch application environments,We'd better call it at the entrance to the application,Then the entire application environment switch takes effect.If you're not sure where to call,  you can call in more than one place.
+
+Example
+
+```
+init_env('testnet');
+init_env('mainnet');
 ```
 
 #
