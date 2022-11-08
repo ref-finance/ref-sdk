@@ -66,6 +66,19 @@ export function getConfig(
 
 ```
 
+
+
+Also, the SDK provides `init_env`  to switch application environment. We'd better call it at the entrance of the application, then the entire application environment switch takes effect. If you're not sure where to call,  you can call in more than one place.
+
+Example
+
+```
+init_env('testnet');
+init_env('mainnet');
+```
+
+
+
 ## Ref V1 Swap
 
 ### Tokens
@@ -157,12 +170,13 @@ Fetch all existing pools, including vanilla/simple pools, stable pools and rated
 
 Parameters
 
-None
+perPage?：number
 
 Example
 
 ```plain
 const { ratedPools, unRatedPools, simplePools } = await fetchAllPools();
+const { ratedPools, unRatedPools, simplePools } = await fetchAllPools(200);
 ```
 
 Response
@@ -650,7 +664,7 @@ Response
 ]
 ```
 
-#
+
 
 ## Ref Swap Widget
 

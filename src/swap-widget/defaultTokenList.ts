@@ -1,3 +1,5 @@
+import { getConfig } from '../constant';
+
 export const DefaultTestnetTokenList = [
   {
     spec: 'ft-1.0.0',
@@ -1034,10 +1036,9 @@ export const DefaultMainnetTokenList = [
   },
 ];
 
-export function getDefaultTokenList(
-  env: string | undefined = process.env.NEAR_ENV ||
-    process.env.REACT_APP_REF_SDK_ENV
-) {
+export function getDefaultTokenList() {
+  const env = getConfig().networkId;
+
   switch (env) {
     case 'mainnet':
       return DefaultMainnetTokenList;

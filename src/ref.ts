@@ -4,6 +4,7 @@ import {
   WRAP_NEAR_CONTRACT_ID,
   NEAR_META_DATA,
   getConfig,
+  switchEnv,
 } from './constant';
 import {
   keyStores,
@@ -40,11 +41,19 @@ export const REPLACE_TOKENS = [
   WOO_ID,
 ];
 
-export const near = new Near({
+let near = new Near({
   keyStore: getKeyStore(),
   headers: {},
-  ...config,
+  ...getConfig(),
 });
+export const init_env = (env: string) => {
+  near = new Near({
+    keyStore: getKeyStore(),
+    headers: {},
+    ...getConfig(env),
+  });
+  return switchEnv();
+};
 
 export const refFiViewFunction = async ({
   methodName,

@@ -30,11 +30,6 @@ export const DEFAULT_START_TOKEN_LIST_MAINNET = [
   'token.sweat',
 ];
 
-export const DEFAULT_START_TOKEN_LIST =
-  getConfig().networkId === 'testnet'
-    ? DEFAULT_START_TOKEN_LIST_TESTNET
-    : DEFAULT_START_TOKEN_LIST_MAINNET;
-
 export interface Theme {
   container: string; // container background
   buttonBg: string; // button background
