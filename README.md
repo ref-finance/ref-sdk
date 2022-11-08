@@ -66,6 +66,19 @@ export function getConfig(
 
 ```
 
+
+
+Also, the SDK provides `init_env`  to switch application environment. We'd better call it at the entrance of the application, then the entire application environment switch takes effect. If you're not sure where to call,  you can call in more than one place.
+
+Example
+
+```
+init_env('testnet');
+init_env('mainnet');
+```
+
+
+
 ## Ref V1 Swap
 
 ### Tokens
@@ -651,20 +664,7 @@ Response
 ]
 ```
 
-## Switch environment
 
-### Description
-
-The sdk provides apis for you to switch application environments,We'd better call it at the entrance to the application,Then the entire application environment switch takes effect.If you're not sure where to call,  you can call in more than one place.
-
-Example
-
-```
-init_env('testnet');
-init_env('mainnet');
-```
-
-#
 
 ## Ref Swap Widget
 
