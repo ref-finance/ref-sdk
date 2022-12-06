@@ -120,10 +120,12 @@ Response
 
 Get tokens metadata and set token id as index.
 
+Will fetch token matadata if the token not included in the allTokens.
+
 Parameters
 
 ```plain
-tokenIds: string[]
+(tokenIds: string[], allTokens: Record<string, TokenMetadata>)
 ```
 
 Example
@@ -132,7 +134,7 @@ Example
 const tokensMetadata = await ftGetTokensMetadata([
   'ref.fakes.testnet',
   'wrap.testnet',
-]);
+],{});
 ```
 
 Response
@@ -696,7 +698,7 @@ A QuickStart of Ref Swap component.
 ```plain
 export interface SwapWidgetProps {
     theme?: Theme;
-    extraTokenList?: string[];
+    defaultTokenList?: string[];
     onSwap: (transactionsRef: Transaction[]) => void;
     onDisConnect: () => void;
     width: string;
@@ -720,7 +722,7 @@ export interface SwapWidgetProps {
 ```
 
 - theme: widget theme for customization.
-- extraTokenList: introduce extra tokens with ref whitelist into default token list in the widget.
+- defaultTokenList: default tokens with ref whitelist into  token list in the widget.
 - onSwap: Swap button triggers this function.
 - width: width of widget component.
 - height: height of widget component.
