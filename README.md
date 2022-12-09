@@ -245,6 +245,75 @@ Response
 
 ---
 
+#### getPoolByIds
+
+Input pool id array to get according pools detail 
+
+Parameters
+
+```
+ids: number[]
+```
+
+Example
+
+```
+const pools = await getPoolByIds([1, 2, 20])
+```
+
+Response
+
+```
+[
+    {
+        "id": 1,
+        "tokenIds": [
+            "nusdt.ft-fin.testnet",
+            "nusdc.ft-fin.testnet"
+        ],
+        "supplies": {
+            "nusdt.ft-fin.testnet": "194177",
+            "nusdc.ft-fin.testnet": "54127"
+        },
+        "fee": 20,
+        "shareSupply": "1004672374319452764166320",
+        "pool_kind": "SIMPLE_POOL"
+    },
+    {
+        "id": 2,
+        "tokenIds": [
+            "wrap.testnet",
+            "rft.tokenfactory.testnet"
+        ],
+        "supplies": {
+            "wrap.testnet": "511569006838329327251856820",
+            "rft.tokenfactory.testnet": "860281941972"
+        },
+        "fee": 20,
+        "shareSupply": "935312501418615016412773941",
+        "pool_kind": "SIMPLE_POOL"
+    },
+    {
+        "id": 20,
+        "tokenIds": [
+            "usdc.fakes.testnet",
+            "nusdc.ft-fin.testnet"
+        ],
+        "supplies": {
+            "usdc.fakes.testnet": "129199395436",
+            "nusdc.ft-fin.testnet": "26747"
+        },
+        "fee": 20,
+        "shareSupply": "7084500646929369809446253",
+        "pool_kind": "SIMPLE_POOL"
+    }
+]
+```
+
+
+
+---
+
 ### Swap
 
 #### estimateSwap
