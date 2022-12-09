@@ -119,7 +119,7 @@ export const ftGetTokenMetadata = async (
   const metadata = await ftViewFunction(id, {
     methodName: 'ft_metadata',
   }).catch(() => {
-    throw TokenNotExistError;
+    throw TokenNotExistError(id);
   });
 
   if (
@@ -142,17 +142,22 @@ export const ftGetTokenMetadata = async (
 };
 
 export const ftGetTokensMetadata = async (
-  tokenIds: string[],
-  allTokens: Record<string, TokenMetadata>
+  tokenIds?: string[],
+  allTokens?: Record<string, TokenMetadata>
 ) => {
+  const ids = tokenIds || (await getGlobalWhitelist());
+
   const tokensMetadata = await Promise.all(
-    tokenIds.map((id: string) => allTokens[id] || ftGetTokenMetadata(id))
+    ids.map(
+      (id: string) =>
+        allTokens?.[id] || ftGetTokenMetadata(id).catch(() => null)
+    )
   );
 
   return tokensMetadata.reduce((pre, cur, i) => {
     return {
       ...pre,
-      [tokenIds[i]]: cur,
+      [ids[i]]: cur,
     };
   }, {}) as Record<string, TokenMetadata>;
 };
