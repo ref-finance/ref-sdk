@@ -47,6 +47,13 @@ export const getPool = async (id: number): Promise<Pool> => {
   }).then((pool: PoolRPCView) => parsePool(pool, id));
 };
 
+export const getPoolByIds = async (ids: number[]): Promise<Pool[]> => {
+  return await refFiViewFunction({
+    methodName: 'get_pool_by_ids',
+    args: { pool_ids: ids },
+  }).then((pools: PoolRPCView[]) => pools.map((p, i) => parsePool(p, ids[i])));
+};
+
 export const getRefPools = async (
   page: number = 1,
   perPage: number = DEFAULT_PAGE_LIMIT

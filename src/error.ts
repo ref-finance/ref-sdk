@@ -23,9 +23,8 @@ export const SwapRouteError = formatError(
   "Something wrong happened, we don't get correct routes corrreponding to current input"
 );
 
-export const TokenNotExistError = formatError(
-  `This token doesn't exist in ${getConfig().networkId}`
-);
+export const TokenNotExistError = (id: string) =>
+  formatError(`${id} doesn't exist in ${getConfig().networkId}`);
 
 export const NoPuiblicKeyError = formatError('No public key found');
 
