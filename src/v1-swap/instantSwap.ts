@@ -17,6 +17,7 @@ export const instantSwap = async ({
   slippageTolerance,
   swapTodos,
   AccountId,
+  referralId,
 }: {
   tokenIn: TokenMetadata;
   tokenOut: TokenMetadata;
@@ -24,6 +25,7 @@ export const instantSwap = async ({
   slippageTolerance: number;
   swapTodos: EstimateSwapView[];
   AccountId: string;
+  referralId?: string;
 }) => {
   const transactions: Transaction[] = [];
 
@@ -122,10 +124,16 @@ export const instantSwap = async ({
         args: {
           receiver_id: REF_FI_CONTRACT_ID,
           amount: toNonDivisibleNumber(tokenIn.decimals, amountIn),
-          msg: JSON.stringify({
-            force: 0,
-            actions: actionsList,
-          }),
+          msg: !!referralId
+            ? JSON.stringify({
+                force: 0,
+                actions: actionsList,
+                referral_id: referralId,
+              })
+            : JSON.stringify({
+                force: 0,
+                actions: actionsList,
+              }),
         },
         gas: '180000000000000',
         amount: ONE_YOCTO_NEAR,

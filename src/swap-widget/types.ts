@@ -20,6 +20,7 @@ export interface SwapWidgetProps {
 
   defaultTokenIn?: string;
   defaultTokenOut?: string;
+  referralId?: string;
   transactionState?: {
     state: 'success' | 'fail' | null;
     setState: (state: 'success' | 'fail' | null) => void;

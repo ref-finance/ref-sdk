@@ -232,6 +232,7 @@ export const useSwap = (
     onSwap: (transactionsRef: Transaction[]) => void;
     AccountId?: string;
     poolFetchingState?: 'loading' | 'end';
+    referralId?: string;
   }
 ): SwapOutParams => {
   const {
@@ -240,6 +241,7 @@ export const useSwap = (
     onSwap,
     AccountId,
     poolFetchingState,
+    referralId,
     ...swapParams
   } = params;
 
@@ -285,6 +287,7 @@ export const useSwap = (
       swapTodos: estimates,
       slippageTolerance,
       AccountId: AccountId || '',
+      referralId,
     });
     if (tokenIn && tokenIn.id === WRAP_NEAR_CONTRACT_ID) {
       transactionsRef.splice(-1, 0, nearDepositTransaction(amountIn));
