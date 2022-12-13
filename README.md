@@ -596,6 +596,7 @@ Parameters
   slippageTolerance: number;
   swapTodos: EstimateSwapView[];
   AccountId: string;
+  referralId?: string;
 }
 ```
 
@@ -608,7 +609,8 @@ const transactionsRef: Transaction[] = await instantSwap({
   amountIn: '1',
   swapTodos,
   slippageTolerance = 0.01,
-  AccountId: 'your-account-id.testnet'
+  AccountId: 'your-account-id.testnet',
+  referralId: 'ref-fee.testnet'
 });
 ```
 
@@ -623,7 +625,7 @@ Response
         args: {
           amount: '1000000000000000000',
           msg:
-            '{"force":0,"actions":[{"pool_id":38,"token_in":"ref.fakes.testnet","token_out":"wrap.testnet","amount_in":"1000000000000000000","min_amount_out":"730191122546589600000000"}]}',
+            '{"force":0,"referral_id":"ref-fee.testnet" ,"actions":[{"pool_id":38,"token_in":"ref.fakes.testnet","token_out":"wrap.testnet","amount_in":"1000000000000000000","min_amount_out":"730191122546589600000000"}]}',
           receiver_id: 'ref-finance-101.testnet',
         },
         gas: '180000000000000',
@@ -781,6 +783,7 @@ export interface SwapWidgetProps {
     };
     defaultTokenIn?: string;
     defaultTokenOut?: string;
+    referralId?:string;
     transactionState?: {
         state: 'success' | 'fail' | null;
         tx?: string;
@@ -801,6 +804,7 @@ export interface SwapWidgetProps {
 - connection: connection to wallets, input { AccountId:"", isSignedIn:false } if wallet not connected.
 - defaultTokenIn: default token-in.
 - defaultTokenOut: default token-out.
+- referralId: You can get referral fee from every swap routed by your app. But make sure that your referral_id is in Ref's referral list. For the details, please check https://gov.ref.finance/t/contract-upgrade-1-7-0-referral-fee/823 . 
 - transactionState: entry to input transaction states after you send transactions.
   - state: denote if last transaction is failed or successfull.
   - setState: used to change setState to interact with pop-up.
