@@ -658,7 +658,7 @@ Parameters
 Example
 
 ```plain
-const signedTransactions:nearTransactions.SignedTransaction[] = getSignedTransactionsByMemoryKey({
+const signedTransactions:nearTransactions.SignedTransaction[] = await getSignedTransactionsByMemoryKey({
   transactionsRef;
   AccountId: "your-account-id.testnet",
   keyPath: "/.near-credentials/testnet/your-account-id.testnet.json"
@@ -1170,11 +1170,16 @@ const fee = 10000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await quote({
         pool_ids,
         input_amount,
-        input_token: tokenA,
-        output_token: tokenB,
+        input_token: tokenAMetadata,
+        output_token: tokenBMetadata,
     });
 ```
 
@@ -1213,11 +1218,17 @@ const fee = 10000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
+
 const res = await quote_by_output({
         pool_ids,
         output_amount: "0.1",
-        input_token: tokenA,
-        output_token: tokenB,
+        input_token: tokenAMetadata,
+        output_token: tokenBMetadata,
     });
 ```
 
@@ -1275,11 +1286,16 @@ const fee = 2000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await DCLSwap({
   swapInfo: {
     amountA: input_amount,
-    tokenA: tokenA,
-    tokenB: tokenB,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
   },
   Swap: {
     min_output_amount: "0",
@@ -1321,13 +1337,19 @@ const tokenB = "wrap.testnet";
 
 const fee = 2000
 
+
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
 const res = await DCLSwap({
   swapInfo: {
     amountA: input_amount,
-    tokenA: tokenA,
-    tokenB: tokenB,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
   },
   SwapByOutput: {
   	pool_ids,
@@ -1371,11 +1393,17 @@ const fee = 2000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await DCLSwap({
   swapInfo: {
     amountA: input_amount,
-    tokenA: tokenA,
-    tokenB: tokenB,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
   },
   LimitOrderWithSwap: {
   	pool_id,
@@ -1434,9 +1462,14 @@ const tokenA = "usdt.fakes.testnet";
 
 const tokenB = "wrap.testnet";
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await DCLSwapByInputOnBestPool({
-        tokenA,
-        tokenB,
+        tokenA:tokenAMetadata,
+        tokenB:tokenBMetadata,
         amountA: "1",
         slippageTolerance: 0.1,
         AccountId,
