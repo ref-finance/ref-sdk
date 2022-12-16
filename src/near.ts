@@ -39,10 +39,8 @@ export const getMemorySigner = async ({
   keyPath: string;
 }) => {
   try {
-    const homedir = os.homedir();
-    const credentials = JSON.parse(
-      fs.readFileSync(homedir + keyPath).toString()
-    );
+    // const homedir = os.homedir();
+    const credentials = JSON.parse(fs.readFileSync(keyPath).toString());
 
     const credentialAccountId = credentials?.account_id;
 
