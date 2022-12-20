@@ -24,7 +24,7 @@ export function getConfig(
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
         explorerUrl: 'https://testnet.nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: '',
+        REF_DCL_SWAP_CONTRACT_ID: 'dcl.ref-labs.near',
       };
     case 'testnet':
       return {
@@ -36,7 +36,7 @@ export function getConfig(
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
         REF_TOKEN_ID: 'ref.fakes.testnet',
         explorerUrl: 'https://testnet.nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: 'dcl.ref-dev.testnet',
+        REF_DCL_SWAP_CONTRACT_ID: 'dclv1.ref-dev.testnet',
       };
     default:
       return {
@@ -48,7 +48,7 @@ export function getConfig(
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
         explorerUrl: 'https://nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: '',
+        REF_DCL_SWAP_CONTRACT_ID: 'dcl.ref-labs.near',
       };
   }
 }

@@ -65,6 +65,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     defaultTokenOut,
     onDisConnect,
     darkMode,
+    referralId,
   } = props;
 
   const curTheme = theme || (darkMode ? defaultDarkModeTheme : defaultTheme);
@@ -259,6 +260,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     AccountId,
     refreshTrigger,
     poolFetchingState,
+    referralId,
   });
 
   const priceImpact = useMemo(() => {

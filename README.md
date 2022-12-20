@@ -596,6 +596,7 @@ Parameters
   slippageTolerance: number;
   swapTodos: EstimateSwapView[];
   AccountId: string;
+  referralId?: string;
 }
 ```
 
@@ -608,7 +609,8 @@ const transactionsRef: Transaction[] = await instantSwap({
   amountIn: '1',
   swapTodos,
   slippageTolerance = 0.01,
-  AccountId: 'your-account-id.testnet'
+  AccountId: 'your-account-id.testnet',
+  referralId: 'ref-fee.testnet'
 });
 ```
 
@@ -623,7 +625,7 @@ Response
         args: {
           amount: '1000000000000000000',
           msg:
-            '{"force":0,"actions":[{"pool_id":38,"token_in":"ref.fakes.testnet","token_out":"wrap.testnet","amount_in":"1000000000000000000","min_amount_out":"730191122546589600000000"}]}',
+            '{"force":0,"referral_id":"ref-fee.testnet" ,"actions":[{"pool_id":38,"token_in":"ref.fakes.testnet","token_out":"wrap.testnet","amount_in":"1000000000000000000","min_amount_out":"730191122546589600000000"}]}',
           receiver_id: 'ref-finance-101.testnet',
         },
         gas: '180000000000000',
@@ -656,7 +658,7 @@ Parameters
 Example
 
 ```plain
-const signedTransactions:nearTransactions.SignedTransaction[] = getSignedTransactionsByMemoryKey({
+const signedTransactions:nearTransactions.SignedTransaction[] = await getSignedTransactionsByMemoryKey({
   transactionsRef;
   AccountId: "your-account-id.testnet",
   keyPath: "/.near-credentials/testnet/your-account-id.testnet.json"
@@ -781,6 +783,7 @@ export interface SwapWidgetProps {
     };
     defaultTokenIn?: string;
     defaultTokenOut?: string;
+    referralId?:string;
     transactionState?: {
         state: 'success' | 'fail' | null;
         tx?: string;
@@ -801,6 +804,7 @@ export interface SwapWidgetProps {
 - connection: connection to wallets, input { AccountId:"", isSignedIn:false } if wallet not connected.
 - defaultTokenIn: default token-in.
 - defaultTokenOut: default token-out.
+- referralId: You can get referral fee from every swap routed by your app. But make sure that your referral_id is in Ref's referral list. For the details, please check https://gov.ref.finance/t/contract-upgrade-1-7-0-referral-fee/823 . 
 - transactionState: entry to input transaction states after you send transactions.
   - state: denote if last transaction is failed or successfull.
   - setState: used to change setState to interact with pop-up.
@@ -1166,11 +1170,16 @@ const fee = 10000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await quote({
         pool_ids,
         input_amount,
-        input_token: tokenA,
-        output_token: tokenB,
+        input_token: tokenAMetadata,
+        output_token: tokenBMetadata,
     });
 ```
 
@@ -1209,11 +1218,17 @@ const fee = 10000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
+
 const res = await quote_by_output({
         pool_ids,
         output_amount: "0.1",
-        input_token: tokenA,
-        output_token: tokenB,
+        input_token: tokenAMetadata,
+        output_token: tokenBMetadata,
     });
 ```
 
@@ -1271,11 +1286,16 @@ const fee = 2000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await DCLSwap({
   swapInfo: {
     amountA: input_amount,
-    tokenA: tokenA,
-    tokenB: tokenB,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
   },
   Swap: {
     min_output_amount: "0",
@@ -1317,13 +1337,19 @@ const tokenB = "wrap.testnet";
 
 const fee = 2000
 
+
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
 const res = await DCLSwap({
   swapInfo: {
     amountA: input_amount,
-    tokenA: tokenA,
-    tokenB: tokenB,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
   },
   SwapByOutput: {
   	pool_ids,
@@ -1367,11 +1393,17 @@ const fee = 2000
 
 const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
 
+
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await DCLSwap({
   swapInfo: {
     amountA: input_amount,
-    tokenA: tokenA,
-    tokenB: tokenB,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
   },
   LimitOrderWithSwap: {
   	pool_id,
@@ -1430,9 +1462,14 @@ const tokenA = "usdt.fakes.testnet";
 
 const tokenB = "wrap.testnet";
 
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
 const res = await DCLSwapByInputOnBestPool({
-        tokenA,
-        tokenB,
+        tokenA:tokenAMetadata,
+        tokenB:tokenBMetadata,
         amountA: "1",
         slippageTolerance: 0.1,
         AccountId,
