@@ -36,7 +36,7 @@ export function getConfig(
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
         REF_TOKEN_ID: 'ref.fakes.testnet',
         explorerUrl: 'https://testnet.nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: 'dclv1.ref-dev.testnet',
+        REF_DCL_SWAP_CONTRACT_ID: 'dclv2-dev.ref-dev.testnet',
       };
     default:
       return {
