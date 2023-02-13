@@ -78,6 +78,7 @@ export const DCLSwap = async ({
         pool_ids,
         output_token,
         min_output_amount,
+        client_id: '',
       },
     });
 
@@ -108,6 +109,7 @@ export const DCLSwap = async ({
         pool_ids,
         output_token,
         output_amount,
+        client_id: '',
       },
     });
     const tokenRegistered = await ftGetStorageBalance(
@@ -199,6 +201,7 @@ export const DCLSwap = async ({
         pool_id,
         buy_token,
         point: new_point,
+        client_id: '',
       },
     });
 
