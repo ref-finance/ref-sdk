@@ -4,6 +4,7 @@ import { parsePool, toNonDivisibleNumber } from '../utils';
 import { STABLE_LP_TOKEN_DECIMALS } from '../constant';
 
 let DEFAULT_PAGE_LIMIT = 100;
+const BLACK_TOKEN_LIST = ['meta-token.near'];
 
 export const getRatedPoolDetail = async ({ id }: { id: string | number }) => {
   return refFiViewFunction({
@@ -63,8 +64,11 @@ export const getRefPools = async (
     methodName: 'get_pools',
     args: { from_index: index, limit: perPage },
   });
-
-  return poolData.map((rawPool, i) => parsePool(rawPool, i + index));
+  return poolData
+    .map((rawPool, i) => parsePool(rawPool, i + index))
+    .filter(
+      p => !p.tokenIds?.find(tokenId => BLACK_TOKEN_LIST.includes(tokenId))
+    );
 };
 
 export const fetchAllPools = async (perPage?: number) => {
@@ -73,13 +77,11 @@ export const fetchAllPools = async (perPage?: number) => {
   }
   const totalPools = await getTotalPools();
   const pages = Math.ceil(totalPools / DEFAULT_PAGE_LIMIT);
-
   const pools = (
     await Promise.all(
       [...Array(pages)].fill(0).map((_, i) => getRefPools(i + 1))
     )
   ).flat() as Pool[];
-
   return {
     simplePools: pools.filter(
       p => p.pool_kind && p.pool_kind === 'SIMPLE_POOL'
