@@ -21,9 +21,11 @@ Ref SDK identifies env variable NEAR_ENV or REACT_APP_REF_SDK_ENV to get global 
 
 ```plain
 export function getConfig(
-  env: string | undefined = process.env.NEAR_ENV ||
+  env: string | undefined = ENV ||
+    process.env.NEAR_ENV ||
     process.env.REACT_APP_REF_SDK_ENV
 ) {
+  ENV = env;
   switch (env) {
     case 'mainnet':
       return {
@@ -35,7 +37,7 @@ export function getConfig(
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
         explorerUrl: 'https://testnet.nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: '',
+        REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
     case 'testnet':
       return {
@@ -47,7 +49,7 @@ export function getConfig(
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
         REF_TOKEN_ID: 'ref.fakes.testnet',
         explorerUrl: 'https://testnet.nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: 'dcl.ref-dev.testnet',
+        REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-dev.testnet',
       };
     default:
       return {
@@ -59,7 +61,7 @@ export function getConfig(
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: 'https://indexer.ref.finance',
         explorerUrl: 'https://nearblocks.io',
-        REF_DCL_SWAP_CONTRACT_ID: '',
+        REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
   }
 }
