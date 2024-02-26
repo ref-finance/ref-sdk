@@ -15,7 +15,7 @@ import {
   InValidAccessKeyError,
   NoCredential,
 } from './error';
-import { AccessKeyView } from 'near-api-js/lib/providers/provider';
+import { AccessKeyViewRaw } from 'near-api-js/lib/providers/provider';
 import { TransformedTransaction } from './types';
 import { Transaction } from './types';
 import { transformTransactions } from './utils';
@@ -65,7 +65,7 @@ export const getMemorySigner = async ({
 
 const validateAccessKey = (
   transaction: TransformedTransaction,
-  accessKey: AccessKeyView
+  accessKey: AccessKeyViewRaw
 ) => {
   if (accessKey.permission === 'FullAccess') {
     return accessKey;
@@ -123,7 +123,7 @@ export const getSignedTransactionsByMemoryKey = async ({
       throw NoPuiblicKeyError;
     }
 
-    const accessKey = await provider.query<AccessKeyView>({
+    const accessKey = await provider.query<AccessKeyViewRaw>({
       request_type: 'view_access_key',
       finality: 'final',
       account_id: AccountId,
