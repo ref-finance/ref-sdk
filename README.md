@@ -1273,6 +1273,11 @@ interface DCLSwapProps {
     pool_id: string;
     output_amount: string;
   };
+  SwapByStopPoint?: {
+    pool_id: string;
+    stop_point: number;
+    skip_unwrap_near: boolean;
+  };
   AccountId: string;
 }
 ```
@@ -1429,6 +1434,61 @@ Response (LimitOrderWithSwap)
           receiver_id: "dcl.ref-dev.testnet",
           amount: "1000000",
           msg: '{"LimitOrderWithSwap":{"pool_id":"usdt.fakes.testnet|wrap.testnet|2000","buy_token":"wrap.testnet","point":495240}}',
+        },
+        gas: "180000000000000",
+        amount: "0.000000000000000000000001",
+      },
+    ],
+  },
+];
+
+```
+
+Example (SwapByStopPoint)
+
+```plain
+const tokenA = "usdt.fakes.testnet";
+
+const tokenB = "wrap.testnet";
+
+const fee = 2000
+
+const pool_ids = [getDCLPoolId(tokenA, tokenB, fee)];
+
+
+const tokenAMetadata = await ftGetTokenMetadata(tokenA)
+
+const tokenBMetadata = await ftGetTokenMetadata(tokenB)
+
+
+const res = await DCLSwap({
+  swapInfo: {
+    amountA: input_amount,
+    tokenA: tokenAMetadata,
+    tokenB: tokenBMetadata,
+  },
+  SwapByStopPoint: {
+      pool_id: pool_id,
+      stop_point: 405920,
+   },
+  AccountId,
+});
+```
+
+Response (SwapByStopPoint)
+
+```
+
+[
+  {
+    receiverId: "usdt.fakes.testnet",
+    functionCalls: [
+      {
+        methodName: "ft_transfer_call",
+        args: {
+          receiver_id: "dcl.ref-dev.testnet",
+          amount: "1000000",
+          msg: '{"SwapByStopPoint":{"pool_id":"usdt.fakes.testnet|wrap.testnet|2000","stop_point":495240}}',
         },
         gas: "180000000000000",
         amount: "0.000000000000000000000001",
