@@ -240,7 +240,9 @@ export const DCLSwap = async ({
         functionCalls: [registerAccountOnToken(AccountId)],
       });
     }
-    const msg = JSON.stringify(SwapByStopPoint);
+    const msg = JSON.stringify({
+      SwapByStopPoint: SwapByStopPoint,
+    });
     transactions.push({
       receiverId: tokenA.id,
       functionCalls: [
