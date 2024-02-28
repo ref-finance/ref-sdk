@@ -61,11 +61,7 @@ export const refFiViewFunction = async ({
 }: RefFiViewFunctionOptions) => {
   const nearConnection = await near.account(REF_FI_CONTRACT_ID);
 
-  return nearConnection.viewFunction({
-    contractId: REF_FI_CONTRACT_ID,
-    methodName,
-    args,
-  });
+  return nearConnection.viewFunction(REF_FI_CONTRACT_ID, methodName, args);
 };
 
 export const ftViewFunction = async (
@@ -74,11 +70,7 @@ export const ftViewFunction = async (
 ) => {
   const nearConnection = await near.account(REF_FI_CONTRACT_ID);
 
-  return nearConnection.viewFunction({
-    contractId: tokenId,
-    methodName,
-    args,
-  });
+  return nearConnection.viewFunction(tokenId, methodName, args);
 };
 
 export const ftGetStorageBalance = (
@@ -240,11 +232,11 @@ export const refDCLSwapViewFunction = async ({
 
   if (!config.REF_DCL_SWAP_CONTRACT_ID) throw DCLInValid;
 
-  return nearConnection.viewFunction({
-    contractId: config.REF_DCL_SWAP_CONTRACT_ID,
+  return nearConnection.viewFunction(
+    config.REF_DCL_SWAP_CONTRACT_ID,
     methodName,
-    args,
-  });
+    args
+  );
 };
 
 export const DCLSwapGetStorageBalance = (
