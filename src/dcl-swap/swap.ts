@@ -38,6 +38,11 @@ interface DCLSwapProps {
     pool_id: string;
     output_amount: string;
   };
+  SwapByStopPoint?: {
+    pool_id: string;
+    stop_point: number;
+    skip_unwrap_near: boolean;
+  };
   AccountId: string;
 }
 export const DCL_POOL_SPLITER = '|';
@@ -46,6 +51,7 @@ export const DCLSwap = async ({
   Swap,
   SwapByOutput,
   LimitOrderWithSwap,
+  SwapByStopPoint,
   AccountId,
   swapInfo,
 }: DCLSwapProps) => {
@@ -205,6 +211,38 @@ export const DCLSwap = async ({
       },
     });
 
+    transactions.push({
+      receiverId: tokenA.id,
+      functionCalls: [
+        {
+          methodName: 'ft_transfer_call',
+          args: {
+            receiver_id: config.REF_DCL_SWAP_CONTRACT_ID,
+            amount: toNonDivisibleNumber(tokenA.decimals, amountA),
+            msg,
+          },
+          gas: '180000000000000',
+          amount: ONE_YOCTO_NEAR,
+        },
+      ],
+    });
+  } else if (SwapByStopPoint) {
+    const tokenRegistered = await ftGetStorageBalance(
+      tokenB.id,
+      AccountId
+    ).catch(() => {
+      throw new Error(`${tokenB.id} doesn't exist.`);
+    });
+
+    if (tokenRegistered === null) {
+      transactions.push({
+        receiverId: tokenB.id,
+        functionCalls: [registerAccountOnToken(AccountId)],
+      });
+    }
+    const msg = JSON.stringify({
+      SwapByStopPoint: SwapByStopPoint,
+    });
     transactions.push({
       receiverId: tokenA.id,
       functionCalls: [
