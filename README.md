@@ -2,7 +2,7 @@
 
 This SDK is designed to assist developers when interacting with the main functions of the protocol. Main functions that can be defined as:
 
-- Trade: Swap tokens with our Automated Market Maker (AMM)
+- Trade: Swap tokens with our Automated Market Maker (AMM).
 - Pool: Add/Remove liquidity and earn revenue from swap fee (Coming soon)
 - Farm: Stale LP tokens into farms and earn liquidity incentives (Coming soon)
 - Boost Farm: Stake LOVE tokens to get boosted liquidity incentives (Coming soon)
