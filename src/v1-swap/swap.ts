@@ -12,7 +12,7 @@ import { FEE_DIVISOR } from '../constant';
 import { getSwappedAmount } from '../stable-swap';
 import { ftGetTokenMetadata, ftGetTokensMetadata } from '../ref';
 import { isStablePool } from '../utils';
-import { getTokens } from '../indexer';
+import { getTokensTiny } from '../indexer';
 import {
   getStablePoolDecimal,
   isStablePoolToken,
@@ -679,7 +679,7 @@ export const estimateSwap = async ({
 
   const inputPools = simplePools.map(p => poolFormatter(p));
 
-  const allTokens = (await getTokens()) as Record<string, TokenMetadata>;
+  const allTokens = (await getTokensTiny()) as Record<string, TokenMetadata>;
 
   const simplePoolSmartRoutingActions = await stableSmart(
     inputPools,
