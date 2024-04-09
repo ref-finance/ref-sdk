@@ -46,11 +46,11 @@ let near = new Near({
   headers: {},
   ...getConfig(),
 });
-export const init_env = (env: string) => {
+export const init_env = (env: string, indexerUrl?: string) => {
   near = new Near({
     keyStore: getKeyStore(),
     headers: {},
-    ...getConfig(env),
+    ...getConfig(env, indexerUrl),
   });
   return switchEnv();
 };
