@@ -7,12 +7,15 @@ export const RATED_POOL_LP_TOKEN_DECIMALS = 24;
 export const STORAGE_TO_REGISTER_WITH_MFT = '0.1';
 export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
 let ENV: string | undefined = '';
+let INDEXER_URL: string | undefined = '';
 export function getConfig(
   env: string | undefined = ENV ||
     process.env.NEAR_ENV ||
-    process.env.REACT_APP_REF_SDK_ENV
+    process.env.REACT_APP_REF_SDK_ENV,
+  indexerUrl: string | undefined = INDEXER_URL
 ) {
   ENV = env;
+  INDEXER_URL = indexerUrl;
   switch (env) {
     case 'mainnet':
       return {
@@ -22,7 +25,7 @@ export function getConfig(
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
-        indexerUrl: 'https://indexer.ref.finance',
+        indexerUrl: indexerUrl || 'https://mainnet-indexer.ref-finance.com',
         explorerUrl: 'https://testnet.nearblocks.io',
         REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
@@ -31,7 +34,7 @@ export function getConfig(
         networkId: 'testnet',
         nodeUrl: 'https://rpc.testnet.near.org',
         walletUrl: 'https://wallet.testnet.near.org',
-        indexerUrl: 'https://testnet-indexer.ref-finance.com',
+        indexerUrl: indexerUrl || 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
         REF_FI_CONTRACT_ID: 'ref-finance-101.testnet',
         REF_TOKEN_ID: 'ref.fakes.testnet',
@@ -46,7 +49,7 @@ export function getConfig(
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
-        indexerUrl: 'https://indexer.ref.finance',
+        indexerUrl: indexerUrl || 'https://mainnet-indexer.ref-finance.com',
         explorerUrl: 'https://nearblocks.io',
         REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
