@@ -70,13 +70,15 @@ export function getConfig(
 
 
 
-Also, the SDK provides `init_env`  to switch application environment. We'd better call it at the entrance of the application, then the entire application environment switch takes effect. If you're not sure where to call,  you can call in more than one place.
+Also, the SDK provides `init_env`  to switch application environment. there is an optional parameter indexerUrl that you can use to replace the one in the SDK with your own deployed indexer service. We'd better call it at the entrance of the application, then the entire application environment switch takes effect. If you're not sure where to call,  you can call in more than one place.
 
 Example
 
 ```
 init_env('testnet');
 init_env('mainnet');
+init_env('testnet', 'https://xx-xx.xx-xxx.com');
+init_env('mainnet', 'https://xx-xx.xx-xxx.com');
 ```
 
 
