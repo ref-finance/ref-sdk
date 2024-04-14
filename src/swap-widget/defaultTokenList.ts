@@ -1034,6 +1034,28 @@ export const DefaultMainnetTokenList = [
     decimals: 6,
     id: 'usdt.tether-token.near',
   },
+  {
+    spec: 'ft-1.0.0',
+    name: 'NEAT',
+    symbol: 'NEAT',
+    icon:
+      "data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' rx='4.8' fill='%23202020'/%3E%3Crect width='40' height='40' rx='4.8' fill='url(%23paint0_linear_1_5571)'/%3E%3Crect x='10.4' y='12.6001' width='4.8' height='4.8' fill='white'/%3E%3Crect x='15.2' y='12.6001' width='4.8' height='4.8' fill='white'/%3E%3Crect x='24.8' y='12.6001' width='4.8' height='4.8' fill='white'/%3E%3Crect x='10.4' y='17.4001' width='4.8' height='4.8' fill='white'/%3E%3Crect x='24.8' y='17.4001' width='4.8' height='4.8' fill='white'/%3E%3Crect x='10.4' y='22.2002' width='4.8' height='4.8' fill='white'/%3E%3Crect x='24.8' y='22.2002' width='4.8' height='4.8' fill='white'/%3E%3Crect x='20' y='22.2002' width='4.8' height='4.8' fill='white'/%3E%3Crect x='17.6' y='17.4001' width='4.8' height='4.8' fill='white'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_1_5571' x1='20' y1='0' x2='20' y2='40' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-color='%23262626'/%3E%3Cstop offset='1' stop-color='%23121212'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A",
+    reference: null,
+    reference_hash: null,
+    decimals: 8,
+    id: 'neat.nrc-20.near',
+  },
+  {
+    spec: 'ft-1.0.0',
+    name: 'USMeme',
+    symbol: 'USM',
+    icon:
+      'https://storage.herewallet.app/upload/13151331-8f9c-4851-8038-36794688c693.jpg',
+    reference: null,
+    reference_hash: null,
+    decimals: 8,
+    id: 'usmeme.tg',
+  },
 ];
 
 export function getDefaultTokenList() {

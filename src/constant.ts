@@ -25,7 +25,7 @@ export function getConfig(
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
-        indexerUrl: indexerUrl || 'https://mainnet-indexer.ref-finance.com',
+        indexerUrl: indexerUrl || 'https://indexer.ref.finance',
         explorerUrl: 'https://testnet.nearblocks.io',
         REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
@@ -49,7 +49,7 @@ export function getConfig(
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
-        indexerUrl: indexerUrl || 'https://mainnet-indexer.ref-finance.com',
+        indexerUrl: indexerUrl || 'https://indexer.ref.finance',
         explorerUrl: 'https://nearblocks.io',
         REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
