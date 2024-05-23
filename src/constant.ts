@@ -41,6 +41,18 @@ export function getConfig(
         explorerUrl: 'https://testnet.nearblocks.io',
         REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-dev.testnet',
       };
+    case 'dev':
+      return {
+        networkId: 'testnet',
+        nodeUrl: 'https://rpc.testnet.near.org',
+        walletUrl: 'https://wallet.testnet.near.org',
+        indexerUrl: indexerUrl || 'https://dev-indexer.ref-finance.com',
+        WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
+        REF_FI_CONTRACT_ID: 'exchange.ref-dev.testnet',
+        REF_TOKEN_ID: 'ref.fakes.testnet',
+        explorerUrl: 'https://testnet.nearblocks.io',
+        REF_DCL_SWAP_CONTRACT_ID: 'refv2-dev.ref-dev.testnet',
+      };
     default:
       return {
         networkId: 'mainnet',
