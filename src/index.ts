@@ -27,3 +27,5 @@ export * from './dcl-swap/dcl-pool';
 export * from './dcl-swap/swap';
 
 export * from './dcl-swap/limit-order';
+
+export * from './swap/swap';
