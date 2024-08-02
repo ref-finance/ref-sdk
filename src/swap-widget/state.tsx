@@ -229,7 +229,7 @@ export const useSwap = (
   } & {
     slippageTolerance: number;
     refreshTrigger: boolean;
-    onSwap: (transactionsRef: Transaction[]) => void;
+    onSwap: (transactionsRef: Transaction[]) => Promise<void>;
     AccountId?: string;
     poolFetchingState?: 'loading' | 'end';
     referralId?: string;
@@ -257,6 +257,8 @@ export const useSwap = (
 
   const [isEstimating, setIsEstimating] = useState<boolean>(false);
 
+  const [isSwapping, setIsSwapping] = useState<boolean>(false);
+
   const [forceEstimate, setForceEstimate] = useState<boolean>(false);
 
   const minAmountOut = amountOut
@@ -279,6 +281,7 @@ export const useSwap = (
 
   const makeSwap = async () => {
     if (!params.tokenIn || !params.tokenOut) return;
+    setIsSwapping(true);
 
     const transactionsRef = await instantSwap({
       tokenIn: params.tokenIn,
@@ -310,7 +313,8 @@ export const useSwap = (
       transactionsRef.push(nearWithdrawTransaction(minAmountOut));
     }
 
-    onSwap(transactionsRef);
+    await onSwap(transactionsRef);
+    setIsSwapping(false);
   };
 
   const getEstimate = () => {
@@ -421,6 +425,7 @@ export const useSwap = (
     swapError,
     setAmountOut,
     isEstimating,
+    isSwapping
   };
 };
 
