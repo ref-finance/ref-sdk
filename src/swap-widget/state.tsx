@@ -293,8 +293,11 @@ export const useSwap = (
 
   useEffect(() => {
     updateTokenInBalance();
+  }, [tokenIn, AccountId])
+
+  useEffect(() => {
     updateTokenOutBalance();
-  }, [tokenIn, tokenOut, AccountId, balances])
+  }, [tokenOut, AccountId])
 
   const makeSwap = async () => {
     if (!params.tokenIn || !params.tokenOut) return;
@@ -336,22 +339,13 @@ export const useSwap = (
 
   const updateTokenInBalance = () => {
     const wrappedId = tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id;
-    if (balances[wrappedId]) {
-      setTokenInBalance(balances[wrappedId]);
-      return;
-    }
     ftGetBalance(wrappedId, AccountId).then(available => {
       setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
     });
   }
 
   const updateTokenOutBalance = () => {
-    const wrappedId =
-      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
-    if (balances[wrappedId]) {
-      setTokenOutBalance(balances[wrappedId]);
-      return;
-    }
+    const wrappedId = tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
     ftGetBalance(wrappedId, AccountId).then(available => {
       setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
     });
