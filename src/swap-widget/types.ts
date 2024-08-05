@@ -34,6 +34,8 @@ export interface SwapWidgetProps {
 export interface SwapOutParams {
   amountOut: string;
   minAmountOut: string;
+  tokenInBalance: string;
+  tokenOutBalance: string;
   rate: string;
   fee: number;
   estimates: EstimateSwapView[];
@@ -42,5 +44,4 @@ export interface SwapOutParams {
   swapError: Error | null;
   setAmountOut: (amount: string) => void;
   isEstimating: boolean;
-  isSwapping: boolean;
 }

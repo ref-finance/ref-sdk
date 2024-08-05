@@ -107,9 +107,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   };
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
-  const [tokenInBalance, setTokenInBalance] = useState<string>('');
-
-  const [tokenOutBalance, setTokenOutBalance] = useState<string>('');
 
   const [notOpen, setNotOpen] = useState<boolean>(false);
 
@@ -204,12 +201,12 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   const {
     amountOut,
     minAmountOut,
+    tokenInBalance,
     rate,
     fee,
     estimates,
     canSwap,
     swapError,
-    isSwapping,
     makeSwap,
     setAmountOut,
   } = useSwap({
@@ -233,36 +230,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     poolFetchingState,
     referralId,
   });
-
-  useEffect(() => {
-    if (!tokenIn) return;
-
-    const wrapedId = tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id;
-
-    if (balances[wrapedId]) {
-      setTokenInBalance(balances[wrapedId]);
-      return;
-    }
-
-    ftGetBalance(wrapedId, AccountId).then(available => {
-      setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
-    });
-  }, [tokenIn, AccountId, balances, isSwapping]);
-
-  useEffect(() => {
-    if (!tokenOut) return;
-
-    const wrapedId =
-      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
-
-    if (balances[wrapedId]) {
-      setTokenOutBalance(balances[wrapedId]);
-      return;
-    }
-    ftGetBalance(wrapedId, AccountId).then(available => {
-      setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
-    });
-  }, [tokenOut, AccountId, balances, isSwapping]);
 
   const priceImpact = useMemo(() => {
     if (!tokenIn || !tokenOut) return '0';

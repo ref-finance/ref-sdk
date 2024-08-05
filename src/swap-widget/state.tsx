@@ -257,9 +257,21 @@ export const useSwap = (
 
   const [isEstimating, setIsEstimating] = useState<boolean>(false);
 
-  const [isSwapping, setIsSwapping] = useState<boolean>(false);
-
   const [forceEstimate, setForceEstimate] = useState<boolean>(false);
+
+  const [tokenInBalance, setTokenInBalance] = useState<string>('');
+
+  const [tokenOutBalance, setTokenOutBalance] = useState<string>('');
+
+  const { tokens, tokenLoading } = useTokensIndexer({
+    defaultTokenList: null,
+    AccountId,
+  });
+
+  // cache list tokens
+  useAllTokens({ reload: true });
+
+  const balances = useTokenBalnces(tokens, AccountId);
 
   const minAmountOut = amountOut
     ? percentLess(slippageTolerance, amountOut)
@@ -279,9 +291,13 @@ export const useSwap = (
     amountOut || '1'
   );
 
+  useEffect(() => {
+    updateTokenInBalance();
+    updateTokenOutBalance();
+  }, [tokenIn, tokenOut, AccountId, balances])
+
   const makeSwap = async () => {
     if (!params.tokenIn || !params.tokenOut) return;
-    setIsSwapping(true);
 
     const transactionsRef = await instantSwap({
       tokenIn: params.tokenIn,
@@ -314,8 +330,32 @@ export const useSwap = (
     }
 
     await onSwap(transactionsRef);
-    setIsSwapping(false);
+    if (tokenIn) updateTokenInBalance();
+    if (tokenOut) updateTokenOutBalance();
   };
+
+  const updateTokenInBalance = () => {
+    const wrappedId = tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id;
+    if (balances[wrappedId]) {
+      setTokenInBalance(balances[wrappedId]);
+      return;
+    }
+    ftGetBalance(wrappedId, AccountId).then(available => {
+      setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
+    });
+  }
+
+  const updateTokenOutBalance = () => {
+    const wrappedId =
+      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
+    if (balances[wrappedId]) {
+      setTokenOutBalance(balances[wrappedId]);
+      return;
+    }
+    ftGetBalance(wrappedId, AccountId).then(available => {
+      setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
+    });
+  }
 
   const getEstimate = () => {
     if (
@@ -417,6 +457,8 @@ export const useSwap = (
   return {
     amountOut,
     minAmountOut,
+    tokenInBalance,
+    tokenOutBalance,
     fee,
     rate,
     estimates,
@@ -425,7 +467,6 @@ export const useSwap = (
     swapError,
     setAmountOut,
     isEstimating,
-    isSwapping
   };
 };
 
