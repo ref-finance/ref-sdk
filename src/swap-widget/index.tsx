@@ -30,7 +30,7 @@ import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { TiWarning } from '@react-icons/all-files/ti/TiWarning';
 
 import './style.css';
-import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
+import { useTokenPriceList, useTokenBalances, useTokensIndexer } from './state';
 
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon, AccountButton } from './components';
@@ -137,7 +137,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   // cache list tokens
   useAllTokens({ reload: true });
 
-  const balances = useTokenBalnces(tokens, AccountId);
+  const { balances } = useTokenBalances(tokens, AccountId);
 
   const [refreshTrigger, setRreshTrigger] = useState<boolean>(false);
 

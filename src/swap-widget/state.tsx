@@ -4,6 +4,8 @@ import React, {
   useContext,
   createContext,
   ReactNode,
+  useMemo,
+  useCallback,
 } from 'react';
 import {
   ftGetBalance,
@@ -259,9 +261,30 @@ export const useSwap = (
 
   const [forceEstimate, setForceEstimate] = useState<boolean>(false);
 
-  const [tokenInBalance, setTokenInBalance] = useState<string>('');
+  const tokenMetadata = [];
+  if (tokenIn) tokenMetadata.push(tokenIn);
+  if (tokenOut) tokenMetadata.push(tokenOut);
 
-  const [tokenOutBalance, setTokenOutBalance] = useState<string>('');
+  const { balances, updateTokenBalance } = useTokenBalances(
+    tokenMetadata,
+    AccountId
+  );
+
+  const tokenInBalance = useMemo(
+    () =>
+      balances[
+        tokenIn?.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn?.id || ''
+      ] || '',
+    [tokenIn, balances]
+  );
+
+  const tokenOutBalance = useMemo(
+    () =>
+      balances[
+        tokenOut?.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut?.id || ''
+      ] || '',
+    [tokenOut, balances]
+  );
 
   const minAmountOut = amountOut
     ? percentLess(slippageTolerance, amountOut)
@@ -280,14 +303,6 @@ export const useSwap = (
     ONLY_ZEROS.test(params.amountIn) ? '1' : params.amountIn,
     amountOut || '1'
   );
-
-  useEffect(() => {
-    updateTokenInBalance(AccountId);
-  }, [tokenIn, AccountId]);
-
-  useEffect(() => {
-    updateTokenOutBalance(AccountId);
-  }, [tokenOut, AccountId]);
 
   const makeSwap = async () => {
     if (!params.tokenIn || !params.tokenOut) return;
@@ -323,26 +338,11 @@ export const useSwap = (
     }
 
     await onSwap(transactionsRef);
-    if (tokenIn) updateTokenInBalance(AccountId);
-    if (tokenOut) updateTokenOutBalance(AccountId);
-  };
-
-  const updateTokenInBalance = (AccountId?: string) => {
-    if (!tokenIn || !AccountId) return;
-    const wrappedId =
-      tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id;
-    ftGetBalance(wrappedId, AccountId).then(available => {
-      setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
-    });
-  };
-
-  const updateTokenOutBalance = (AccountId?: string) => {
-    if (!tokenOut || !AccountId) return;
-    const wrappedId =
-      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
-    ftGetBalance(wrappedId, AccountId).then(available => {
-      setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
-    });
+    const tokensToUpdate = [];
+    if (tokenIn) tokensToUpdate.push(tokenIn.id);
+    if (tokenOut) tokensToUpdate.push(tokenOut.id);
+    if (tokensToUpdate.length > 0)
+      updateTokenBalance(tokensToUpdate, AccountId || '');
   };
 
   const getEstimate = () => {
@@ -482,12 +482,21 @@ export const TokenPriceContextProvider: React.FC = ({ children }) => {
   );
 };
 
-export const useTokenBalnces = (tokens: TokenMetadata[], AccountId: string) => {
+export const useTokenBalances = (
+  tokens: TokenMetadata[],
+  AccountId?: string
+) => {
   const [balances, setBalances] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const validTokens = tokens.filter(t => !!t?.id);
+  // Initializes token balances in a callback function to avoid re-renders
+  // Called in 1 minute intervals
+  const initTokenBalances = useCallback(() => {
+    if (!AccountId) {
+      if (Object.keys(balances).length > 0) setBalances({});
+      return;
+    }
 
+    const validTokens = tokens.filter(t => !!t?.id);
     const ids = validTokens.map(token => token.id);
 
     Promise.all(
@@ -504,7 +513,35 @@ export const useTokenBalnces = (tokens: TokenMetadata[], AccountId: string) => {
 
       setBalances(balancesMap);
     });
-  }, [tokens.map(t => t?.id).join('-')]);
+  }, [tokens, AccountId]);
 
-  return balances;
+  useEffect(() => {
+    initTokenBalances();
+    const interval = setInterval(initTokenBalances, 60000);
+    return () => clearInterval(interval);
+  }, [initTokenBalances]);
+
+  const updateTokenBalance = (tokenIds: string[], AccountId: string) => {
+    tokenIds.forEach(tokenId => {
+      ftGetBalance(tokenId, AccountId).then(available => {
+        setBalances({
+          ...balances,
+          [tokenId]: toReadableNumber(
+            tokens.find(t => t.id === tokenId)?.decimals || 0,
+            available
+          ),
+        });
+      });
+    });
+  };
+
+  const tokenDeps = tokens.map(t => t?.id).join('-');
+  useEffect(() => initTokenBalances(), [
+    tokens,
+    tokenDeps,
+    AccountId,
+    initTokenBalances,
+  ]);
+
+  return { balances, updateTokenBalance };
 };
