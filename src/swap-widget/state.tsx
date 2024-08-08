@@ -338,11 +338,16 @@ export const useSwap = (
     }
 
     await onSwap(transactionsRef);
-    const tokensToUpdate = [];
-    if (tokenIn) tokensToUpdate.push(tokenIn.id);
-    if (tokenOut) tokensToUpdate.push(tokenOut.id);
-    if (tokensToUpdate.length > 0)
-      updateTokenBalance(tokensToUpdate, AccountId || '');
+
+    const refreshBalances = () => {
+      const tokensToUpdate = [];
+      if (tokenIn) tokensToUpdate.push(tokenIn.id);
+      if (tokenOut) tokensToUpdate.push(tokenOut.id);
+      if (tokensToUpdate.length > 0)
+        updateTokenBalance(tokensToUpdate, AccountId || '');
+    };
+
+    window.setTimeout(refreshBalances, 3000);
   };
 
   const getEstimate = () => {
@@ -445,6 +450,7 @@ export const useSwap = (
   return {
     amountOut,
     minAmountOut,
+    balances,
     tokenInBalance,
     tokenOutBalance,
     fee,
@@ -488,39 +494,6 @@ export const useTokenBalances = (
 ) => {
   const [balances, setBalances] = useState<Record<string, string>>({});
 
-  // Initializes token balances in a callback function to avoid re-renders
-  // Called in 1 minute intervals
-  const initTokenBalances = useCallback(() => {
-    if (!AccountId) {
-      if (Object.keys(balances).length > 0) setBalances({});
-      return;
-    }
-
-    const validTokens = tokens.filter(t => !!t?.id);
-    const ids = validTokens.map(token => token.id);
-
-    Promise.all(
-      ids.map(id =>
-        ftGetBalance(id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : id, AccountId)
-      )
-    ).then(balances => {
-      const balancesMap = validTokens.reduce((acc, token, index) => {
-        return {
-          ...acc,
-          [token.id]: toReadableNumber(token.decimals, balances[index]),
-        };
-      }, {});
-
-      setBalances(balancesMap);
-    });
-  }, [tokens, AccountId]);
-
-  useEffect(() => {
-    initTokenBalances();
-    const interval = setInterval(initTokenBalances, 60000);
-    return () => clearInterval(interval);
-  }, [initTokenBalances]);
-
   const updateTokenBalance = (tokenIds: string[], AccountId: string) => {
     tokenIds.forEach(tokenId => {
       ftGetBalance(tokenId, AccountId).then(available => {
@@ -535,13 +508,38 @@ export const useTokenBalances = (
     });
   };
 
-  const tokenDeps = tokens.map(t => t?.id).join('-');
-  useEffect(() => initTokenBalances(), [
-    tokens,
-    tokenDeps,
-    AccountId,
-    initTokenBalances,
-  ]);
+  useEffect(() => {
+    // Initializes token balances
+    // Called in 1 minute intervals
+    const initTokenBalances = () => {
+      if (!AccountId) {
+        if (Object.keys(balances).length > 0) setBalances({});
+        return;
+      }
+
+      const validTokens = tokens.filter(t => !!t?.id);
+      const ids = validTokens.map(token => token.id);
+
+      Promise.all(
+        ids.map(id =>
+          ftGetBalance(id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : id, AccountId)
+        )
+      ).then(balances => {
+        const balancesMap = validTokens.reduce((acc, token, index) => {
+          return {
+            ...acc,
+            [token.id]: toReadableNumber(token.decimals, balances[index]),
+          };
+        }, {});
+
+        setBalances(balancesMap);
+      });
+    };
+
+    initTokenBalances();
+    const interval = setInterval(initTokenBalances, 60000);
+    return () => clearInterval(interval);
+  }, [AccountId, balances, tokens]);
 
   return { balances, updateTokenBalance };
 };

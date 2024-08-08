@@ -137,8 +137,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   // cache list tokens
   useAllTokens({ reload: true });
 
-  const { balances } = useTokenBalances(tokens, AccountId);
-
   const [refreshTrigger, setRreshTrigger] = useState<boolean>(false);
 
   const tokenPriceList = useTokenPriceList();
@@ -201,6 +199,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   const {
     amountOut,
     minAmountOut,
+    balances,
     tokenInBalance,
     tokenOutBalance,
     rate,

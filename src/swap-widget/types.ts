@@ -36,6 +36,7 @@ export interface SwapOutParams {
   minAmountOut: string;
   tokenInBalance: string;
   tokenOutBalance: string;
+  balances: Record<string, string>;
   rate: string;
   fee: number;
   estimates: EstimateSwapView[];
