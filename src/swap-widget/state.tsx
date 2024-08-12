@@ -235,6 +235,7 @@ export const useSwap = (
     AccountId?: string;
     poolFetchingState?: 'loading' | 'end';
     referralId?: string;
+    tokens: TokenMetadata[];
   }
 ): SwapOutParams => {
   const {
@@ -244,7 +245,7 @@ export const useSwap = (
     AccountId,
     poolFetchingState,
     referralId,
-    ...swapParams
+    tokens,
   } = params;
 
   const { tokenIn, tokenOut, amountIn } = params;
@@ -261,30 +262,17 @@ export const useSwap = (
 
   const [forceEstimate, setForceEstimate] = useState<boolean>(false);
 
-  const tokenMetadata = [];
-  if (tokenIn) tokenMetadata.push(tokenIn);
-  if (tokenOut) tokenMetadata.push(tokenOut);
+  const { balances, updateTokenBalance } = useTokenBalances(tokens, AccountId);
 
-  const { balances, updateTokenBalance } = useTokenBalances(
-    tokenMetadata,
-    AccountId
-  );
+  const tokenInBalance = useMemo(() => balances[tokenIn?.id!], [
+    tokenIn,
+    balances,
+  ]);
 
-  const tokenInBalance = useMemo(
-    () =>
-      balances[
-        tokenIn?.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn?.id || ''
-      ] || '',
-    [tokenIn, balances]
-  );
-
-  const tokenOutBalance = useMemo(
-    () =>
-      balances[
-        tokenOut?.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut?.id || ''
-      ] || '',
-    [tokenOut, balances]
-  );
+  const tokenOutBalance = useMemo(() => balances[tokenOut?.id!] || '', [
+    tokenOut,
+    balances,
+  ]);
 
   const minAmountOut = amountOut
     ? percentLess(slippageTolerance, amountOut)
@@ -339,15 +327,13 @@ export const useSwap = (
 
     await onSwap(transactionsRef);
 
-    const refreshBalances = () => {
+    setTimeout(() => {
       const tokensToUpdate = [];
       if (tokenIn) tokensToUpdate.push(tokenIn.id);
       if (tokenOut) tokensToUpdate.push(tokenOut.id);
-      if (tokensToUpdate.length > 0)
-        updateTokenBalance(tokensToUpdate, AccountId || '');
-    };
-
-    window.setTimeout(refreshBalances, 3000);
+      if (tokensToUpdate.length > 0 && AccountId)
+        updateTokenBalance(tokensToUpdate, AccountId);
+    }, 3000);
   };
 
   const getEstimate = () => {
@@ -488,58 +474,52 @@ export const TokenPriceContextProvider: React.FC = ({ children }) => {
   );
 };
 
+type BalancesMap = Record<string, string>;
+
 export const useTokenBalances = (
   tokens: TokenMetadata[],
   AccountId?: string
 ) => {
-  const [balances, setBalances] = useState<Record<string, string>>({});
+  const [balances, setBalances] = useState<BalancesMap>({});
 
-  const updateTokenBalance = (tokenIds: string[], AccountId: string) => {
-    tokenIds.forEach(tokenId => {
-      ftGetBalance(tokenId, AccountId).then(available => {
-        setBalances({
-          ...balances,
-          [tokenId]: toReadableNumber(
+  const updateTokenBalance = useCallback(
+    async (tokenIds: string[], AccountId: string) => {
+      const updatedTokensBalancesMap: BalancesMap = {};
+      await Promise.all(
+        tokenIds.map(async tokenId => {
+          updatedTokensBalancesMap[tokenId] = toReadableNumber(
             tokens.find(t => t.id === tokenId)?.decimals || 0,
-            available
-          ),
-        });
-      });
-    });
-  };
+            await ftGetBalance(
+              tokenId === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenId,
+              AccountId
+            )
+          );
+        })
+      );
+      setBalances(prevState => ({ ...prevState, ...updatedTokensBalancesMap }));
+    },
+    [tokens]
+  );
 
   useEffect(() => {
     // Initializes token balances
     // Called in 1 minute intervals
-    const initTokenBalances = () => {
+    const initTokenBalances = async () => {
       if (!AccountId) {
-        if (Object.keys(balances).length > 0) setBalances({});
+        setBalances({});
         return;
       }
 
       const validTokens = tokens.filter(t => !!t?.id);
       const ids = validTokens.map(token => token.id);
 
-      Promise.all(
-        ids.map(id =>
-          ftGetBalance(id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : id, AccountId)
-        )
-      ).then(balances => {
-        const balancesMap = validTokens.reduce((acc, token, index) => {
-          return {
-            ...acc,
-            [token.id]: toReadableNumber(token.decimals, balances[index]),
-          };
-        }, {});
-
-        setBalances(balancesMap);
-      });
+      updateTokenBalance(ids, AccountId);
     };
 
     initTokenBalances();
     const interval = setInterval(initTokenBalances, 60000);
     return () => clearInterval(interval);
-  }, [AccountId, balances, tokens]);
+  }, [AccountId, tokens.map(t => t?.id).join('-')]);
 
   return { balances, updateTokenBalance };
 };

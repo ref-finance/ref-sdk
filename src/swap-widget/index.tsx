@@ -229,6 +229,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     refreshTrigger,
     poolFetchingState,
     referralId,
+    tokens,
   });
 
   const priceImpact = useMemo(() => {
