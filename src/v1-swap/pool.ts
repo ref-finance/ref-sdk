@@ -1,7 +1,7 @@
 import { getTotalPools, refFiViewFunction } from '../ref';
 import { Pool, PoolRPCView } from '../types';
 import { parsePool, toNonDivisibleNumber } from '../utils';
-import { STABLE_LP_TOKEN_DECIMALS } from '../constant';
+import { STABLE_LP_TOKEN_DECIMALS, config } from '../constant';
 
 let DEFAULT_PAGE_LIMIT = 100;
 const BLACK_TOKEN_LIST = ['meta-token.near'];
@@ -72,6 +72,12 @@ export const getRefPools = async (
 };
 
 export const fetchAllPools = async (perPage?: number) => {
+  try {
+    const pools = await fetch(`${config.indexerUrl}/fetchAllPools`).then(res =>
+      res.json()
+    );
+    return pools;
+  } catch (error) {}
   if (perPage) {
     DEFAULT_PAGE_LIMIT = Math.min(perPage, 500);
   }
