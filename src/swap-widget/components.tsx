@@ -662,6 +662,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
                   style={{
                     whiteSpace: 'nowrap',
                     height: '26px',
+                    userSelect: 'none',
                   }}
                   className="__ref-swap-widget-row-flex-center"
                 >

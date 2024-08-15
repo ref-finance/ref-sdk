@@ -263,6 +263,10 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     slippageTolerance < 100 &&
     !ONLY_ZEROS.test(tokenInBalance);
 
+  const tokensAndBalancesLoaded = useMemo(() => {
+    return tokens.length > 0 && Object.keys(balances).length > 0;
+  }, [tokens, balances]);
+
   return (
     <ThemeContextProvider customTheme={curTheme}>
       <TokenPriceContextProvider>
@@ -316,6 +320,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               price={!tokenIn ? null : tokenPriceList?.[tokenIn.id]?.price}
               onChangeAmount={setAmountIn}
               onSelectToken={() => {
+                if (!tokensAndBalancesLoaded) return;
                 setWidgetRoute('token-selector-in');
               }}
             />
@@ -351,6 +356,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               token={tokenOut}
               price={!tokenOut ? null : tokenPriceList?.[tokenOut.id]?.price}
               onSelectToken={() => {
+                if (!tokensAndBalancesLoaded) return;
                 setWidgetRoute('token-selector-out');
               }}
               onForceUpdate={() => {
@@ -399,7 +405,11 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 }}
                 disabled={!canSubmit}
               >
-                {'Swap'}
+                {tokensAndBalancesLoaded ? (
+                  'Swap'
+                ) : (
+                  <div className="__ref-swap-widget-submit-button-loader"></div>
+                )}
               </button>
             ) : (
               <button
