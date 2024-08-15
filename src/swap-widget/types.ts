@@ -6,7 +6,7 @@ import { Theme } from './constant';
 export interface SwapWidgetProps {
   theme?: Theme;
   defaultTokenList?: TokenMetadata[];
-  onSwap: (transactionsRef: Transaction[]) => void;
+  onSwap: (transactionsRef: Transaction[]) => Promise<void>;
   onDisConnect: () => void;
   width: string;
   height?: string;
@@ -34,6 +34,9 @@ export interface SwapWidgetProps {
 export interface SwapOutParams {
   amountOut: string;
   minAmountOut: string;
+  tokenInBalance: string;
+  tokenOutBalance: string;
+  balances: Record<string, string>;
   rate: string;
   fee: number;
   estimates: EstimateSwapView[];

@@ -30,7 +30,7 @@ import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
 import { TiWarning } from '@react-icons/all-files/ti/TiWarning';
 
 import './style.css';
-import { useTokenPriceList, useTokenBalnces, useTokensIndexer } from './state';
+import { useTokenPriceList, useTokenBalances, useTokensIndexer } from './state';
 
 import { CgArrowsExchangeAltV } from '@react-icons/all-files/cg/CgArrowsExchangeAltV';
 import { RefIcon, AccountButton } from './components';
@@ -107,9 +107,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
   };
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
-  const [tokenInBalance, setTokenInBalance] = useState<string>('');
-
-  const [tokenOutBalance, setTokenOutBalance] = useState<string>('');
 
   const [notOpen, setNotOpen] = useState<boolean>(false);
 
@@ -139,8 +136,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   // cache list tokens
   useAllTokens({ reload: true });
-
-  const balances = useTokenBalnces(tokens, AccountId);
 
   const [refreshTrigger, setRreshTrigger] = useState<boolean>(false);
 
@@ -201,39 +196,12 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     }
   }, [tokens, tokenLoading]);
 
-  useEffect(() => {
-    if (!tokenIn) return;
-
-    const wrapedId = tokenIn.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenIn.id;
-
-    if (balances[wrapedId]) {
-      setTokenInBalance(balances[wrapedId]);
-      return;
-    }
-
-    ftGetBalance(wrapedId, AccountId).then(available => {
-      setTokenInBalance(toReadableNumber(tokenIn.decimals, available));
-    });
-  }, [tokenIn, AccountId, balances]);
-
-  useEffect(() => {
-    if (!tokenOut) return;
-
-    const wrapedId =
-      tokenOut.id === WRAP_NEAR_CONTRACT_ID ? 'NEAR' : tokenOut.id;
-
-    if (balances[wrapedId]) {
-      setTokenOutBalance(balances[wrapedId]);
-      return;
-    }
-    ftGetBalance(wrapedId, AccountId).then(available => {
-      setTokenOutBalance(toReadableNumber(tokenOut.decimals, available));
-    });
-  }, [tokenOut, AccountId, balances]);
-
   const {
     amountOut,
     minAmountOut,
+    balances,
+    tokenInBalance,
+    tokenOutBalance,
     rate,
     fee,
     estimates,
@@ -261,6 +229,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     refreshTrigger,
     poolFetchingState,
     referralId,
+    tokens,
   });
 
   const priceImpact = useMemo(() => {

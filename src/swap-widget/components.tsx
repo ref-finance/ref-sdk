@@ -4,7 +4,7 @@ import {
   ThemeContext,
   useTokenPriceList,
   TokenPriceContext,
-  useTokenBalnces,
+  useTokenBalances,
 } from './state';
 
 import { FiChevronDown } from '@react-icons/all-files/fi/FiChevronDown';
