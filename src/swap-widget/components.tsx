@@ -571,6 +571,25 @@ export const HalfAndMaxAmount = ({
   );
 };
 
+const ALLOWED_KEYS = [
+  'Backspace',
+  'Tab',
+  'ArrowLeft',
+  'ArrowRight',
+  'Delete', // control keys
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9', // numeric keys
+  '.', // decimal point
+];
+
 export const TokenAmount = (props: TokenAmountProps) => {
   const {
     balance,
@@ -601,6 +620,26 @@ export const TokenAmount = (props: TokenAmountProps) => {
   const ref = useRef<HTMLInputElement>(null);
 
   const [hoverSelect, setHoverSelect] = useState<boolean>(false);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!ALLOWED_KEYS.includes(event.key) && !event.ctrlKey) {
+      event.preventDefault();
+    }
+
+    // Ensure only one dot is allowed
+    const inputValue = (event.target as HTMLInputElement).value;
+    if (event.key === '.' && inputValue.includes('.')) {
+      event.preventDefault();
+    }
+  };
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+    const paste = event.clipboardData.getData('text');
+
+    if (!/^[0-9.]+$/.test(paste)) {
+      event.preventDefault();
+    }
+  };
 
   const handleChange = (amount: string) => {
     if (onChangeAmount) {
@@ -719,16 +758,16 @@ export const TokenAmount = (props: TokenAmountProps) => {
           <input
             ref={ref}
             max={!!onChangeAmount ? curMax : undefined}
-            min="0"
             onWheel={() => {
               if (ref.current) {
                 ref.current.blur();
               }
             }}
             className="__ref-swap-widget-input-class"
-            step="any"
             value={amount}
-            type="number"
+            type="text"
+            onKeyDownCapture={handleKeyDown}
+            onPaste={handlePaste}
             placeholder={!onChangeAmount ? '-' : '0.0'}
             onChange={({ target }) => {
               target.setCustomValidity('');
