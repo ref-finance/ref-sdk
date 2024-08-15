@@ -766,7 +766,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
             className="__ref-swap-widget-input-class"
             value={amount}
             type="text"
-            onKeyDownCapture={handleKeyDown}
+            onKeyDown={handleKeyDown}
             onPaste={handlePaste}
             placeholder={!onChangeAmount ? '-' : '0.0'}
             onChange={({ target }) => {
@@ -774,7 +774,6 @@ export const TokenAmount = (props: TokenAmountProps) => {
               handleChange(target.value);
             }}
             disabled={!onChangeAmount}
-            onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
               color: primary,
               marginBottom: '8px',
