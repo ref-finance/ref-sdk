@@ -571,6 +571,7 @@ export const HalfAndMaxAmount = ({
   );
 };
 
+const DECIMAL_POINT = '.';
 const ALLOWED_KEYS = [
   'Backspace',
   'Tab',
@@ -587,7 +588,7 @@ const ALLOWED_KEYS = [
   '7',
   '8',
   '9', // numeric keys
-  '.', // decimal point
+  DECIMAL_POINT, // decimal point
 ];
 
 export const TokenAmount = (props: TokenAmountProps) => {
@@ -626,9 +627,16 @@ export const TokenAmount = (props: TokenAmountProps) => {
       event.preventDefault();
     }
 
+    const isDecimalPoint = event.key === DECIMAL_POINT;
+    if (!isDecimalPoint) return;
     // Ensure only one dot is allowed
     const inputValue = (event.target as HTMLInputElement).value;
-    if (event.key === '.' && inputValue.includes('.')) {
+    if (inputValue.includes(DECIMAL_POINT)) {
+      event.preventDefault();
+    }
+
+    // prohibit only one dot
+    if (inputValue.length === 0) {
       event.preventDefault();
     }
   };
