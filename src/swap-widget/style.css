@@ -168,6 +168,8 @@
 
 .__ref-swap-widget-submit-button {
   width: 100%;
+  display: flex;
+  align-items: center;
   justify-content: center;
   font-size: 18px;
   font-weight: 700;
@@ -176,6 +178,28 @@
   margin-top: 14px;
   cursor: pointer;
 }
+
+.__ref-swap-widget-submit-button-loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-bottom-color: rgb(255, 255, 255);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .__ref-widget-swap-detail-view {
   justify-content: space-between;
   width: 100%;

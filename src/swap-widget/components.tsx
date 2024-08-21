@@ -571,6 +571,26 @@ export const HalfAndMaxAmount = ({
   );
 };
 
+const DECIMAL_POINT = '.';
+const ALLOWED_KEYS = [
+  'Backspace',
+  'Tab',
+  'ArrowLeft',
+  'ArrowRight',
+  'Delete', // control keys
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9', // numeric keys
+  DECIMAL_POINT, // decimal point
+];
+
 export const TokenAmount = (props: TokenAmountProps) => {
   const {
     balance,
@@ -601,6 +621,33 @@ export const TokenAmount = (props: TokenAmountProps) => {
   const ref = useRef<HTMLInputElement>(null);
 
   const [hoverSelect, setHoverSelect] = useState<boolean>(false);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!ALLOWED_KEYS.includes(event.key) && !event.ctrlKey) {
+      event.preventDefault();
+    }
+
+    const isDecimalPoint = event.key === DECIMAL_POINT;
+    if (!isDecimalPoint) return;
+    // Ensure only one dot is allowed
+    const inputValue = (event.target as HTMLInputElement).value;
+    if (inputValue.includes(DECIMAL_POINT)) {
+      event.preventDefault();
+    }
+
+    // prohibit only one dot
+    if (inputValue.length === 0) {
+      event.preventDefault();
+    }
+  };
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+    const paste = event.clipboardData.getData('text');
+
+    if (!/^[0-9.]+$/.test(paste)) {
+      event.preventDefault();
+    }
+  };
 
   const handleChange = (amount: string) => {
     if (onChangeAmount) {
@@ -662,6 +709,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
                   style={{
                     whiteSpace: 'nowrap',
                     height: '26px',
+                    userSelect: 'none',
                   }}
                   className="__ref-swap-widget-row-flex-center"
                 >
@@ -719,23 +767,22 @@ export const TokenAmount = (props: TokenAmountProps) => {
           <input
             ref={ref}
             max={!!onChangeAmount ? curMax : undefined}
-            min="0"
             onWheel={() => {
               if (ref.current) {
                 ref.current.blur();
               }
             }}
             className="__ref-swap-widget-input-class"
-            step="any"
             value={amount}
-            type="number"
+            type="text"
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder={!onChangeAmount ? '-' : '0.0'}
             onChange={({ target }) => {
               target.setCustomValidity('');
               handleChange(target.value);
             }}
             disabled={!onChangeAmount}
-            onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
             style={{
               color: primary,
               marginBottom: '8px',
