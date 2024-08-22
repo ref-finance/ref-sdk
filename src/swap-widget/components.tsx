@@ -572,25 +572,35 @@ export const HalfAndMaxAmount = ({
 };
 
 const DECIMAL_POINT = '.';
-const ALLOWED_KEYS = [
-  'Backspace',
-  'Tab',
-  'ArrowLeft',
-  'ArrowRight',
-  'Delete', // control keys
-  '0',
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9', // numeric keys
-  DECIMAL_POINT, // decimal point
-];
+const ALLOWED_KEYS: Record<string, boolean> = {
+  '0': true,
+  '1': true,
+  '2': true,
+  '3': true,
+  '4': true,
+  '5': true,
+  '6': true,
+  '7': true,
+  '8': true,
+  '9': true,
+  [DECIMAL_POINT]: true,
+};
 
+const isValidInput = (value: string) => {
+  let decimalPointsAmount = 0;
+  if (value === DECIMAL_POINT) return false;
+  for (let i = 0; i < value.length; i++) {
+    const char = value[i];
+    if (!ALLOWED_KEYS[char]) return false;
+    if (char === DECIMAL_POINT) {
+      decimalPointsAmount++;
+      if (decimalPointsAmount === 2) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
 export const TokenAmount = (props: TokenAmountProps) => {
   const {
     balance,
@@ -621,34 +631,6 @@ export const TokenAmount = (props: TokenAmountProps) => {
   const ref = useRef<HTMLInputElement>(null);
 
   const [hoverSelect, setHoverSelect] = useState<boolean>(false);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!ALLOWED_KEYS.includes(event.key) && !event.ctrlKey) {
-      event.preventDefault();
-    }
-
-    const isDecimalPoint = event.key === DECIMAL_POINT;
-    if (!isDecimalPoint) return;
-    // Ensure only one dot is allowed
-    const inputValue = (event.target as HTMLInputElement).value;
-    if (inputValue.includes(DECIMAL_POINT)) {
-      event.preventDefault();
-    }
-
-    // prohibit only one dot
-    if (inputValue.length === 0) {
-      event.preventDefault();
-    }
-  };
-
-  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
-    const paste = event.clipboardData.getData('text');
-
-    if (!/^[0-9.]+$/.test(paste)) {
-      event.preventDefault();
-    }
-  };
-
   const handleChange = (amount: string) => {
     if (onChangeAmount) {
       onChangeAmount(amount);
@@ -775,10 +757,9 @@ export const TokenAmount = (props: TokenAmountProps) => {
             className="__ref-swap-widget-input-class"
             value={amount}
             type="text"
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
             placeholder={!onChangeAmount ? '-' : '0.0'}
             onChange={({ target }) => {
+              if (!isValidInput(target.value)) return;
               target.setCustomValidity('');
               handleChange(target.value);
             }}
