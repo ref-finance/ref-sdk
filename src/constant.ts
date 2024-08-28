@@ -5,6 +5,8 @@ export const FEE_DIVISOR = 10000;
 export const STABLE_LP_TOKEN_DECIMALS = 18;
 export const RATED_POOL_LP_TOKEN_DECIMALS = 24;
 export const STORAGE_TO_REGISTER_WITH_MFT = '0.1';
+//0.0125 NEAR
+export const FT_MINIMUM_STORAGE_BALANCE_LARGE =  "12500000000000000000000"
 export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
 let ENV: string | undefined = '';
 let INDEXER_URL: string | undefined = '';
