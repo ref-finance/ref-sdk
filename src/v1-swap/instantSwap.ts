@@ -52,7 +52,7 @@ export const instantSwap = async ({
               account_id: AccountId,
             },
             gas: '30000000000000',
-            amount: formatNearAmount(await getMinStorageBalance(token.id),24),
+            amount: formatNearAmount(await getMinStorageBalance(token.id), 24),
           },
         ],
       });

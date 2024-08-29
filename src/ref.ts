@@ -257,19 +257,18 @@ export const getMinStorageBalance = async (
     const provider = new providers.JsonRpcProvider({
       url: getConfig().nodeUrl,
     });
-  
     const result = await provider.query<CodeResult>({
-      request_type: "call_function",
+      request_type: 'call_function',
       account_id: nep141Address,
-      method_name: "storage_balance_bounds",
-      args_base64: "",
-      finality: "optimistic",
-    })
-    const balance = JSON.parse(Buffer.from(result.result).toString())
-    if (!balance || !balance.min) return FT_MINIMUM_STORAGE_BALANCE_LARGE
-    return balance.min as string
+      method_name: 'storage_balance_bounds',
+      args_base64: '',
+      finality: 'optimistic',
+    });
+    const balance = JSON.parse(Buffer.from(result.result).toString());
+    if (!balance || !balance.min) return FT_MINIMUM_STORAGE_BALANCE_LARGE;
+    return balance.min as string;
   } catch (e) {
-    console.error(e, nep141Address)
-    return FT_MINIMUM_STORAGE_BALANCE_LARGE
+    console.error(e, nep141Address);
+    return FT_MINIMUM_STORAGE_BALANCE_LARGE;
   }
-}
+};
