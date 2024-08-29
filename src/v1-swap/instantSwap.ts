@@ -1,5 +1,5 @@
 import { TokenMetadata, EstimateSwapView, Transaction } from '../types';
-import { ftGetStorageBalance } from '../ref';
+import { ftGetStorageBalance, getMinStorageBalance } from '../ref';
 import {
   STORAGE_TO_REGISTER_WITH_MFT,
   REF_FI_CONTRACT_ID,
@@ -9,6 +9,7 @@ import { round, percentLess } from '../utils';
 import { toNonDivisibleNumber } from '../utils';
 import { config } from '../constant';
 import { SwapRouteError } from '../error';
+import { formatNearAmount } from 'near-api-js/lib/utils/format';
 
 export const instantSwap = async ({
   tokenIn,
@@ -51,7 +52,7 @@ export const instantSwap = async ({
               account_id: AccountId,
             },
             gas: '30000000000000',
-            amount: STORAGE_TO_REGISTER_WITH_MFT,
+            amount: formatNearAmount(await getMinStorageBalance(token.id), 24),
           },
         ],
       });

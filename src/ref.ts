@@ -5,6 +5,7 @@ import {
   NEAR_META_DATA,
   getConfig,
   switchEnv,
+  FT_MINIMUM_STORAGE_BALANCE_LARGE,
 } from './constant';
 import {
   keyStores,
@@ -21,7 +22,7 @@ import {
   FTStorageBalance,
   RefFiViewFunctionOptions,
 } from './types';
-import { AccountView } from 'near-api-js/lib/providers/provider';
+import { AccountView, CodeResult } from 'near-api-js/lib/providers/provider';
 import { Transaction } from './types';
 import { ONE_YOCTO_NEAR, REF_TOKEN_ID, REF_META_DATA } from './constant';
 
@@ -247,4 +248,27 @@ export const DCLSwapGetStorageBalance = (
     methodName: 'storage_balance_of',
     args: { account_id: AccountId },
   });
+};
+
+export const getMinStorageBalance = async (
+  nep141Address: string
+): Promise<string> => {
+  try {
+    const provider = new providers.JsonRpcProvider({
+      url: getConfig().nodeUrl,
+    });
+    const result = await provider.query<CodeResult>({
+      request_type: 'call_function',
+      account_id: nep141Address,
+      method_name: 'storage_balance_bounds',
+      args_base64: '',
+      finality: 'optimistic',
+    });
+    const balance = JSON.parse(Buffer.from(result.result).toString());
+    if (!balance || !balance.min) return FT_MINIMUM_STORAGE_BALANCE_LARGE;
+    return balance.min as string;
+  } catch (e) {
+    console.error(e, nep141Address);
+    return FT_MINIMUM_STORAGE_BALANCE_LARGE;
+  }
 };
