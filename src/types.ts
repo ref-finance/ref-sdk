@@ -139,15 +139,3 @@ export interface FTStorageBalance {
   total: string;
   available: string;
 }
-
-export type Config = {
-  networkId: string;
-  nodeUrl: string;
-  walletUrl: string;
-  WRAP_NEAR_CONTRACT_ID: string;
-  REF_FI_CONTRACT_ID: string;
-  REF_TOKEN_ID: string;
-  indexerUrl: string;
-  explorerUrl: string;
-  REF_DCL_SWAP_CONTRACT_ID: string;
-};

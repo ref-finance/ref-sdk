@@ -21,7 +21,6 @@ import {
   TokenMetadata,
   FTStorageBalance,
   RefFiViewFunctionOptions,
-  Config,
 } from './types';
 import { AccountView, CodeResult } from 'near-api-js/lib/providers/provider';
 import { Transaction } from './types';

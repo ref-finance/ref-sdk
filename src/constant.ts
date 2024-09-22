@@ -1,4 +1,4 @@
-import { Config, TokenMetadata } from './types';
+import { TokenMetadata } from './types';
 
 export const FEE_DIVISOR = 10000;
 
