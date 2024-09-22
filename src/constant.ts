@@ -10,17 +10,15 @@ export const FT_MINIMUM_STORAGE_BALANCE_LARGE =  "12500000000000000000000"
 export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
 let ENV: string | undefined = '';
 let INDEXER_URL: string | undefined = '';
-let CONFIG: Config | undefined = undefined;
 export function getConfig(
   env: string | undefined = ENV ||
     process.env.NEAR_ENV ||
     process.env.REACT_APP_REF_SDK_ENV,
   indexerUrl: string | undefined = INDEXER_URL,
-  custom_config: Config | undefined = CONFIG
+  customConfig: Config | undefined
   ): Config {
-    if (custom_config) {
-      CONFIG = custom_config;
-      return custom_config;
+    if (customConfig) {
+      return customConfig;
     }
  {
   ENV = env;

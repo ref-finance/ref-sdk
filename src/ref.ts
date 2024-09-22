@@ -47,7 +47,7 @@ let near = new Near({
   headers: {},
   ...getConfig(),
 });
-export const init_env = (env: string, indexerUrl?: string) => {
+export const init_env = (env: string, indexerUrl?: string, config?: Config) => {
   near = new Near({
     keyStore: getKeyStore(),
     headers: {},
