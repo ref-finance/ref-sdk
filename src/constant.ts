@@ -1,4 +1,4 @@
-import { TokenMetadata } from './types';
+import { Config, TokenMetadata } from './types';
 
 export const FEE_DIVISOR = 10000;
 
@@ -10,12 +10,19 @@ export const FT_MINIMUM_STORAGE_BALANCE_LARGE =  "12500000000000000000000"
 export const ONE_YOCTO_NEAR = '0.000000000000000000000001';
 let ENV: string | undefined = '';
 let INDEXER_URL: string | undefined = '';
+let CONFIG: Config | undefined = undefined;
 export function getConfig(
   env: string | undefined = ENV ||
     process.env.NEAR_ENV ||
     process.env.REACT_APP_REF_SDK_ENV,
-  indexerUrl: string | undefined = INDEXER_URL
-) {
+  indexerUrl: string | undefined = INDEXER_URL,
+  custom_config: Config | undefined = CONFIG
+  ): Config {
+    if (custom_config) {
+      CONFIG = custom_config;
+      return custom_config;
+    }
+ {
   ENV = env;
   INDEXER_URL = indexerUrl;
   switch (env) {
