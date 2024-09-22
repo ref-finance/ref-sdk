@@ -21,6 +21,7 @@ import {
   TokenMetadata,
   FTStorageBalance,
   RefFiViewFunctionOptions,
+  Config,
 } from './types';
 import { AccountView, CodeResult } from 'near-api-js/lib/providers/provider';
 import { Transaction } from './types';
@@ -51,7 +52,7 @@ export const init_env = (env: string, indexerUrl?: string, config?: Config) => {
   near = new Near({
     keyStore: getKeyStore(),
     headers: {},
-    ...getConfig(env, indexerUrl),
+    ...getConfig(env, indexerUrl, config),
   });
   return switchEnv();
 };
