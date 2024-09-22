@@ -29,7 +29,6 @@ import {
   STORAGE_TO_REGISTER_WITH_MFT,
 } from './constant';
 import Big from 'big.js';
-import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 import { TokenMetadata } from './types';
 import { PoolMode } from './v1-swap/swap';
 import { getSwappedAmount } from './stable-swap';
@@ -289,7 +288,7 @@ export const WalletSelectorTransactions = (
     };
   });
 
-  return { transactions: parsedTransactions } as SignAndSendTransactionsParams;
+  return { transactions: parsedTransactions } ;
 };
 
 export const separateRoutes = (

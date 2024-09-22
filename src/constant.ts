@@ -14,15 +14,16 @@ export function getConfig(
   env: string | undefined = ENV ||
     process.env.NEAR_ENV ||
     process.env.REACT_APP_REF_SDK_ENV,
-  indexerUrl: string | undefined = INDEXER_URL
-) {
+    indexerUrl: string | undefined = INDEXER_URL,
+    nodeUrl: string | undefined = ""
+  ) {
   ENV = env;
   INDEXER_URL = indexerUrl;
   switch (env) {
     case 'mainnet':
       return {
         networkId: 'mainnet',
-        nodeUrl: 'https://rpc.mainnet.near.org',
+        nodeUrl: nodeUrl || 'https://rpc.mainnet.near.org',
         walletUrl: 'https://wallet.near.org',
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
@@ -34,7 +35,7 @@ export function getConfig(
     case 'testnet':
       return {
         networkId: 'testnet',
-        nodeUrl: 'https://rpc.testnet.near.org',
+        nodeUrl: nodeUrl || 'https://rpc.testnet.near.org',
         walletUrl: 'https://wallet.testnet.near.org',
         indexerUrl: indexerUrl || 'https://testnet-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
@@ -46,7 +47,7 @@ export function getConfig(
     case 'dev':
       return {
         networkId: 'testnet',
-        nodeUrl: 'https://rpc.testnet.near.org',
+        nodeUrl: nodeUrl || 'https://rpc.testnet.near.org',
         walletUrl: 'https://wallet.testnet.near.org',
         indexerUrl: indexerUrl || 'https://dev-indexer.ref-finance.com',
         WRAP_NEAR_CONTRACT_ID: 'wrap.testnet',
@@ -58,7 +59,7 @@ export function getConfig(
     default:
       return {
         networkId: 'mainnet',
-        nodeUrl: 'https://rpc.mainnet.near.org',
+        nodeUrl: nodeUrl || 'https://rpc.mainnet.near.org',
         walletUrl: 'https://wallet.near.org',
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         WRAP_NEAR_CONTRACT_ID: 'wrap.near',
