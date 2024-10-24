@@ -1781,7 +1781,7 @@ export const Notification = ({
         {(state === null || state === undefined) && (
           <p>Waiting for confirmation</p>
         )}
-        {state === 'fail' && !!tx && (
+        {state === 'success' && tx && (
           <a
             className="text-primary font-semibold"
             href={`${config.explorerUrl}/txns/${tx}`}

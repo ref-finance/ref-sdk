@@ -28,7 +28,7 @@ export function getConfig(
         REF_FI_CONTRACT_ID: 'v2.ref-finance.near',
         REF_TOKEN_ID: 'token.v2.ref-finance.near',
         indexerUrl: indexerUrl || 'https://indexer.ref.finance',
-        explorerUrl: 'https://testnet.nearblocks.io',
+        explorerUrl: 'https://nearblocks.io',
         REF_DCL_SWAP_CONTRACT_ID: 'dclv2.ref-labs.near',
       };
     case 'testnet':
