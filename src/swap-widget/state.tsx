@@ -503,7 +503,7 @@ export const useTokenBalances = (
 
   useEffect(() => {
     // Initializes token balances
-    // Called in 1 minute intervals
+    // Called in 15 seconds intervals
     const initTokenBalances = async () => {
       if (!AccountId) {
         setBalances({});
@@ -517,7 +517,7 @@ export const useTokenBalances = (
     };
 
     initTokenBalances();
-    const interval = setInterval(initTokenBalances, 60000);
+    const interval = setInterval(initTokenBalances, 15_000);
     return () => clearInterval(interval);
   }, [AccountId, tokens.map(t => t?.id).join('-')]);
 
