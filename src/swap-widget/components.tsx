@@ -70,6 +70,7 @@ import {
 } from './constant';
 import { PoolMode } from '../v1-swap/swap';
 import { isMobile, separateRoutes, divide, getMax } from '../utils';
+import { SwapState } from './types';
 
 interface TokenAmountProps {
   balance?: string;
@@ -1721,32 +1722,24 @@ export const Notification = ({
   state,
   tx,
   detail,
-  open,
-  setOpen,
-  setState,
+  setSwapState,
 }: {
-  state?: 'success' | 'fail' | null;
-  setState?: (state: 'success' | 'fail' | null) => void;
+  state: SwapState;
+  setSwapState: (state: SwapState) => void;
   tx?: string;
   detail?: string;
-
-  open: boolean;
-  setOpen: (open: boolean) => void;
 }) => {
   const theme = useContext(ThemeContext);
-  const {
-    container,
-    buttonBg,
-    primary,
-    secondary,
-    borderRadius,
-    fontFamily,
-    hover,
-    active,
-    secondaryBg,
-  } = theme;
+  const { container, buttonBg, primary } = theme;
 
-  if (!open) return null;
+  const notificationStatus = useMemo(() => {
+    return {
+      isClosed: false,
+      isWaitingForConfirmation: state === 'waitingForConfirmation',
+      isFailure: state === 'fail',
+      isSuccess: state === 'success',
+    };
+  }, [state]);
 
   return (
     <div
@@ -1757,9 +1750,9 @@ export const Notification = ({
       }}
     >
       <div className="__ref-swap-widget-notification__icon">
-        {state === null && <Loading />}
-        {state === 'fail' && <Warning />}
-        {state === 'success' && <Success />}
+        {notificationStatus.isWaitingForConfirmation && <Loading />}
+        {notificationStatus.isFailure && <Warning />}
+        {notificationStatus.isSuccess && <Success />}
       </div>
 
       <div
@@ -1769,19 +1762,17 @@ export const Notification = ({
           marginBottom: '6px',
         }}
       >
-        {state === 'success' && <p>Success!</p>}
-        {state === 'fail' && <p>Swap Failed!</p>}
+        {notificationStatus.isSuccess && <p>Success!</p>}
+        {notificationStatus.isFailure && <p>Swap Failed!</p>}
       </div>
       <div
-        className="__ref-swap-widget-notification__text"
+        className="text-center"
         style={{
           color: primary,
         }}
       >
-        {(state === null || state === undefined) && (
-          <p>Waiting for confirmation</p>
-        )}
-        {state === 'success' && tx && (
+        {notificationStatus.isWaitingForConfirmation && <p>Waiting for confirmation</p>}
+        {notificationStatus.isSuccess && tx && (
           <a
             className="text-primary font-semibold"
             href={`${config.explorerUrl}/txns/${tx}`}
@@ -1797,7 +1788,7 @@ export const Notification = ({
           </a>
         )}
 
-        {state === 'success' && detail}
+        {notificationStatus.isSuccess && detail}
       </div>
       {state !== null && (
         <button
@@ -1810,8 +1801,7 @@ export const Notification = ({
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
-            setOpen(false);
-            setState && setState(null);
+            setSwapState(null);
           }}
         >
           Close

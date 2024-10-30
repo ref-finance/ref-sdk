@@ -788,8 +788,9 @@ export interface SwapWidgetProps {
     defaultTokenIn?: string;
     defaultTokenOut?: string;
     referralId?:string;
-    transactionState?: {
-        state: 'success' | 'fail' | null;
+    transactionState: {
+        state: SwapState;
+        setState: (state: SwapState) => void;
         tx?: string;
         detail?: string;
     };
@@ -889,7 +890,7 @@ export const Widget = ()=>{
   
   const { modal, selector, accountId } = useWalletSelector();
   
-  const [swapState, setSwapState] = React.useState<'success' | 'fail' | null>(
+  const [swapState, setSwapState] = React.useState<SwapState>(
     null
   );
   const [tx, setTx] = React.useState<string | undefined>(undefined);

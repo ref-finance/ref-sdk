@@ -3,6 +3,7 @@ import { Transaction } from '../types';
 import { TokenMetadata } from '../../dist/types';
 import { Theme } from './constant';
 
+export type SwapState = 'success' | 'fail' | 'waitingForConfirmation' | null;
 export interface SwapWidgetProps {
   theme?: Theme;
   defaultTokenList?: TokenMetadata[];
@@ -21,9 +22,9 @@ export interface SwapWidgetProps {
   defaultTokenIn?: string;
   defaultTokenOut?: string;
   referralId?: string;
-  transactionState?: {
-    state: 'success' | 'fail' | null;
-    setState: (state: 'success' | 'fail' | null) => void;
+  transactionState: {
+    state: SwapState;
+    setState: (state: SwapState) => void;
     tx?: string;
     detail?: string;
   };

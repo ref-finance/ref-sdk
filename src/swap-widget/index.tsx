@@ -108,17 +108,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
 
-  const [notOpen, setNotOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!transactionState) return;
-
-    if (transactionState && transactionState.state !== null) {
-      setNotOpen(true);
-    }
-    transactionState?.setState(transactionState?.state || null);
-  }, [transactionState]);
-
   const [widgetRoute, setWidgetRoute] = useState<
     'swap' | 'token-selector-in' | 'token-selector-out'
   >('swap');
@@ -247,8 +236,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    setNotOpen(true);
+    transactionState.setState('waitingForConfirmation');
     makeSwap();
   };
 
@@ -453,14 +441,14 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               </a>
             </div>
 
-            <Notification
-              state={transactionState?.state}
-              setState={transactionState?.setState}
-              open={notOpen}
-              setOpen={setNotOpen}
-              tx={transactionState?.tx}
-              detail={transactionState?.detail}
-            />
+            {transactionState.state !== null && (
+              <Notification
+                state={transactionState.state}
+                setSwapState={transactionState.setState}
+                tx={transactionState?.tx}
+                detail={transactionState?.detail}
+              />
+            )}
           </form>
         )}
 
