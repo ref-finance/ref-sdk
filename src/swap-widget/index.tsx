@@ -66,6 +66,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     onDisConnect,
     darkMode,
     referralId,
+    customMinNearAmountLeftForGasFees
   } = props;
 
   const curTheme = theme || (darkMode ? defaultDarkModeTheme : defaultTheme);
@@ -311,6 +312,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 if (!tokensLoaded) return;
                 setWidgetRoute('token-selector-in');
               }}
+              minNearAmountLeftForGasFees={customMinNearAmountLeftForGasFees}
             />
 
             <div
@@ -351,6 +353,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 setRreshTrigger(!refreshTrigger);
               }}
               poolFetchingState={poolFetchingState}
+              minNearAmountLeftForGasFees={customMinNearAmountLeftForGasFees}
             />
             {!swapError && amountIn && amountOut && (
               <DetailView

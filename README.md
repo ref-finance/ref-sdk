@@ -794,6 +794,7 @@ export interface SwapWidgetProps {
         tx?: string;
         detail?: string;
     };
+    customMinNearAmountLeftForGasFees?: number; 
     onConnect: () => void;
 }
 ```
@@ -815,6 +816,7 @@ export interface SwapWidgetProps {
   - setState: used to change setState to interact with pop-up.
   - tx: will add link to near explorer according to this tx.
   - detail: you could input some tips to show on sucess pop-up.
+-  customMinNearAmountLeftForGasFees: minimun near value reserved for tx gas fees.
 
 ![111](https://user-images.githubusercontent.com/50706666/199178453-8d09be3f-5a00-4b62-a6f1-af42ce4beae6.png)
 

@@ -82,6 +82,7 @@ interface TokenAmountProps {
   price?: string;
   onForceUpdate?: () => void;
   poolFetchingState?: 'loading' | 'end';
+  minNearAmountLeftForGasFees?: number;
 }
 
 export const getPriceImpact = (
@@ -613,6 +614,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
     price,
     onForceUpdate,
     poolFetchingState,
+    minNearAmountLeftForGasFees = 0.5
   } = props;
 
   const theme = useContext(ThemeContext);
@@ -648,17 +650,17 @@ export const TokenAmount = (props: TokenAmountProps) => {
       token &&
       balance &&
       token.id === WRAP_NEAR_CONTRACT_ID &&
-      Number(balance) - Number(ref.current.value) < 0.5
+      Number(balance) - Number(ref.current.value) < minNearAmountLeftForGasFees
     ) {
       ref.current.setCustomValidity(
-        'Must have 0.5N or more left in wallet for gas fee.'
+        `Must have ${minNearAmountLeftForGasFees}N or more left in wallet for gas fee.`
       );
     } else {
       ref.current?.setCustomValidity('');
     }
   }, [ref, balance, ref.current, ref.current?.value, token, amount]);
 
-  const curMax = token ? getMax(token.id, balance || '0') : '0';
+  const curMax = token ? getMax(token.id, balance || '0', minNearAmountLeftForGasFees) : '0';
 
   return (
     <>
@@ -807,7 +809,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
           {token && (
             <HalfAndMaxAmount
               token={token}
-              max={getMax(token.id, balance)}
+              max={getMax(token.id, balance, minNearAmountLeftForGasFees)}
               onChangeAmount={handleChange}
               amount={amount}
             />

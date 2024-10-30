@@ -835,12 +835,12 @@ export function divide(numerator: string, denominator: string) {
   });
 }
 
-export const getMax = function(id: string, amount: string) {
+export const getMax = function(id: string, amount: string, minNearAmountLeftForGasFees: number) {
   return id !== WRAP_NEAR_CONTRACT_ID
     ? amount
-    : Number(amount) <= 0.5
+    : Number(amount) <= minNearAmountLeftForGasFees
     ? '0'
-    : String(Number(amount) - 0.5);
+    : String(Number(amount) - minNearAmountLeftForGasFees);
 };
 
 export function getPointByPrice(
