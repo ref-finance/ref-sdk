@@ -28,7 +28,7 @@ export interface SwapWidgetProps {
     tx?: string;
     detail?: string;
   };
-  customMinNearAmountLeftForGasFees?: number; 
+  minNearAmountLeftForGasFees?: number; 
   onConnect: () => void;
 }
 

@@ -33,8 +33,6 @@ import { IoWarning } from '@react-icons/all-files/io5/IoWarning';
 
 import { IoCloseOutline } from '@react-icons/all-files/io5/IoCloseOutline';
 
-import { AiOutlineClose } from '@react-icons/all-files/ai/AiOutlineClose';
-
 import './style.css';
 import {
   getAccountName,
@@ -47,11 +45,13 @@ import {
   toInternationalCurrencySystemLongString,
   calculateFeeCharge,
   calculateFeePercent,
+  isValidSlippageTolerance,
 } from '../utils';
 import { REF_WIDGET_STAR_TOKEN_LIST_KEY } from './constant';
 import Big from 'big.js';
 import {
   config,
+  DEFAULT_SLIPPAGE_TOLERANCE,
   FEE_DIVISOR,
   getConfig,
   NEAR_META_DATA,
@@ -82,7 +82,7 @@ interface TokenAmountProps {
   price?: string;
   onForceUpdate?: () => void;
   poolFetchingState?: 'loading' | 'end';
-  minNearAmountLeftForGasFees?: number;
+  minNearAmountLeftForGasFees: number;
 }
 
 export const getPriceImpact = (
@@ -614,7 +614,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
     price,
     onForceUpdate,
     poolFetchingState,
-    minNearAmountLeftForGasFees = 0.5
+    minNearAmountLeftForGasFees,
   } = props;
 
   const theme = useContext(ThemeContext);
@@ -660,7 +660,9 @@ export const TokenAmount = (props: TokenAmountProps) => {
     }
   }, [ref, balance, ref.current, ref.current?.value, token, amount]);
 
-  const curMax = token ? getMax(token.id, balance || '0', minNearAmountLeftForGasFees) : '0';
+  const curMax = token
+    ? getMax(token.id, balance || '0', minNearAmountLeftForGasFees)
+    : '0';
 
   return (
     <>
@@ -823,61 +825,45 @@ export const TokenAmount = (props: TokenAmountProps) => {
 export const SlippageSelector = ({
   slippageTolerance,
   onChangeSlippageTolerance,
-  showSlip,
   setShowSlip,
 }: {
-  slippageTolerance: number;
-  onChangeSlippageTolerance: (slippageTolerance: number) => void;
-  showSlip: boolean;
+  slippageTolerance: string;
+  onChangeSlippageTolerance: (slippageTolerance: string) => void;
   setShowSlip: (showSlip: boolean) => void;
 }) => {
   const [invalid, setInValid] = useState<boolean>(false);
 
   const theme = useContext(ThemeContext);
-  const {
-    container,
-    buttonBg,
-    primary,
-    secondary,
-    borderRadius,
-    fontFamily,
-    hover,
-    active,
-    secondaryBg,
-    borderColor,
-  } = theme;
-
-  const ref = useRef<HTMLInputElement>(null);
+  const { container, buttonBg, primary, borderRadius, borderColor } = theme;
 
   const handleChange = (amount: string) => {
-    onChangeSlippageTolerance(Number(amount));
-
-    if (Number(amount) > 0 && Number(amount) < 100) {
-      setInValid(false);
-    } else {
-      setInValid(true);
-    }
-
-    if (ref.current) {
-      ref.current.value = amount;
-    }
+    onChangeSlippageTolerance(amount);
+    setInValid(!isValidSlippageTolerance(Number(amount)));
   };
 
   useEffect(() => {
-    if (!showSlip) return;
+    const onClick = (event: Event) => {
+      if (!event.target) return;
+      if (
+        (event.target as HTMLElement).closest('#__ref-slippage-container') ===
+        null
+      ) {
+        setShowSlip(false);
+        if (invalid) onChangeSlippageTolerance(DEFAULT_SLIPPAGE_TOLERANCE);
+      }
+    };
 
-    document.onclick = () => setShowSlip(false);
+    document.addEventListener('click', onClick);
 
     return () => {
-      document.onclick = null;
+      document.removeEventListener('click', onClick);
     };
-  }, [showSlip, setShowSlip]);
-
-  if (!showSlip) return null;
+  }, [invalid]);
 
   return (
     <div
       className="__ref-swap-widget_slippage_selector __ref-swap-widget-col-flex-start"
+      id="__ref-slippage-container"
       onClick={e => e.stopPropagation()}
       style={{
         background: container,
@@ -903,28 +889,21 @@ export const SlippageSelector = ({
           style={{
             border: `1px solid ${invalid ? '#FF7575' : borderColor}`,
             borderRadius,
+            color: invalid ? '#FF7575' : primary,
           }}
         >
           <input
-            ref={ref}
-            max={99.99999}
-            min={0.000001}
-            defaultValue={slippageTolerance ? slippageTolerance : 0.5}
-            onWheel={() => {
-              if (ref.current) {
-                ref.current.blur();
-              }
-            }}
             value={slippageTolerance}
-            step="any"
-            type="number"
+            type="text"
             required={true}
             placeholder=""
-            onChange={({ target }) => handleChange(target.value)}
-            onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
+            onChange={event => {
+              if (isValidInput(event.target.value)) {
+                handleChange(event.target.value);
+              }
+            }}
             style={{
               width: '100%',
-              color: invalid ? '#FF7575' : primary,
             }}
             className="__ref-swap-widget-input-class"
           />
@@ -945,7 +924,7 @@ export const SlippageSelector = ({
           onClick={e => {
             e.stopPropagation();
             e.preventDefault();
-            onChangeSlippageTolerance(0.5);
+            onChangeSlippageTolerance(DEFAULT_SLIPPAGE_TOLERANCE);
             setInValid(false);
           }}
         >
@@ -958,7 +937,7 @@ export const SlippageSelector = ({
           style={{
             color: '#FF7575',
             fontSize: '12px',
-            padding: '10px 0px',
+            padding: '10px 0px 0px 0px',
             alignItems: 'start',
           }}
         >
@@ -1530,6 +1509,7 @@ export const Slider = ({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => setShowSlip(true)}
+      className="cursor-pointer"
     >
       <path
         fillRule="evenodd"
@@ -1773,7 +1753,9 @@ export const Notification = ({
           color: primary,
         }}
       >
-        {notificationStatus.isWaitingForConfirmation && <p>Waiting for confirmation</p>}
+        {notificationStatus.isWaitingForConfirmation && (
+          <p>Waiting for confirmation</p>
+        )}
         {notificationStatus.isSuccess && tx && (
           <a
             className="text-primary font-semibold"
