@@ -788,11 +788,13 @@ export interface SwapWidgetProps {
     defaultTokenIn?: string;
     defaultTokenOut?: string;
     referralId?:string;
-    transactionState?: {
-        state: 'success' | 'fail' | null;
+    transactionState: {
+        state: SwapState;
+        setState: (state: SwapState) => void;
         tx?: string;
         detail?: string;
     };
+    minNearAmountLeftForGasFees?: number; 
     onConnect: () => void;
 }
 ```
@@ -814,6 +816,7 @@ export interface SwapWidgetProps {
   - setState: used to change setState to interact with pop-up.
   - tx: will add link to near explorer according to this tx.
   - detail: you could input some tips to show on sucess pop-up.
+-  minNearAmountLeftForGasFees: minimun near value reserved for tx gas fees.
 
 ![111](https://user-images.githubusercontent.com/50706666/199178453-8d09be3f-5a00-4b62-a6f1-af42ce4beae6.png)
 
@@ -889,7 +892,7 @@ export const Widget = ()=>{
   
   const { modal, selector, accountId } = useWalletSelector();
   
-  const [swapState, setSwapState] = React.useState<'success' | 'fail' | null>(
+  const [swapState, setSwapState] = React.useState<SwapState>(
     null
   );
   const [tx, setTx] = React.useState<string | undefined>(undefined);

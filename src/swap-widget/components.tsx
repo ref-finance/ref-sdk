@@ -33,8 +33,6 @@ import { IoWarning } from '@react-icons/all-files/io5/IoWarning';
 
 import { IoCloseOutline } from '@react-icons/all-files/io5/IoCloseOutline';
 
-import { AiOutlineClose } from '@react-icons/all-files/ai/AiOutlineClose';
-
 import './style.css';
 import {
   getAccountName,
@@ -47,11 +45,13 @@ import {
   toInternationalCurrencySystemLongString,
   calculateFeeCharge,
   calculateFeePercent,
+  isValidSlippageTolerance,
 } from '../utils';
 import { REF_WIDGET_STAR_TOKEN_LIST_KEY } from './constant';
 import Big from 'big.js';
 import {
   config,
+  DEFAULT_SLIPPAGE_TOLERANCE,
   FEE_DIVISOR,
   getConfig,
   NEAR_META_DATA,
@@ -70,6 +70,7 @@ import {
 } from './constant';
 import { PoolMode } from '../v1-swap/swap';
 import { isMobile, separateRoutes, divide, getMax } from '../utils';
+import { SwapState } from './types';
 
 interface TokenAmountProps {
   balance?: string;
@@ -81,6 +82,7 @@ interface TokenAmountProps {
   price?: string;
   onForceUpdate?: () => void;
   poolFetchingState?: 'loading' | 'end';
+  minNearAmountLeftForGasFees: number;
 }
 
 export const getPriceImpact = (
@@ -612,6 +614,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
     price,
     onForceUpdate,
     poolFetchingState,
+    minNearAmountLeftForGasFees,
   } = props;
 
   const theme = useContext(ThemeContext);
@@ -647,17 +650,19 @@ export const TokenAmount = (props: TokenAmountProps) => {
       token &&
       balance &&
       token.id === WRAP_NEAR_CONTRACT_ID &&
-      Number(balance) - Number(ref.current.value) < 0.5
+      Number(balance) - Number(ref.current.value) < minNearAmountLeftForGasFees
     ) {
       ref.current.setCustomValidity(
-        'Must have 0.5N or more left in wallet for gas fee.'
+        `Must have ${minNearAmountLeftForGasFees}N or more left in wallet for gas fee.`
       );
     } else {
       ref.current?.setCustomValidity('');
     }
   }, [ref, balance, ref.current, ref.current?.value, token, amount]);
 
-  const curMax = token ? getMax(token.id, balance || '0') : '0';
+  const curMax = token
+    ? getMax(token.id, balance || '0', minNearAmountLeftForGasFees)
+    : '0';
 
   return (
     <>
@@ -806,7 +811,7 @@ export const TokenAmount = (props: TokenAmountProps) => {
           {token && (
             <HalfAndMaxAmount
               token={token}
-              max={getMax(token.id, balance)}
+              max={getMax(token.id, balance, minNearAmountLeftForGasFees)}
               onChangeAmount={handleChange}
               amount={amount}
             />
@@ -820,61 +825,45 @@ export const TokenAmount = (props: TokenAmountProps) => {
 export const SlippageSelector = ({
   slippageTolerance,
   onChangeSlippageTolerance,
-  showSlip,
   setShowSlip,
 }: {
-  slippageTolerance: number;
-  onChangeSlippageTolerance: (slippageTolerance: number) => void;
-  showSlip: boolean;
+  slippageTolerance: string;
+  onChangeSlippageTolerance: (slippageTolerance: string) => void;
   setShowSlip: (showSlip: boolean) => void;
 }) => {
   const [invalid, setInValid] = useState<boolean>(false);
 
   const theme = useContext(ThemeContext);
-  const {
-    container,
-    buttonBg,
-    primary,
-    secondary,
-    borderRadius,
-    fontFamily,
-    hover,
-    active,
-    secondaryBg,
-    borderColor,
-  } = theme;
-
-  const ref = useRef<HTMLInputElement>(null);
+  const { container, buttonBg, primary, borderRadius, borderColor } = theme;
 
   const handleChange = (amount: string) => {
-    onChangeSlippageTolerance(Number(amount));
-
-    if (Number(amount) > 0 && Number(amount) < 100) {
-      setInValid(false);
-    } else {
-      setInValid(true);
-    }
-
-    if (ref.current) {
-      ref.current.value = amount;
-    }
+    onChangeSlippageTolerance(amount);
+    setInValid(!isValidSlippageTolerance(Number(amount)));
   };
 
   useEffect(() => {
-    if (!showSlip) return;
+    const onClick = (event: Event) => {
+      if (!event.target) return;
+      if (
+        (event.target as HTMLElement).closest('#__ref-slippage-container') ===
+        null
+      ) {
+        setShowSlip(false);
+        if (invalid) onChangeSlippageTolerance(DEFAULT_SLIPPAGE_TOLERANCE);
+      }
+    };
 
-    document.onclick = () => setShowSlip(false);
+    document.addEventListener('click', onClick);
 
     return () => {
-      document.onclick = null;
+      document.removeEventListener('click', onClick);
     };
-  }, [showSlip, setShowSlip]);
-
-  if (!showSlip) return null;
+  }, [invalid]);
 
   return (
     <div
       className="__ref-swap-widget_slippage_selector __ref-swap-widget-col-flex-start"
+      id="__ref-slippage-container"
       onClick={e => e.stopPropagation()}
       style={{
         background: container,
@@ -900,28 +889,21 @@ export const SlippageSelector = ({
           style={{
             border: `1px solid ${invalid ? '#FF7575' : borderColor}`,
             borderRadius,
+            color: invalid ? '#FF7575' : primary,
           }}
         >
           <input
-            ref={ref}
-            max={99.99999}
-            min={0.000001}
-            defaultValue={slippageTolerance ? slippageTolerance : 0.5}
-            onWheel={() => {
-              if (ref.current) {
-                ref.current.blur();
-              }
-            }}
             value={slippageTolerance}
-            step="any"
-            type="number"
+            type="text"
             required={true}
             placeholder=""
-            onChange={({ target }) => handleChange(target.value)}
-            onKeyDown={e => symbolsArr.includes(e.key) && e.preventDefault()}
+            onChange={event => {
+              if (isValidInput(event.target.value)) {
+                handleChange(event.target.value);
+              }
+            }}
             style={{
               width: '100%',
-              color: invalid ? '#FF7575' : primary,
             }}
             className="__ref-swap-widget-input-class"
           />
@@ -942,7 +924,7 @@ export const SlippageSelector = ({
           onClick={e => {
             e.stopPropagation();
             e.preventDefault();
-            onChangeSlippageTolerance(0.5);
+            onChangeSlippageTolerance(DEFAULT_SLIPPAGE_TOLERANCE);
             setInValid(false);
           }}
         >
@@ -955,7 +937,7 @@ export const SlippageSelector = ({
           style={{
             color: '#FF7575',
             fontSize: '12px',
-            padding: '10px 0px',
+            padding: '10px 0px 0px 0px',
             alignItems: 'start',
           }}
         >
@@ -1527,6 +1509,7 @@ export const Slider = ({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => setShowSlip(true)}
+      className="cursor-pointer"
     >
       <path
         fillRule="evenodd"
@@ -1721,32 +1704,24 @@ export const Notification = ({
   state,
   tx,
   detail,
-  open,
-  setOpen,
-  setState,
+  setSwapState,
 }: {
-  state?: 'success' | 'fail' | null;
-  setState?: (state: 'success' | 'fail' | null) => void;
+  state: SwapState;
+  setSwapState: (state: SwapState) => void;
   tx?: string;
   detail?: string;
-
-  open: boolean;
-  setOpen: (open: boolean) => void;
 }) => {
   const theme = useContext(ThemeContext);
-  const {
-    container,
-    buttonBg,
-    primary,
-    secondary,
-    borderRadius,
-    fontFamily,
-    hover,
-    active,
-    secondaryBg,
-  } = theme;
+  const { container, buttonBg, primary } = theme;
 
-  if (!open) return null;
+  const notificationStatus = useMemo(() => {
+    return {
+      isClosed: false,
+      isWaitingForConfirmation: state === 'waitingForConfirmation',
+      isFailure: state === 'fail',
+      isSuccess: state === 'success',
+    };
+  }, [state]);
 
   return (
     <div
@@ -1757,9 +1732,9 @@ export const Notification = ({
       }}
     >
       <div className="__ref-swap-widget-notification__icon">
-        {state === null && <Loading />}
-        {state === 'fail' && <Warning />}
-        {state === 'success' && <Success />}
+        {notificationStatus.isWaitingForConfirmation && <Loading />}
+        {notificationStatus.isFailure && <Warning />}
+        {notificationStatus.isSuccess && <Success />}
       </div>
 
       <div
@@ -1769,19 +1744,19 @@ export const Notification = ({
           marginBottom: '6px',
         }}
       >
-        {state === 'success' && <p>Success!</p>}
-        {state === 'fail' && <p>Swap Failed!</p>}
+        {notificationStatus.isSuccess && <p>Success!</p>}
+        {notificationStatus.isFailure && <p>Swap Failed!</p>}
       </div>
       <div
-        className="__ref-swap-widget-notification__text"
+        className="text-center"
         style={{
           color: primary,
         }}
       >
-        {(state === null || state === undefined) && (
+        {notificationStatus.isWaitingForConfirmation && (
           <p>Waiting for confirmation</p>
         )}
-        {state === 'success' && tx && (
+        {notificationStatus.isSuccess && tx && (
           <a
             className="text-primary font-semibold"
             href={`${config.explorerUrl}/txns/${tx}`}
@@ -1797,7 +1772,7 @@ export const Notification = ({
           </a>
         )}
 
-        {state === 'success' && detail}
+        {notificationStatus.isSuccess && detail}
       </div>
       {state !== null && (
         <button
@@ -1810,8 +1785,7 @@ export const Notification = ({
           onClick={e => {
             e.preventDefault();
             e.stopPropagation();
-            setOpen(false);
-            setState && setState(null);
+            setSwapState(null);
           }}
         >
           Close
