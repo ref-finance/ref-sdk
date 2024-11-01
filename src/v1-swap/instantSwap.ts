@@ -59,16 +59,6 @@ export const instantSwap = async ({
     }
   };
 
-  if (tokenIn.id === config.WRAP_NEAR_CONTRACT_ID) {
-    const registered = await ftGetStorageBalance(
-      config.WRAP_NEAR_CONTRACT_ID,
-      AccountId
-    );
-    if (registered === null) {
-      await registerToken(tokenIn);
-    }
-  }
-
   await registerToken(tokenOut);
   let actionsList: any = [];
   let allSwapsTokens = swapTodos.map(s => [s.inputToken, s.outputToken]); // to get the hop tokens
