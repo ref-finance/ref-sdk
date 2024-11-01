@@ -24,6 +24,7 @@ import {
 } from '../types';
 import { fetchAllPools, getStablePools } from '../v1-swap/pool';
 import { estimateSwap, SwapOptions, SwapParams } from '../v1-swap/swap';
+import { ftGetStorageBalance, getMinStorageBalance } from '../ref';
 import { SwapOutParams } from './types';
 import {
   percentLess,
@@ -52,6 +53,10 @@ import { getUserRegisteredTokens } from '../ref';
 import { WRAP_NEAR_CONTRACT_ID, NEAR_META_DATA } from '../constant';
 import { scientificNotationToString } from '../utils';
 import metaIconDefaults from '../metaIcons';
+import {
+  formatNearAmount,
+  parseNearAmount,
+} from 'near-api-js/lib/utils/format';
 
 export const ThemeContext = createContext<Theme>(defaultTheme);
 
@@ -293,7 +298,7 @@ export const useSwap = (
   );
 
   const makeSwap = async () => {
-    if (!params.tokenIn || !params.tokenOut) return;
+    if (!params.tokenIn || !params.tokenOut || !AccountId) return;
 
     const transactionsRef = await instantSwap({
       tokenIn: params.tokenIn,
@@ -301,11 +306,24 @@ export const useSwap = (
       amountIn: params.amountIn,
       swapTodos: estimates,
       slippageTolerance,
-      AccountId: AccountId || '',
+      AccountId: AccountId,
       referralId,
     });
     if (tokenIn && tokenIn.id === WRAP_NEAR_CONTRACT_ID) {
-      transactionsRef.splice(-1, 0, nearDepositTransaction(amountIn));
+      const tokenRegistered = await ftGetStorageBalance(tokenIn.id, AccountId);
+
+      let nearDepositAmount = amountIn;
+      if (tokenRegistered === null) {
+        const minStorageBalance = await getMinStorageBalance(tokenIn.id);
+        nearDepositAmount = formatNearAmount(
+          String(
+            BigInt(parseNearAmount(nearDepositAmount)!) +
+              BigInt(minStorageBalance)
+          )
+        );
+      }
+
+      transactionsRef.splice(-1, 0, nearDepositTransaction(nearDepositAmount));
     }
     if (tokenOut && tokenOut.id === WRAP_NEAR_CONTRACT_ID) {
       let outEstimate = new Big(0);
