@@ -1,7 +1,7 @@
 import { TokenMetadata } from './types';
 
 export const FEE_DIVISOR = 10000;
-
+export const DEFAULT_SLIPPAGE_TOLERANCE = "0.5"
 export const STABLE_LP_TOKEN_DECIMALS = 18;
 export const RATED_POOL_LP_TOKEN_DECIMALS = 24;
 export const STORAGE_TO_REGISTER_WITH_MFT = '0.1';

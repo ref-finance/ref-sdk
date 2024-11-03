@@ -16,6 +16,7 @@ import {
   toPrecision,
   getPriceImpact,
   isMobile,
+  isValidSlippageTolerance,
 } from '../utils';
 import {
   Slider,
@@ -47,6 +48,7 @@ import {
   NEAR_META_DATA,
   REF_TOKEN_ID,
   REF_META_DATA,
+  DEFAULT_SLIPPAGE_TOLERANCE,
 } from '../constant';
 
 export const SwapWidget = (props: SwapWidgetProps) => {
@@ -66,6 +68,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     onDisConnect,
     darkMode,
     referralId,
+    minNearAmountLeftForGasFees = 0.5,
   } = props;
 
   const curTheme = theme || (darkMode ? defaultDarkModeTheme : defaultTheme);
@@ -108,17 +111,6 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const [tokenOut, setTokenOut] = useState<TokenMetadata>();
 
-  const [notOpen, setNotOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!transactionState) return;
-
-    if (transactionState && transactionState.state !== null) {
-      setNotOpen(true);
-    }
-    transactionState?.setState(transactionState?.state || null);
-  }, [transactionState]);
-
   const [widgetRoute, setWidgetRoute] = useState<
     'swap' | 'token-selector-in' | 'token-selector-out'
   >('swap');
@@ -127,7 +119,20 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const [showSlip, setShowSlip] = useState<boolean>(false);
 
-  const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
+  const [slippageTolerance, setSlippageTolerance] = useState<string>(
+    DEFAULT_SLIPPAGE_TOLERANCE
+  );
+
+  const formattedSlippageTolerance = useMemo(() => {
+    try {
+      const formatted = Number(slippageTolerance);
+      if (Number.isNaN(formatted) || !isValidSlippageTolerance(formatted))
+        return +DEFAULT_SLIPPAGE_TOLERANCE;
+      return formatted;
+    } catch {
+      return +DEFAULT_SLIPPAGE_TOLERANCE;
+    }
+  }, [slippageTolerance]);
 
   const { tokens, tokenLoading } = useTokensIndexer({
     defaultTokenList,
@@ -223,7 +228,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
         p => Number(p.shares_total_supply) > 0
       ),
     },
-    slippageTolerance,
+    slippageTolerance: formattedSlippageTolerance,
     onSwap,
     AccountId,
     refreshTrigger,
@@ -247,8 +252,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    setNotOpen(true);
+    transactionState.setState('waitingForConfirmation');
     makeSwap();
   };
 
@@ -259,8 +263,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
     !swapError &&
     isSignedIn &&
     new Big(tokenInBalance || '0').gte(amountIn || '0') &&
-    slippageTolerance > 0 &&
-    slippageTolerance < 100 &&
+    isValidSlippageTolerance(formattedSlippageTolerance) &&
     !ONLY_ZEROS.test(tokenInBalance);
 
   const tokensLoaded = useMemo(() => {
@@ -304,12 +307,13 @@ export const SwapWidget = (props: SwapWidgetProps) => {
 
                 <Slider showSlip={showSlip} setShowSlip={setShowSlip} />
 
-                <SlippageSelector
-                  slippageTolerance={slippageTolerance}
-                  onChangeSlippageTolerance={setSlippageTolerance}
-                  showSlip={showSlip}
-                  setShowSlip={setShowSlip}
-                />
+                {showSlip && (
+                  <SlippageSelector
+                    slippageTolerance={slippageTolerance}
+                    onChangeSlippageTolerance={setSlippageTolerance}
+                    setShowSlip={setShowSlip}
+                  />
+                )}
               </div>
             </div>
 
@@ -323,6 +327,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 if (!tokensLoaded) return;
                 setWidgetRoute('token-selector-in');
               }}
+              minNearAmountLeftForGasFees={minNearAmountLeftForGasFees}
             />
 
             <div
@@ -363,6 +368,7 @@ export const SwapWidget = (props: SwapWidgetProps) => {
                 setRreshTrigger(!refreshTrigger);
               }}
               poolFetchingState={poolFetchingState}
+              minNearAmountLeftForGasFees={minNearAmountLeftForGasFees}
             />
             {!swapError && amountIn && amountOut && (
               <DetailView
@@ -453,14 +459,14 @@ export const SwapWidget = (props: SwapWidgetProps) => {
               </a>
             </div>
 
-            <Notification
-              state={transactionState?.state}
-              setState={transactionState?.setState}
-              open={notOpen}
-              setOpen={setNotOpen}
-              tx={transactionState?.tx}
-              detail={transactionState?.detail}
-            />
+            {transactionState.state !== null && (
+              <Notification
+                state={transactionState.state}
+                setSwapState={transactionState.setState}
+                tx={transactionState?.tx}
+                detail={transactionState?.detail}
+              />
+            )}
           </form>
         )}
 
