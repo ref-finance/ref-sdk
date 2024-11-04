@@ -48,7 +48,7 @@
   padding: 16px;
   padding-right: 20px;
   padding-left: 20px;
-  z-index: 100;
+  z-index: 5;
   width: 230px;
   font-size: 14px;
 }
@@ -228,7 +228,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 5;
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.25);
   border-radius: 12px;
   padding: 32px 20px;
