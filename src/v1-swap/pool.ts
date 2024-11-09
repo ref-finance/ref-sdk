@@ -76,7 +76,7 @@ export const fetchAllPools = async (perPage?: number) => {
     const pools = await fetch(`${config.indexerUrl}/fetchAllPools`).then(res =>
       res.json()
     );
-    if (pools.code !== 0 || !pools.simplePools) throw Error();
+    if (!pools.simplePools) throw Error();
     return pools;
   } catch (error) {}
   if (perPage) {
