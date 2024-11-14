@@ -22,7 +22,11 @@ import {
   TokenMetadata,
   Transaction,
 } from '../types';
-import { fetchAllPools, getStablePools } from '../v1-swap/pool';
+import {
+  fetchAllPools,
+  getRatedPoolDetail,
+  getUnRatedPoolDetail,
+} from '../v1-swap/pool';
 import { estimateSwap, SwapOptions, SwapParams } from '../v1-swap/swap';
 import { ftGetStorageBalance, getMinStorageBalance } from '../ref';
 import { SwapOutParams } from './types';
@@ -201,22 +205,42 @@ export const useRefPools = (refreshTrigger: boolean) => {
   const [allStablePools, setAllStablePools] = useState<StablePool[]>([]);
 
   useEffect(() => {
-    setPoolFetchingState('loading');
+    const init = async () => {
+      try {
+        setPoolFetchingState('loading');
 
-    fetchAllPools()
-      .then(allPools => {
+        const allPools = await fetchAllPools();
         setAllPools(allPools);
 
-        return allPools;
-      })
-      .then(allPools => {
-        const pools: Pool[] = allPools.unRatedPools.concat(allPools.ratedPools);
+        const pools: StablePool[] = [];
 
-        return getStablePools(pools).then(setAllStablePools);
-      })
-      .finally(() => {
+        const processPools = async (pool: Pool) => {
+          try {
+            pools.push(
+              await (pool.pool_kind === 'RATED_SWAP'
+                ? getRatedPoolDetail({ id: pool.id })
+                : getUnRatedPoolDetail({ id: pool.id }))
+            );
+          } catch {
+            console.error(
+              new Error(
+                `Failed to get pool details for a pool: ${pool.id}, ${pool.pool_kind}`
+              )
+            );
+          }
+        };
+
+        (allPools.unRatedPools as Pool[]).forEach(processPools);
+        (allPools.ratedPools as Pool[]).forEach(processPools);
+
+        setAllStablePools(pools);
+      } catch (error) {
+        console.error(error);
+      } finally {
         setPoolFetchingState('end');
-      });
+      }
+    };
+    init();
   }, [refreshTrigger]);
 
   return {
