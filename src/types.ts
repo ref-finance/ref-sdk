@@ -9,9 +9,13 @@ export interface TokenMetadata {
   icon: string;
 }
 
-export type PoolKind = 'SIMPLE_POOL' | 'STABLE_SWAP' | 'RATED_SWAP';
+export type PoolKind =
+  | 'SIMPLE_POOL'
+  | 'STABLE_SWAP'
+  | 'RATED_SWAP'
+  | 'DEGEN_SWAP';
 
-export type StablePoolKind = 'STABLE_SWAP' | 'RATED_SWAP';
+export type StablePoolKind = 'STABLE_SWAP' | 'RATED_SWAP' | 'DEGEN_SWAP';
 
 export interface PoolRPCView {
   id: number;

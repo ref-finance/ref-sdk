@@ -30,13 +30,30 @@ export const getUnRatedPoolDetail = async ({ id }: { id: string | number }) => {
     ),
   }));
 };
+export const getDegenPoolDetail = async ({ id }: { id: string | number }) => {
+  return refFiViewFunction({
+    methodName: 'get_degen_pool',
+    args: { pool_id: Number(id) },
+  }).then(pool_info => ({
+    ...pool_info,
+    id: Number(id),
+    pool_kind: 'DEGEN_SWAP',
+    rates: pool_info.c_amounts.map((i: any) =>
+      toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
+    ),
+  }));
+};
 
 export const getStablePools = async (stablePools: Pool[]) => {
   return Promise.all(
     stablePools.map(pool =>
       pool.pool_kind === 'RATED_SWAP'
         ? getRatedPoolDetail({ id: pool.id })
-        : getUnRatedPoolDetail({ id: pool.id })
+        : pool.pool_kind === 'DEGEN_SWAP'
+        ? getDegenPoolDetail({ id: pool.id })
+        : pool.pool_kind === 'STABLE_SWAP'
+        ? getUnRatedPoolDetail({ id: pool.id })
+        : getPool(pool.id)
     )
   );
 };
