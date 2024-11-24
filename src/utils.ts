@@ -288,7 +288,7 @@ export const WalletSelectorTransactions = (
     };
   });
 
-  return { transactions: parsedTransactions } ;
+  return { transactions: parsedTransactions };
 };
 
 export const separateRoutes = (
