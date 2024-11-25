@@ -84,7 +84,8 @@ export const isStablePool = (
 };
 
 export const getStablePoolDecimal = (stablePool: StablePool) => {
-  return stablePool.pool_kind === 'RATED_SWAP'
+  return stablePool.pool_kind === 'RATED_SWAP' ||
+    stablePool.pool_kind === 'DEGEN_SWAP'
     ? RATED_POOL_LP_TOKEN_DECIMALS
     : STABLE_LP_TOKEN_DECIMALS;
 };

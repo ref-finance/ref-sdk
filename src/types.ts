@@ -61,6 +61,7 @@ export interface StablePool {
   rates: string[];
   pool_kind: StablePoolKind;
   partialAmountIn?: string;
+  degens?: string[];
 }
 
 export interface SmartRoutingInputPool {
