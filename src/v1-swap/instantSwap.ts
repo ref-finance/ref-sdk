@@ -126,7 +126,7 @@ export const instantSwap = async ({
                 actions: actionsList,
               }),
         },
-        gas: '180000000000000',
+        gas: '300000000000000',
         amount: ONE_YOCTO_NEAR,
       },
     ],

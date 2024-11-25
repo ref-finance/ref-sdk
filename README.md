@@ -72,6 +72,8 @@ export function getConfig(
 
 Also, the SDK provides `init_env`  to switch application environment. there is an optional parameter indexerUrl that you can use to replace the one in the SDK with your own deployed indexer service. We'd better call it at the entrance of the application, then the entire application environment switch takes effect. If you're not sure where to call,  you can call in more than one place.
 
+An optional property nodeUrl has been added as the third parameter, allowing developers to pass their own nodeUrl to replace the default nodeUrl in the SDK.
+
 Example
 
 ```
@@ -79,6 +81,8 @@ init_env('testnet');
 init_env('mainnet');
 init_env('testnet', 'https://xx-xx.xx-xxx.com');
 init_env('mainnet', 'https://xx-xx.xx-xxx.com');
+init_env('mainnet', 'https://xx-xx.xx-xxx.com', 'https://beta.rpc.mainnet.near.org');
+init_env('mainnet', '', 'https://beta.rpc.mainnet.near.org');
 ```
 
 

@@ -9,7 +9,6 @@ import {
 import BN from 'bn.js';
 import { getConfig } from './constant';
 import fs from 'fs';
-import os from 'os';
 import {
   NoPuiblicKeyError,
   InValidAccessKeyError,

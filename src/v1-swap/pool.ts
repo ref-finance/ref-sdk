@@ -10,42 +10,73 @@ export const getRatedPoolDetail = async ({ id }: { id: string | number }) => {
   return refFiViewFunction({
     methodName: 'get_rated_pool',
     args: { pool_id: Number(id) },
-  }).then(pool_info => ({
-    ...pool_info,
-    id: Number(id),
-    pool_kind: 'RATED_SWAP',
-  }));
+  })
+    .then(pool_info => ({
+      ...pool_info,
+      id: Number(id),
+      pool_kind: 'RATED_SWAP',
+    }))
+    .catch(() => {});
 };
 
 export const getUnRatedPoolDetail = async ({ id }: { id: string | number }) => {
   return refFiViewFunction({
     methodName: 'get_stable_pool',
     args: { pool_id: Number(id) },
-  }).then(pool_info => ({
-    ...pool_info,
-    id: Number(id),
-    pool_kind: 'STABLE_SWAP',
-    rates: pool_info.c_amounts.map((_: any) =>
-      toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
-    ),
-  }));
+  })
+    .then(pool_info => ({
+      ...pool_info,
+      id: Number(id),
+      pool_kind: 'STABLE_SWAP',
+      rates: pool_info.c_amounts.map((_: any) =>
+        toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
+      ),
+    }))
+    .catch(() => {});
+};
+export const getDegenPoolDetail = async ({ id }: { id: string | number }) => {
+  return refFiViewFunction({
+    methodName: 'get_degen_pool',
+    args: { pool_id: Number(id) },
+  })
+    .then(pool_info => ({
+      ...pool_info,
+      id: Number(id),
+      pool_kind: 'DEGEN_SWAP',
+      rates: pool_info.c_amounts.map((i: any) =>
+        toNonDivisibleNumber(STABLE_LP_TOKEN_DECIMALS, '1')
+      ),
+    }))
+    .catch(() => {});
 };
 
 export const getStablePools = async (stablePools: Pool[]) => {
-  return Promise.all(
+  const res: any[] = await Promise.allSettled(
     stablePools.map(pool =>
       pool.pool_kind === 'RATED_SWAP'
         ? getRatedPoolDetail({ id: pool.id })
-        : getUnRatedPoolDetail({ id: pool.id })
+        : pool.pool_kind === 'DEGEN_SWAP'
+        ? getDegenPoolDetail({ id: pool.id })
+        : pool.pool_kind === 'STABLE_SWAP'
+        ? getUnRatedPoolDetail({ id: pool.id })
+        : getPool(pool.id)
     )
   );
+  return res.reduce((acc, cur) => {
+    if (cur.status === 'fulfilled' && cur.value) {
+      return [...(acc || []), cur.value];
+    }
+    return acc;
+  }, []);
 };
 
 export const getPool = async (id: number): Promise<Pool> => {
   return await refFiViewFunction({
     methodName: 'get_pool',
     args: { pool_id: id },
-  }).then((pool: PoolRPCView) => parsePool(pool, id));
+  })
+    .then((pool: PoolRPCView) => parsePool(pool, id))
+    .catch();
 };
 
 export const getPoolByIds = async (ids: number[]): Promise<Pool[]> => {

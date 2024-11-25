@@ -493,11 +493,14 @@ export async function getHybridStableSmart(
             }
 
             const [tmpPool1, tmpPool2] = poolPair;
-            const tokenMidId = poolPair[0].tokenIds.find((t: string) =>
-              poolPair[1].tokenIds.includes(t)
-            ) as string;
+            const tokenMidId = poolPair[0].tokenIds.find(
+              (t: string) =>
+                poolPair[1].tokenIds.includes(t) &&
+                t !== tokenIn.id &&
+                t !== tokenOut.id
+            );
 
-            const tokenMidMeta = tokensMedata[tokenMidId];
+            const tokenMidMeta = tokensMedata[tokenMidId!];
 
             const estimate1 = {
               ...(isStablePool(stablePoolsDetail, tmpPool1.id)
@@ -572,13 +575,16 @@ export async function getHybridStableSmart(
     // two pool case get best price
     [pool1, pool2] = BestPoolPair;
 
-    const tokenMidId = BestPoolPair[0].tokenIds.find((t: string) =>
-      BestPoolPair[1].tokenIds.includes(t)
-    ) as string;
+    const tokenMidId = BestPoolPair[0].tokenIds.find(
+      (t: string) =>
+        BestPoolPair[1].tokenIds.includes(t) &&
+        t !== tokenIn.id &&
+        t !== tokenOut.id
+    );
 
     const tokenMidMeta =
-      allTokens[tokenMidId] ||
-      (await ftGetTokenMetadata(tokenMidId, 'hybridSmartRoutingEstimate'));
+      allTokens[tokenMidId!] ||
+      (await ftGetTokenMetadata(tokenMidId!, 'hybridSmartRoutingEstimate'));
 
     const estimate1 = {
       ...(isStablePool(stablePoolsDetail, pool1.id)
