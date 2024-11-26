@@ -35,6 +35,7 @@ import { getSwappedAmount } from './stable-swap';
 import { NoFeeToPool } from './error';
 import { CONSTANT_D, POINTLEFTRANGE, POINTRIGHTRANGE } from './constant';
 import { DCL_POOL_FEE_LIST } from './dcl-swap/dcl-pool';
+import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(typeof id === 'number' ? id : pool.id),
@@ -289,7 +290,7 @@ export const WalletSelectorTransactions = (
     };
   });
 
-  return { transactions: parsedTransactions };
+  return { transactions: parsedTransactions } as SignAndSendTransactionsParams;
 };
 
 export const separateRoutes = (
