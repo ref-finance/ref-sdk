@@ -35,6 +35,7 @@ import { getSwappedAmount } from './stable-swap';
 import { NoFeeToPool } from './error';
 import { CONSTANT_D, POINTLEFTRANGE, POINTRIGHTRANGE } from './constant';
 import { DCL_POOL_FEE_LIST } from './dcl-swap/dcl-pool';
+import { SignAndSendTransactionsParams } from '@near-wallet-selector/core/lib/wallet';
 
 export const parsePool = (pool: PoolRPCView, id?: number): Pool => ({
   id: Number(typeof id === 'number' ? id : pool.id),
@@ -84,7 +85,8 @@ export const isStablePool = (
 };
 
 export const getStablePoolDecimal = (stablePool: StablePool) => {
-  return stablePool.pool_kind === 'RATED_SWAP'
+  return stablePool.pool_kind === 'RATED_SWAP' ||
+    stablePool.pool_kind === 'DEGEN_SWAP'
     ? RATED_POOL_LP_TOKEN_DECIMALS
     : STABLE_LP_TOKEN_DECIMALS;
 };
@@ -288,7 +290,7 @@ export const WalletSelectorTransactions = (
     };
   });
 
-  return { transactions: parsedTransactions };
+  return { transactions: parsedTransactions } as SignAndSendTransactionsParams;
 };
 
 export const separateRoutes = (
