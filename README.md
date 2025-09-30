@@ -1,4 +1,7 @@
 # Ref SDK
+Disclaimer: 
+Our SDK is provided by a third party, and we do not take any responsibility for any losses caused by the use of this SDK.
+
 
 This SDK is designed to assist developers when interacting with the main functions of the protocol. Main functions that can be defined as:
 
