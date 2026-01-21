@@ -186,12 +186,7 @@ export const getUserRegisteredTokens = async (
 };
 
 export const getAccountNearBalance = async (accountId: string) => {
-  const provider = new providers.JsonRpcProvider({
-    url: getConfig().nodeUrl,
-  });
-
-  return provider
-    .query<AccountView>({
+  return near.connection.provider.query<AccountView>({
       request_type: 'view_account',
       finality: 'final',
       account_id: accountId,
@@ -258,10 +253,7 @@ export const getMinStorageBalance = async (
   nep141Address: string
 ): Promise<string> => {
   try {
-    const provider = new providers.JsonRpcProvider({
-      url: getConfig().nodeUrl,
-    });
-    const result = await provider.query<CodeResult>({
+    const result = await near.connection.provider.query<CodeResult>({
       request_type: 'call_function',
       account_id: nep141Address,
       method_name: 'storage_balance_bounds',
