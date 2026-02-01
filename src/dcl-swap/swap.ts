@@ -44,6 +44,7 @@ interface DCLSwapProps {
     skip_unwrap_near: boolean;
   };
   AccountId: string;
+  referralId?: string;
 }
 export const DCL_POOL_SPLITER = '|';
 
@@ -54,6 +55,7 @@ export const DCLSwap = async ({
   SwapByStopPoint,
   AccountId,
   swapInfo,
+  referralId,
 }: DCLSwapProps) => {
   const transactions: Transaction[] = [];
 
@@ -84,6 +86,7 @@ export const DCLSwap = async ({
         pool_ids,
         output_token,
         min_output_amount,
+        referral_id: referralId || '',
         client_id: '',
       },
     });
@@ -115,6 +118,7 @@ export const DCLSwap = async ({
         pool_ids,
         output_token,
         output_amount,
+        referral_id: referralId || '',
         client_id: '',
       },
     });
@@ -208,6 +212,7 @@ export const DCLSwap = async ({
         buy_token,
         point: new_point,
         client_id: '',
+        referral_id: referralId || '',
       },
     });
 
@@ -241,7 +246,10 @@ export const DCLSwap = async ({
       });
     }
     const msg = JSON.stringify({
-      SwapByStopPoint: SwapByStopPoint,
+      SwapByStopPoint: {
+        ...SwapByStopPoint,
+        referral_id: referralId || '',
+      },
     });
     transactions.push({
       receiverId: tokenA.id,
@@ -318,12 +326,14 @@ export const DCLSwapByInputOnBestPool = async ({
   amountA,
   slippageTolerance,
   AccountId,
+  referralId,
 }: {
   tokenA: TokenMetadata;
   tokenB: TokenMetadata;
   amountA: string;
   slippageTolerance: number;
   AccountId: string;
+  referralId?: string;
 }) => {
   if (slippageTolerance <= 0 || slippageTolerance >= 100) {
     throw SlippageError;
@@ -368,6 +378,7 @@ export const DCLSwapByInputOnBestPool = async ({
       min_output_amount: percentLess(slippageTolerance, bestEstimate.amount),
     },
     AccountId,
+    referralId,
   });
 };
 
